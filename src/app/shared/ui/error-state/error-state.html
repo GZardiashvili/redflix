@@ -1,0 +1,11 @@
+<section class="error-state" role="alert">
+  <h2 class="error-state__title">{{ title() }}</h2>
+
+  <p class="error-state__message">{{ message() }}</p>
+
+  @if (canRetry()) {
+    <button type="button" class="error-state__retry" (click)="retry.emit()">
+      {{ retryLabel() }}
+    </button>
+  }
+</section>
