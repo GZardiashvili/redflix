@@ -3,7 +3,7 @@ import { Service, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ApiError, toApiError } from '../api/api-error';
 import { ApiResponse } from '../api/api-response';
-import { API_BASE_URL } from '../config/api.config';
+import { API_ENDPOINTS, apiUrl } from '../config/api.config';
 import { FilterOptions } from '../models/filter-options';
 
 /**
@@ -43,7 +43,7 @@ export class FilterOptionsService {
   private async fetchFilterOptions(): Promise<void> {
     try {
       const response = await firstValueFrom(
-        this.http.get<ApiResponse<FilterOptions>>(`${API_BASE_URL}/filter-options`),
+        this.http.get<ApiResponse<FilterOptions>>(apiUrl(API_ENDPOINTS.filterOptions)),
       );
 
       this.filterOptions.set(response.data);
