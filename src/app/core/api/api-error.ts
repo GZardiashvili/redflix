@@ -28,9 +28,29 @@ export interface ApiError {
 }
 
 /**
+ * Normalised API failure. Used only so a caught value can be re-normalised without losing
+ * information: `toApiError()` returns an existing {@link ApiError} untouched.
+ */
+export function isApiError(value: unknown): value is ApiError {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const candidate = value as ApiError;
+  return typeof candidate.status === 'number' && 'body' in candidate;
+}
+
+/**
  * Converts a thrown value into an {@link ApiError} without losing server information.
+ *
+ * Accepts an {@link HttpErrorResponse} from `HttpClient` as well as an already normalised
+ * {@link ApiError}, so every layer can normalise a caught value with the same call.
  */
 export function toApiError(error: unknown): ApiError {
+  if (isApiError(error)) {
+    return error;
+  }
+
   if (!(error instanceof HttpErrorResponse)) {
     return { status: 0, body: null };
   }
