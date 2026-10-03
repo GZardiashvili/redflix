@@ -1,0 +1,41 @@
+<button
+  class="session-pill"
+  type="button"
+  [class.session-pill--sold-out]="session().isSoldOut"
+  [disabled]="session().isSoldOut"
+  [attr.aria-label]="ariaLabel()"
+  (click)="select.emit(session())"
+>
+  <span class="session-pill__top">
+    <span class="session-pill__time">{{ session().time }}</span>
+    <span class="session-pill__spacer" aria-hidden="true"></span>
+    <span class="session-pill__format">{{ session().format.name }}</span>
+  </span>
+
+  <span class="session-pill__body">
+    <span class="session-pill__details">
+      <span class="session-pill__language">{{ session().language.name }}</span>
+      <span class="session-pill__place">{{ place() }}</span>
+    </span>
+
+    <span class="session-pill__aside">
+      @if (session().isSoldOut) {
+        <span class="session-pill__seats session-pill__seats--sold-out">Sold out</span>
+      } @else {
+        <span class="session-pill__seats" [class.session-pill__seats--low]="isLow()">
+          <svg
+            class="session-pill__seats-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M2 6h20v4a2 2 0 0 0 0 4v4H2v-4a2 2 0 0 0 0-4V6Z" />
+          </svg>
+          {{ session().seatsLeft }} left
+        </span>
+      }
+
+      <span class="session-pill__price">₾{{ session().price }}</span>
+    </span>
+  </span>
+</button>

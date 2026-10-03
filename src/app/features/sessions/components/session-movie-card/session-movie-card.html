@@ -1,0 +1,26 @@
+<article class="session-card">
+  <header class="session-card__head">
+    <img class="session-card__poster" [src]="group().movie.posterUrl" alt="" loading="lazy" />
+
+    <div class="session-card__info">
+      <div class="session-card__title-row">
+        <h3 class="session-card__title">{{ group().movie.title }}</h3>
+        <span class="session-card__rating">{{ group().movie.ageRating.code }}</span>
+      </div>
+
+      <p class="session-card__meta">
+        <span>{{ group().movie.runtimeMinutes }} min</span>
+        @if (formatNames(); as formats) {
+          <span aria-hidden="true">·</span>
+          <span>{{ formats }}</span>
+        }
+      </p>
+    </div>
+  </header>
+
+  <div class="session-card__pills">
+    @for (session of group().sessions; track session.id) {
+      <app-session-time-pill [session]="session" (select)="select.emit($event)" />
+    }
+  </div>
+</article>

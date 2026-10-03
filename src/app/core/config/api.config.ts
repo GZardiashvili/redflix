@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   logout: 'logout',
   me: 'me',
   search: 'search',
+  sessions: 'sessions',
   featuredMovies: 'movies/featured',
   nowPlayingMovies: 'movies/now-playing',
   comingSoonMovies: 'movies/coming-soon',

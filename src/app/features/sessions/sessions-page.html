@@ -1,1 +1,64 @@
-<h1>Sessions</h1>
+<div class="sessions-page">
+  <header class="sessions-page__header">
+    <h1 class="sessions-page__title">Sessions</h1>
+    <p class="sessions-page__subtitle">Browse showtimes across all venues</p>
+  </header>
+
+  <div class="sessions-page__layout">
+    <!-- Sticky slot for the Task 11 filter groups. -->
+    <aside class="sessions-sidebar" aria-labelledby="sessions-filters-heading">
+      <div class="sessions-sidebar__card">
+        <h2 id="sessions-filters-heading" class="sessions-sidebar__title">Filters</h2>
+      </div>
+    </aside>
+
+    <section class="sessions-content" aria-label="Showtimes">
+      @if (loading()) {
+        <div class="sessions-content__skeleton" role="status" aria-label="Loading sessions">
+          @for (group of skeletonGroups; track group) {
+            <div class="sessions-skeleton">
+              <div class="sessions-skeleton__head">
+                <span class="sessions-skeleton__poster">
+                  <app-skeleton />
+                </span>
+                <span class="sessions-skeleton__lines">
+                  <app-skeleton variant="text" />
+                  <app-skeleton variant="text" />
+                </span>
+              </div>
+
+              <div class="sessions-skeleton__pills">
+                @for (pill of skeletonPills; track pill) {
+                  <span class="sessions-skeleton__pill">
+                    <app-skeleton />
+                  </span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else if (error(); as message) {
+        <app-error-state
+          title="Sessions unavailable"
+          [message]="message"
+          [canRetry]="true"
+          (retry)="loadSessions()"
+        />
+      } @else if (groups().length > 0) {
+        <p class="sessions-content__summary">{{ summary() }}</p>
+
+        <div class="sessions-content__groups">
+          @for (group of groups(); track group.movie.id; let last = $last) {
+            <app-session-movie-card [group]="group" (select)="onSelectSession($event)" />
+
+            @if (!last) {
+              <hr class="sessions-content__divider" />
+            }
+          }
+        </div>
+      } @else {
+        <app-empty-state title="No showtimes" message="No sessions found for this date." />
+      }
+    </section>
+  </div>
+</div>

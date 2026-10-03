@@ -1,0 +1,134 @@
+// Sessions surface: deep-navy page with the 51px gutters, 320px sticky filter
+// sidebar and 1255px showtimes column of the 1728px design. The pills row of a
+// group scrolls horizontally because five 252px pills exceed the column width.
+
+.sessions-page {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  gap: 2.25rem; // 36px between the page header and the two-column layout
+  padding: 1.5rem 3.1875rem 4rem; // 51px side gutters
+  background: #070c1c;
+  color: #fff;
+}
+
+.sessions-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem; // 6px
+}
+
+.sessions-page__title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.625rem; // 26px
+}
+
+.sessions-page__subtitle {
+  color: #a9a9a9;
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+
+.sessions-page__layout {
+  display: grid;
+  grid-template-columns: 20rem minmax(0, 1fr); // 320px sidebar + fluid list
+  gap: 3.1875rem; // 51px
+  align-items: start;
+}
+
+.sessions-sidebar {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.sessions-sidebar__card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; // 24px
+  padding: 1.5rem; // 24px
+  border-radius: 1rem;
+  background: #1e2031;
+}
+
+.sessions-sidebar__title {
+  font-size: 1.125rem; // 18px
+  font-weight: 800;
+  line-height: 1.25rem; // 20px
+}
+
+.sessions-content {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1.5rem; // 24px between the summary row and the list
+}
+
+.sessions-content__summary {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.sessions-content__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem; // 32px above and below each divider
+}
+
+.sessions-content__divider {
+  height: 1px;
+  margin: 0;
+  border: 0;
+  background: #2a2c3d;
+}
+
+// Loading skeleton: composed from the shared <app-skeleton>, whose neutral
+// placeholder is tuned for light surfaces — a translucent white on the host
+// keeps it visible on this dark page.
+.sessions-content__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sessions-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem; // matches the card's header-to-pills gap
+}
+
+.sessions-skeleton__head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sessions-skeleton__poster {
+  width: 3.5rem; // 56px, matches the poster column
+  flex-shrink: 0;
+}
+
+.sessions-skeleton__lines {
+  display: flex;
+  max-width: 16rem;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sessions-skeleton__pills {
+  display: flex;
+  gap: 0.75rem;
+  overflow: hidden;
+}
+
+.sessions-skeleton__pill {
+  width: 15.75rem; // 252px, matches a pill
+  flex-shrink: 0;
+}
+
+.sessions-content app-skeleton {
+  border-radius: 0.5rem;
+  background: rgb(255 255 255 / 8%);
+}
