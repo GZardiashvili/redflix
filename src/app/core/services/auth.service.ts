@@ -83,6 +83,18 @@ export class AuthService {
   }
 
   /**
+   * Drops a stale authentication session without contacting the API.
+   *
+   * Used by the 401 replay infrastructure: a protected request has proven the
+   * token invalid, so the app must stop treating the user as authenticated
+   * before the recovery login flow begins. Token persistence stays here; the
+   * storage key is still never exposed.
+   */
+  sessionExpired(): void {
+    this.clearSession();
+  }
+
+  /**
    * Revokes the current token through the API and always clears the local session, even when
    * the request fails, so the UI can never stay authenticated on a broken logout.
    */

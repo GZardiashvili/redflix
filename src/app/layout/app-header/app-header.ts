@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -7,4 +7,10 @@ import { RouterLink } from '@angular/router';
   styleUrl: './app-header.scss',
   templateUrl: './app-header.html',
 })
-export class AppHeader {}
+export class AppHeader {
+  /** The user asked to log in; the application shell owns the dialog. */
+  readonly loginRequested = output<void>();
+
+  /** The user asked to register; the application shell owns the dialog. */
+  readonly registerRequested = output<void>();
+}

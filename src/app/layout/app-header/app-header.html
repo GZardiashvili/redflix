@@ -4,5 +4,9 @@
   <nav class="app-header__nav" aria-label="Main navigation">
     <a routerLink="/sessions">Sessions</a>
     <a routerLink="/profile">Profile</a>
+    <button class="app-header__auth" type="button" (click)="loginRequested.emit()">Log in</button>
+    <button class="app-header__auth" type="button" (click)="registerRequested.emit()">
+      Sign up
+    </button>
   </nav>
 </header>

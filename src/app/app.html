@@ -1,5 +1,13 @@
-<app-header />
+<app-header (loginRequested)="openLogin()" (registerRequested)="openRegister()" />
 
 <main class="app-content">
   <router-outlet />
 </main>
+
+@if (loginOpen()) {
+  <app-login-modal (closed)="onLoginClosed()" (switchToRegister)="openRegister()" />
+}
+
+@if (registerOpen()) {
+  <app-register-modal (closed)="onRegisterClosed()" (switchToLogin)="openLogin()" />
+}
