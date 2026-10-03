@@ -41,6 +41,12 @@
         }
       </section>
 
+      @if (bookingBlockedByProfile()) {
+        <p class="movie-details__profile-notice" role="status">
+          Complete your profile before buying tickets. Your chosen screening is kept.
+        </p>
+      }
+
       <app-movie-showtimes
         [groups]="groups()"
         [selectedDate]="date()"

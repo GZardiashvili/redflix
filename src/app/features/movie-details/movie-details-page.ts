@@ -33,8 +33,9 @@ import { ageEligibility, restrictionMessage } from './screening-eligibility';
  * error branches, while the session request only ever occupies the Sessions
  * column. That way switching date never blanks the hero or the details card.
  *
- * Seat selection and payment are a later task: clicking an eligible screening
- * hands it to {@link BookingEntryService} and stops there.
+ * Booking starts through {@link BookingEntryService}: it holds the screening,
+ * runs the login and profile gates and only then opens the booking dialog. The
+ * page owns none of that state.
  */
 @Component({
   imports: [
@@ -71,6 +72,13 @@ export class MovieDetailsPage {
 
   /** Whether the API reported no movie for this slug. */
   protected readonly notFound = signal(false);
+
+  /**
+   * Whether a chosen screening is waiting on the account's profile being
+   * completed. The booking dialog stays closed in that case, so the page says so
+   * rather than letting the click look like it did nothing.
+   */
+  protected readonly bookingBlockedByProfile = this.booking.blockedByProfile;
 
   /**
    * Calendar day the Sessions column is showing, `YYYY-MM-DD`. Always starts on
@@ -278,9 +286,10 @@ export class MovieDetailsPage {
    * two guards are kept as the last line of defence so a future caller cannot
    * start booking from an ineligible screening.
    *
-   * A guest is not turned away here — the assignment places the age check after
-   * login — so the selection is recorded and the existing login flow is joined,
-   * leaving the intended screening ready for the booking screen.
+   * Everything after this point belongs to {@link BookingEntryService}: a guest
+   * is sent through the existing login flow with the screening preserved, an
+   * incomplete profile parks the screening and routes to `/profile`, and only an
+   * eligible account opens the booking dialog.
    */
   protected onScreeningSelected(session: MovieSession): void {
     const movie = this.movie();
@@ -289,6 +298,6 @@ export class MovieDetailsPage {
       return;
     }
 
-    this.booking.select(session, movie.slug);
+    this.booking.select(session, { slug: movie.slug, title: movie.title });
   }
 }

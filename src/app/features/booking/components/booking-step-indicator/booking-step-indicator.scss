@@ -1,0 +1,38 @@
+// Step indicator from the design: a 720×33 pill split into two halves, the
+// active one filled with the accent colour and the other left on the surface
+// colour.
+
+.steps {
+  display: flex;
+  width: 100%;
+  max-width: 45rem; // 720px
+  height: 2.0625rem; // 33px
+  margin: 0;
+  padding: 0;
+  border-radius: 999px;
+  background: #1e2031;
+  list-style: none;
+}
+
+.steps__step {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem; // 6px
+  padding: 0.625rem 1rem; // 10px 16px
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 0.8125rem; // 13px
+  text-transform: uppercase;
+
+  &--active {
+    background: #ec3013;
+  }
+}
+
+.steps__position {
+  font-variant-numeric: tabular-nums;
+}

@@ -1,8 +1,13 @@
 @if (open()) {
-  <div class="modal__overlay" (click)="onOverlayClick($event)">
+  <div
+    class="modal__overlay"
+    [class.modal__overlay--booking]="variant() === 'booking'"
+    (click)="onOverlayClick($event)"
+  >
     <div
       #dialog
       class="modal__dialog"
+      [class.modal__dialog--booking]="variant() === 'booking'"
       role="dialog"
       aria-modal="true"
       [attr.aria-labelledby]="titleId"

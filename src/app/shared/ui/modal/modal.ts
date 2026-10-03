@@ -31,6 +31,13 @@ export class Modal {
   readonly closeLabel = input('Close');
 
   /**
+   * Visual treatment of the dialog. `booking` applies the Figma booking shell —
+   * its own surface, size, radius and overlay — so the booking feature reuses
+   * this overlay instead of introducing a second one.
+   */
+  readonly variant = input<'default' | 'booking'>('default');
+
+  /**
    * Requested by the user through the close button, Escape or the overlay.
    *
    * The parent decides what happens next (usually setting its own `open` signal to `false`);

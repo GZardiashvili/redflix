@@ -1,0 +1,13 @@
+// Layout of the booking dialog's projected content.
+//
+// The panel itself is styled by the shared dialog shell's `booking` variant, so
+// this file only owns how the header, the step indicator and the active step's
+// content stack inside it.
+
+app-booking-header,
+app-booking-step-indicator,
+app-booking-step-seats,
+app-booking-step-checkout {
+  display: block;
+  width: 100%;
+}

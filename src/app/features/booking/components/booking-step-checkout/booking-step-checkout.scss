@@ -1,0 +1,17 @@
+// Content area of the booking dialog's second step. It shares Step 1's shell so
+// moving between steps does not resize the dialog; the checkout form, order
+// summary and payment request drop into it later.
+
+.booking-step {
+  display: flex;
+  width: 100%;
+  min-height: 28.25rem; // 452px, the design's content height
+  align-items: center;
+  justify-content: center;
+  padding: 2rem; // 32px
+  border: 1px solid #1e2031;
+  border-radius: 1.25rem; // 20px
+  color: #a9a9a9;
+  font-size: 0.875rem; // 14px
+  text-align: center;
+}

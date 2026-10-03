@@ -1,0 +1,22 @@
+<app-modal
+  variant="booking"
+  [open]="open()"
+  [title]="title()"
+  closeLabel="Close booking"
+  (closed)="close()"
+>
+  @if (context(); as screening) {
+    <app-booking-header [context]="screening" />
+
+    <app-booking-step-indicator [active]="status()" />
+
+    @switch (status()) {
+      @case ('step2') {
+        <app-booking-step-checkout />
+      }
+      @default {
+        <app-booking-step-seats />
+      }
+    }
+  }
+</app-modal>
