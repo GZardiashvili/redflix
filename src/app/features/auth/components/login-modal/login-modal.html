@@ -1,0 +1,46 @@
+<app-modal [open]="open()" title="Log in" (closed)="closed.emit()">
+  <form class="login-modal" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <p class="login-modal__subtitle">Welcome back to Kino XII</p>
+
+    @if (serverError(); as message) {
+      <p class="login-modal__server-error" role="alert">{{ message }}</p>
+    }
+
+    <app-form-field label="Email" controlId="login-email" [error]="emailError()">
+      <input
+        id="login-email"
+        class="login-modal__input"
+        type="email"
+        formControlName="email"
+        placeholder="example@gmail.com"
+        autocomplete="email"
+      />
+    </app-form-field>
+
+    <app-form-field label="Password" controlId="login-password" [error]="passwordError()">
+      <input
+        id="login-password"
+        class="login-modal__input"
+        type="password"
+        formControlName="password"
+        placeholder="••••••••"
+        autocomplete="current-password"
+      />
+    </app-form-field>
+
+    <button class="login-modal__submit" type="submit" [disabled]="loading()">
+      @if (loading()) {
+        <app-loading-indicator size="sm" label="Logging in" />
+      } @else {
+        Log in
+      }
+    </button>
+
+    <p class="login-modal__switch">
+      Don&apos;t have an account?
+      <button class="login-modal__switch-button" type="button" (click)="switchToRegister.emit()">
+        Sign up
+      </button>
+    </p>
+  </form>
+</app-modal>
