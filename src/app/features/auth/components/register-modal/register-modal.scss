@@ -1,0 +1,184 @@
+// Visual treatment mirrors the login dialog and the Task 06 reference:
+// deep-navy card, rounded avatar tile, pill inputs, two-column passwords,
+// muted pill submit. The shared modal still owns overlay, centring and close
+// behaviour; only the card surface is restyled here.
+
+:host {
+  display: contents;
+}
+
+:host ::ng-deep .modal__dialog {
+  width: min(100%, 29.6875rem);
+  padding: 2rem;
+  border: 1px solid #2a2c3d;
+  border-radius: 1.75rem;
+  background: #070c1c;
+  box-shadow: 0 1.25rem 3.125rem -0.625rem rgb(0 0 0 / 20%);
+}
+
+:host ::ng-deep .modal__header {
+  align-items: center;
+}
+
+:host ::ng-deep .modal__title {
+  color: #fff;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+:host ::ng-deep .modal__close {
+  color: #fff;
+  font-size: 1.75rem;
+}
+
+:host ::ng-deep .modal__body {
+  margin-top: 0;
+}
+
+.register-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.register-modal__subtitle {
+  color: rgb(255 255 255 / 70%);
+  font-size: 1rem;
+}
+
+.register-modal__server-error {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: rgb(220 38 38 / 15%);
+  color: #fca5a5;
+  font-size: 0.875rem;
+}
+
+.register-modal__avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.register-modal__avatar-preview {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  object-fit: cover;
+}
+
+.register-modal__avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  background: #1e2133;
+  color: rgb(255 255 255 / 45%);
+}
+
+.register-modal__avatar-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.register-modal__avatar-label {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.register-modal__avatar-hint {
+  color: rgb(255 255 255 / 55%);
+  font-size: 0.875rem;
+}
+
+.register-modal__avatar-error {
+  color: #fca5a5;
+  font-size: 0.875rem;
+}
+
+.register-modal__avatar-file {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgb(255 255 255 / 70%);
+  font-size: 0.875rem;
+}
+
+.register-modal__avatar-remove {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #e63d2e;
+  font: inherit;
+  cursor: pointer;
+}
+
+.register-modal__avatar-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.register-modal__input {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: #1e2133;
+  color: #fff;
+  font-size: 1rem;
+
+  &::placeholder {
+    color: rgb(255 255 255 / 45%);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #e63d2e;
+    outline-offset: 2px;
+  }
+}
+
+.register-modal__passwords {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.register-modal__submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.25rem;
+  padding: 0.875rem 1.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: #4b4e69;
+  color: rgb(255 255 255 / 70%);
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.register-modal__switch {
+  color: rgb(255 255 255 / 70%);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.register-modal__switch-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #e63d2e;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}

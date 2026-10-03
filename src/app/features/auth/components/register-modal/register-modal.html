@@ -1,0 +1,118 @@
+<app-modal [open]="open()" title="Sign up" (closed)="closed.emit()">
+  <form class="register-modal" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <p class="register-modal__subtitle">Welcome to Kino XII</p>
+
+    @if (serverError(); as message) {
+      <p class="register-modal__server-error" role="alert">{{ message }}</p>
+    }
+
+    <div class="register-modal__avatar">
+      @if (avatarPreview(); as preview) {
+        <img class="register-modal__avatar-preview" [src]="preview" alt="Selected avatar preview" />
+      } @else {
+        <span class="register-modal__avatar-placeholder" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+            <path
+              d="M12 16V4m0 0 4 4m-4-4L8 8M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+      }
+
+      <div class="register-modal__avatar-text">
+        <label class="register-modal__avatar-label" for="register-avatar">
+          Upload avatar (optional)
+        </label>
+        <p class="register-modal__avatar-hint">JPG, PNG or WEBP</p>
+        @if (avatarError(); as message) {
+          <p class="register-modal__avatar-error" role="alert">{{ message }}</p>
+        }
+        @if (avatar(); as file) {
+          <p class="register-modal__avatar-file">
+            {{ file.name }}
+            <button class="register-modal__avatar-remove" type="button" (click)="removeAvatar()">
+              Remove
+            </button>
+          </p>
+        }
+      </div>
+
+      <input
+        id="register-avatar"
+        class="register-modal__avatar-input"
+        type="file"
+        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+        (change)="onAvatarSelected($event)"
+      />
+    </div>
+
+    <app-form-field label="Username" controlId="register-username" [error]="usernameError()">
+      <input
+        id="register-username"
+        class="register-modal__input"
+        type="text"
+        formControlName="username"
+        placeholder="User"
+        autocomplete="username"
+      />
+    </app-form-field>
+
+    <app-form-field label="Email" controlId="register-email" [error]="emailError()">
+      <input
+        id="register-email"
+        class="register-modal__input"
+        type="email"
+        formControlName="email"
+        placeholder="example@gmail.com"
+        autocomplete="email"
+      />
+    </app-form-field>
+
+    <div class="register-modal__passwords">
+      <app-form-field label="Password" controlId="register-password" [error]="passwordError()">
+        <input
+          id="register-password"
+          class="register-modal__input"
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+          autocomplete="new-password"
+        />
+      </app-form-field>
+
+      <app-form-field
+        label="Confirm password"
+        controlId="register-password-confirmation"
+        [error]="passwordConfirmationError()"
+      >
+        <input
+          id="register-password-confirmation"
+          class="register-modal__input"
+          type="password"
+          formControlName="password_confirmation"
+          placeholder="••••••••"
+          autocomplete="new-password"
+        />
+      </app-form-field>
+    </div>
+
+    <button class="register-modal__submit" type="submit" [disabled]="loading()">
+      @if (loading()) {
+        <app-loading-indicator size="sm" label="Creating your account" />
+      } @else {
+        Sign up
+      }
+    </button>
+
+    <p class="register-modal__switch">
+      Already have an account?
+      <button class="register-modal__switch-button" type="button" (click)="switchToLogin.emit()">
+        Log in
+      </button>
+    </p>
+  </form>
+</app-modal>
