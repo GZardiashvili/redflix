@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.skeleton {
+  display: block;
+  min-height: 4rem;
+  // Neutral placeholder treatment: final colours and shimmer arrive with the Figma work.
+  background: rgb(0 0 0 / 8%);
+}
+
+.skeleton--text {
+  min-height: 1rem;
+}
+
+.skeleton--avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  min-height: 0;
+  border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
