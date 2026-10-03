@@ -1,0 +1,88 @@
+<section class="summary" aria-labelledby="booking-summary-heading">
+  <h3 class="summary__heading" id="booking-summary-heading">Your seats · Max {{ maxSeats() }}</h3>
+
+  <p class="summary__hint">
+    Pick up to {{ maxSeats() }} seats from the map. Each seat can carry its own ticket type.
+  </p>
+
+  <!--
+    The live region is always present so a notice is announced when it appears,
+    rather than only being visible. It is polite, so it does not interrupt.
+  -->
+  <p class="summary__notice" role="status" aria-live="polite">{{ notice() ?? '' }}</p>
+
+  @if (lines().length > 0) {
+    <ul class="summary__lines">
+      @for (line of lines(); track line.seatId) {
+        <li class="summary__line" [class.summary__line--invalid]="!line.valid">
+          <div class="summary__line-head">
+            <p class="summary__seat">
+              <span class="summary__seat-caption">Seat</span>
+              <span class="summary__seat-code">{{ line.code }}</span>
+            </p>
+
+            <div class="summary__line-price">
+              <span class="summary__amount">₾{{ line.price }}</span>
+
+              <button
+                type="button"
+                class="summary__remove"
+                [attr.aria-label]="'Remove seat ' + line.code"
+                (click)="removeSeat(line.seatId)"
+              >
+                &times;
+              </button>
+            </div>
+          </div>
+
+          <hr class="summary__rule" />
+
+          <!--
+            One ticket-type group per seat: changing one seat's type cannot touch
+            another's, and each group is labelled by its own seat code.
+          -->
+          <div
+            class="summary__types"
+            role="group"
+            [attr.aria-label]="'Ticket type for seat ' + line.code"
+          >
+            @for (type of ticketTypes(); track type.id) {
+              <button
+                type="button"
+                class="summary__type"
+                [class.summary__type--active]="line.ticketType?.id === type.id"
+                [attr.aria-pressed]="line.ticketType?.id === type.id"
+                (click)="chooseTicketType(line.seatId, type.id)"
+              >
+                {{ type.name }} {{ type.percentage }}
+              </button>
+            }
+          </div>
+
+          @if (line.invalidReason; as reason) {
+            <p class="summary__reason">{{ reason }}</p>
+          }
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="summary__empty">No seats selected yet.</p>
+  }
+
+  <div class="summary__footer">
+    <div class="summary__subtotal">
+      <span class="summary__subtotal-label">Subtotal</span>
+      <span class="summary__subtotal-rule"></span>
+      <span class="summary__amount summary__amount--total">₾{{ subtotal() }}</span>
+    </div>
+
+    <button
+      type="button"
+      class="summary__next"
+      [disabled]="!canContinue()"
+      (click)="continueToCheckout()"
+    >
+      Next: Checkout
+    </button>
+  </div>
+</section>

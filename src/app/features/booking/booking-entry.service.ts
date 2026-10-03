@@ -87,6 +87,7 @@ export class BookingEntryService {
       hallName: session.hall.name,
       movieSlug: movie.slug,
       movieTitle: movie.title,
+      ageRatingMinAge: movie.ageRating.minAge,
       formatName: session.format.name,
       languageName: session.language.name,
       languageCode: session.language.code,

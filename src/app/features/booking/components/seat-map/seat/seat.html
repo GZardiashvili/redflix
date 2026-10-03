@@ -1,12 +1,27 @@
-<span
-  class="seat"
-  [class.seat--sold]="seat().state === 'sold'"
-  [class.seat--held]="seat().state === 'held'"
-  [class.seat--mine]="seat().isMine"
-  [attr.data-state]="seat().state"
-  [attr.data-seat]="seat().code"
-  [attr.aria-label]="label()"
-  role="img"
->
-  <span class="seat__label" aria-hidden="true">{{ seat().label }}</span>
-</span>
+@if (seat().state === 'available') {
+  <button
+    type="button"
+    class="seat seat--available"
+    [class.seat--selected]="selected()"
+    [attr.data-state]="seat().state"
+    [attr.data-seat]="seat().code"
+    [attr.aria-pressed]="selected()"
+    [attr.aria-label]="label()"
+    (click)="select()"
+  >
+    <span class="seat__label" aria-hidden="true">{{ seat().label }}</span>
+  </button>
+} @else {
+  <span
+    class="seat"
+    [class.seat--sold]="seat().state === 'sold'"
+    [class.seat--held]="seat().state === 'held'"
+    [class.seat--mine]="seat().isMine"
+    [attr.data-state]="seat().state"
+    [attr.data-seat]="seat().code"
+    [attr.aria-label]="label()"
+    role="img"
+  >
+    <span class="seat__label" aria-hidden="true">{{ seat().label }}</span>
+  </span>
+}

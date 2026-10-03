@@ -20,8 +20,12 @@
       />
     </div>
   } @else {
-    <div class="booking-step__scroll">
-      <app-seat-map [map]="layout" />
+    <div class="booking-step__layout">
+      <div class="booking-step__scroll">
+        <app-seat-map [map]="layout" />
+      </div>
+
+      <app-seat-selection-summary />
     </div>
   }
 }

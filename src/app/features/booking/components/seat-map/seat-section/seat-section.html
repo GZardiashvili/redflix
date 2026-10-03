@@ -3,7 +3,11 @@
 
   <div class="seat-section__rows">
     @for (row of section().rows; track row.label) {
-      <app-seat-row [row]="row" />
+      <app-seat-row
+        [row]="row"
+        [selectedSeatIds]="selectedSeatIds()"
+        (seatToggled)="seatToggled.emit($event)"
+      />
     }
   </div>
 </section>

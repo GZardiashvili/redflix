@@ -10,10 +10,11 @@ interface LegendItem {
  * Key to the seat states the map draws.
  *
  * The list is fixed by what is actually rendered — the three states the API can
- * return a seat in, plus the missing-position gap that keeps a row's shape. It is
- * not derived from whatever one hall happens to contain, so the key does not
- * change from screening to screening. `isMine` is deliberately absent: it marks the
- * visitor's own hold rather than a state the map offers, so it gets no entry.
+ * return a seat in, plus the chosen state Step 1 adds and the missing-position gap
+ * that keeps a row's shape. It is not derived from whatever one hall happens to
+ * contain, so the key does not change from screening to screening. `isMine` is
+ * deliberately absent: it marks the visitor's own hold rather than a state the map
+ * offers, so it gets no entry.
  */
 @Component({
   selector: 'app-seat-map-legend',
@@ -23,6 +24,7 @@ interface LegendItem {
 export class SeatMapLegendComponent {
   protected readonly items: readonly LegendItem[] = [
     { key: 'available', label: 'Available' },
+    { key: 'selected', label: 'Selected' },
     { key: 'sold', label: 'Sold' },
     { key: 'held', label: 'Held by another visitor' },
     { key: 'gap', label: 'No seat' },

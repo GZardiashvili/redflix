@@ -3,7 +3,11 @@
 
   <div class="seat-map__sections">
     @for (section of map().sections; track section.name) {
-      <app-seat-section [section]="section" />
+      <app-seat-section
+        [section]="section"
+        [selectedSeatIds]="selectedSeatIds()"
+        (seatToggled)="toggleSeat($event)"
+      />
     }
   </div>
 

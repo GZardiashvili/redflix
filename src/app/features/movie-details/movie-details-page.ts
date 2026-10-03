@@ -298,6 +298,10 @@ export class MovieDetailsPage {
       return;
     }
 
-    this.booking.select(session, { slug: movie.slug, title: movie.title });
+    this.booking.select(session, {
+      slug: movie.slug,
+      title: movie.title,
+      ageRating: movie.ageRating,
+    });
   }
 }

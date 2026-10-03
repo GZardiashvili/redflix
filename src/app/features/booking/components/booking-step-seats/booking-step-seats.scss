@@ -1,9 +1,15 @@
 // Content area of the booking dialog's first step.
 //
-// The seat map is taller than the panel in every real hall, so it scrolls inside
-// this slot while the dialog header and step indicator stay put. The scroll is
-// local to the map: the page behind the dialog must not move while the visitor
-// reads the seating.
+// The seat map and the summary of picked seats stand side by side: the map scrolls
+// inside its own column while the summary keeps its prices and its forward
+// control in place. The scroll is local to the map, so the page behind the
+// dialog must not move while the visitor reads the seating.
+
+.booking-step__layout {
+  display: flex;
+  align-items: stretch;
+  gap: 1.25rem; // 20px
+}
 
 .booking-step__scroll {
   max-height: 28.25rem; // 452px, the design's content height

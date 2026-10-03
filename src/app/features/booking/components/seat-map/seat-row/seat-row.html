@@ -6,7 +6,11 @@
       @if (seat.state === 'unavailable') {
         <span class="seat-row__gap" aria-hidden="true"></span>
       } @else {
-        <app-seat [seat]="seat" />
+        <app-seat
+          [seat]="seat"
+          [selected]="selectedSeatIds().has(seat.id)"
+          (toggled)="seatToggled.emit($event)"
+        />
       }
 
       @if (seat.aisleAfter) {

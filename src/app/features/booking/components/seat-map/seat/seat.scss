@@ -1,8 +1,9 @@
 // One seat: a 52×52 tile from the design, on the raised surface colour with a
 // hairline border and a soft drop shadow.
 //
-// Availability is carried by colour alone here — there is no selected state yet,
-// so nothing is painted in the accent colour.
+// The tile is a `<button>` when the seat is bookable and a `<span>` otherwise, so
+// the shared box is declared once here and the two element types differ only in
+// the resets below and the treatments under them.
 
 .seat {
   position: relative;
@@ -20,6 +21,43 @@
   font-size: 0.875rem; // 14px
   font-weight: 800;
   line-height: 0.9375rem; // 15px
+}
+
+// A bookable seat is a real button, so the browser's own control styling and
+// typography are dropped in favour of the tile: nothing here may change its size
+// or position, only its colour.
+.seat--available {
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+
+  &:hover {
+    border-color: #a9a9a9;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+// Selected: the design's accent fill with the darker page colour as its border,
+// so a chosen seat is unmistakable against an available one at a glance and the
+// legend swatch can repeat the same treatment.
+.seat--selected {
+  border-color: #070c1c;
+  background: #ec3013;
+  color: #fff;
+  font-size: 1.125rem; // 18px
+  line-height: 1.25rem; // 20px
+
+  &:hover {
+    border-color: #070c1c;
+  }
 }
 
 .seat__label {

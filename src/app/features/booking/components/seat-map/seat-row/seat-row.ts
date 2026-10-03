@@ -1,5 +1,5 @@
-import { Component, input } from '@angular/core';
-import { SeatRow } from '../../../../../core/models/seat';
+import { Component, input, output } from '@angular/core';
+import { Seat, SeatRow } from '../../../../../core/models/seat';
 import { SeatComponent } from '../seat/seat';
 
 /**
@@ -18,6 +18,11 @@ import { SeatComponent } from '../seat/seat';
  * The label is printed exactly as received. Rows are not always contiguous —
  * one hall runs `A`–`G` and then `J`, `K`, `L` — so nothing is derived from an
  * index or completed alphabetically.
+ *
+ * Selection is only relayed here: which seats are chosen arrives in
+ * {@link selectedSeatIds} and the seats the visitor activates are emitted
+ * onwards. Deciding what may be selected belongs to the booking feature's
+ * selection owner, not to a row.
  */
 @Component({
   imports: [SeatComponent],
@@ -28,4 +33,10 @@ import { SeatComponent } from '../seat/seat';
 export class SeatRowComponent {
   /** The row to render. */
   readonly row = input.required<SeatRow>();
+
+  /** Ids of the seats currently held by the visitor, as decided by the booking flow. */
+  readonly selectedSeatIds = input<ReadonlySet<number>>(new Set<number>());
+
+  /** Emitted when one of this row's available seats is activated. */
+  readonly seatToggled = output<Seat>();
 }
