@@ -6,7 +6,7 @@
 
   <div class="sessions-page__layout">
     <aside class="sessions-sidebar" aria-label="Session filters">
-      <app-sessions-filters (filtersChanged)="onFiltersChange($event)">
+      <app-sessions-filters [selection]="filters()" (filtersChanged)="onFiltersChange($event)">
         <!-- Projected so the date picker sits between the Venue and Format groups. -->
         <app-date-selector [selected]="selectedDate()" (dateSelected)="onDateChange($event)" />
       </app-sessions-filters>

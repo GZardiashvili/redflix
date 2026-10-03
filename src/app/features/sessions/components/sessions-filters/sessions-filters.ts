@@ -1,5 +1,5 @@
-import { Component, computed, inject, linkedSignal, output, signal } from '@angular/core';
-import { Format, TimeBand } from '../../../../core/models/filter-options';
+import { Component, computed, inject, input, linkedSignal, output } from '@angular/core';
+import { TimeBand } from '../../../../core/models/filter-options';
 import { FilterOptionsService } from '../../../../core/services/filter-options.service';
 
 /** Slugs currently checked, per category, as emitted to the page. */
@@ -9,14 +9,6 @@ export interface SessionsFiltersValue {
   languages: string[];
   bands: string[];
 }
-
-/** Nothing selected: the state the page starts from and `Clear filters` restores. */
-export const NO_SESSIONS_FILTERS: SessionsFiltersValue = {
-  venues: [],
-  formats: [],
-  languages: [],
-  bands: [],
-};
 
 /** A time-of-day option split into its name and its muted time hint. */
 interface BandOption {
@@ -30,9 +22,10 @@ interface BandOption {
  * checkbox groups plus the clear/counter footer.
  *
  * The lists are never hardcoded — they come from the cached `/filter-options`
- * payload. Selection is local state; every change is emitted through
- * `filtersChanged` and the page decides what to do with it, so this component
- * never talks to the sessions API.
+ * payload. The checked state mirrors the `selection` input (which the page reads
+ * from the URL), so external state — including Back/Forward navigation — moves
+ * the checkboxes. The component emits only on user interaction, never in reaction
+ * to its input, which is what keeps the URL round-trip from looping.
  */
 @Component({
   imports: [],
@@ -42,6 +35,9 @@ interface BandOption {
 })
 export class SessionsFilters {
   private readonly filterOptions = inject(FilterOptionsService);
+
+  /** Selection owned by the page; drives the checkboxes. */
+  readonly selection = input.required<SessionsFiltersValue>();
 
   /** Authoritative lists owned by `/filter-options`; empty until the initializer resolves. */
   protected readonly venues = computed(() => this.filterOptions.value()?.venues ?? []);
@@ -54,9 +50,13 @@ export class SessionsFilters {
     (this.filterOptions.value()?.timeBands ?? []).map(splitBandLabel),
   );
 
-  protected readonly selectedVenues = signal<string[]>([]);
-  protected readonly selectedLanguages = signal<string[]>([]);
-  protected readonly selectedBands = signal<string[]>([]);
+  // Each group mirrors the incoming selection, so a URL change (a click, a shared
+  // link or Back/Forward) updates the boxes. `update`/`set` still apply a click
+  // immediately; the page echoes the same value back through the URL, which is
+  // idempotent and therefore emits nothing further.
+  protected readonly selectedVenues = linkedSignal(() => this.selection().venues);
+  protected readonly selectedLanguages = linkedSignal(() => this.selection().languages);
+  protected readonly selectedBands = linkedSignal(() => this.selection().bands);
 
   /**
    * Formats the current venue selection can actually show: every format while no
@@ -74,14 +74,14 @@ export class SessionsFilters {
   });
 
   /**
-   * Selected formats, narrowed whenever changing venues removes one: the linked
-   * signal keeps only values still offered, so a stale selection can never reach
-   * the API.
+   * Formats mirror the incoming selection, narrowed to what the venues offer: a
+   * format the current venues do not play is dropped here, so it can never reach
+   * the API — whether it was clicked or restored from the URL.
    */
-  protected readonly selectedFormats = linkedSignal<Format[], string[]>({
-    source: this.availableFormats,
-    computation: (available, previous) =>
-      (previous?.value ?? []).filter((slug) => available.some((format) => format.slug === slug)),
+  protected readonly selectedFormats = linkedSignal({
+    source: () => ({ selected: this.selection().formats, available: this.availableFormats() }),
+    computation: ({ selected, available }) =>
+      selected.filter((slug) => available.some((format) => format.slug === slug)),
   });
 
   /** Total checked boxes across the four categories. */
