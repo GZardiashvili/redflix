@@ -17,13 +17,32 @@
       <span>Releases {{ movie().releaseDate }}</span>
     </p>
 
+    @if (notifyError(); as message) {
+      <p class="coming-soon-card__error" role="alert">
+        {{ message }}
+        <button
+          class="coming-soon-card__retry"
+          type="button"
+          (click)="notifyRequested.emit(movie())"
+        >
+          Try again
+        </button>
+      </p>
+    }
+
     <button
       class="coming-soon-card__action"
       type="button"
-      [disabled]="movie().isNotified"
+      [disabled]="notifyPending() || notifySubscribed()"
       (click)="notifyRequested.emit(movie())"
     >
-      {{ movie().isNotified ? 'Notified' : 'Notify Me' }}
+      @if (notifyPending()) {
+        <app-loading-indicator size="sm" label="Subscribing to notifications" />
+      } @else if (notifySubscribed()) {
+        Notified
+      } @else {
+        Notify Me
+      }
     </button>
   </div>
 </article>

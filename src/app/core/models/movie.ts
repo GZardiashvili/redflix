@@ -33,3 +33,14 @@ export interface Genre {
   slug: string;
   name: string;
 }
+
+/**
+ * Successful payload of `POST /movies/{movie}/notify`.
+ *
+ * `subscribed` is the server's authoritative subscription state and may be
+ * `true` again for a duplicate request, which is not an error.
+ */
+export interface MovieNotifyResponse {
+  movieId: number;
+  subscribed: boolean;
+}

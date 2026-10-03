@@ -16,5 +16,7 @@
 
   <p class="movie-card__price">From {{ movie().fromPrice }} ₾</p>
 
-  <a class="movie-card__action" [routerLink]="['/movies', movie().slug]">Buy Ticket</a>
+  <a class="movie-card__action" [routerLink]="['/movies', movie().slug]" (click)="recordView()"
+    >Buy Ticket</a
+  >
 </article>

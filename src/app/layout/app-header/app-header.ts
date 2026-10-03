@@ -1,6 +1,7 @@
 import { Component, ElementRef, computed, inject, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { AppHeaderSearch } from './app-header-search/app-header-search';
 
 /**
  * Application header: brand, primary navigation and the session-dependent
@@ -9,7 +10,7 @@ import { AuthService } from '../../core/services/auth.service';
  * dialogs themselves belong to the shell, so they are only requested here.
  */
 @Component({
-  imports: [RouterLink],
+  imports: [AppHeaderSearch, RouterLink],
   selector: 'app-header',
   styleUrl: './app-header.scss',
   templateUrl: './app-header.html',

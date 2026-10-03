@@ -1,41 +1,85 @@
 @if (activeMovie(); as movie) {
   <section class="home-hero" aria-label="Featured movie">
-    <img
-      class="home-hero__backdrop"
-      [src]="movie.backdropUrl"
-      [alt]="movie.title + ' backdrop'"
-      fetchpriority="high"
-    />
-    <div class="home-hero__overlay" aria-hidden="true"></div>
+    <!-- Single-item @for keyed by id: swapping the slide recreates it so the
+         entrance animation replays for every active movie. -->
+    @for (slide of [movie]; track slide.id) {
+      <div class="home-hero__slide">
+        <img
+          class="home-hero__backdrop"
+          [src]="slide.backdropUrl"
+          [alt]="slide.title + ' backdrop'"
+          fetchpriority="high"
+        />
+        <div class="home-hero__overlay" aria-hidden="true"></div>
 
-    <div class="home-hero__content">
-      <p class="home-hero__kicker">Featured</p>
-      <h2 class="home-hero__title">{{ movie.title }}</h2>
+        <div class="home-hero__content">
+          <p class="home-hero__kicker">Featured</p>
+          <h2 class="home-hero__title">{{ slide.title }}</h2>
 
-      <p class="home-hero__meta">
-        <span class="home-hero__rating">{{ movie.ageRating.code }}</span>
-        <span aria-hidden="true">•</span>
-        <span>{{ movie.runtimeMinutes }} min</span>
-        @if (genreNames(movie); as genres) {
-          <span aria-hidden="true">•</span>
-          <span>{{ genres }}</span>
-        }
-      </p>
+          <p class="home-hero__meta">
+            <span class="home-hero__rating">{{ slide.ageRating.code }}</span>
+            <span aria-hidden="true">•</span>
+            <span>{{ slide.runtimeMinutes }} min</span>
+            @if (genreNames(slide); as genres) {
+              <span aria-hidden="true">•</span>
+              <span>{{ genres }}</span>
+            }
+          </p>
 
-      <p class="home-hero__price">From {{ movie.fromPrice }} ₾</p>
+          <p class="home-hero__price">From {{ slide.fromPrice }} ₾</p>
 
-      <div class="home-hero__actions">
-        <a class="home-hero__primary" [routerLink]="['/movies', movie.slug]">Buy Ticket</a>
-        <a class="home-hero__secondary" [routerLink]="['/movies', movie.slug]">More Info</a>
+          <div class="home-hero__actions">
+            <a
+              class="home-hero__primary"
+              [routerLink]="['/movies', slide.slug]"
+              (click)="recordView()"
+              >Buy Ticket</a
+            >
+            <a
+              class="home-hero__secondary"
+              [routerLink]="['/movies', slide.slug]"
+              (click)="recordView()"
+              >More Info</a
+            >
+          </div>
+        </div>
       </div>
-    </div>
+    }
 
-    <div class="home-hero__controls" aria-hidden="true">
-      <span class="home-hero__progress"></span>
-      <span class="home-hero__arrows">
-        <span class="home-hero__arrow">‹</span>
-        <span class="home-hero__arrow">›</span>
-      </span>
-    </div>
+    @if (movies().length > 1) {
+      <div class="home-hero__controls">
+        <div class="home-hero__indicators" role="group" aria-label="Featured movie slides">
+          @for (item of movies(); track item.id; let i = $index) {
+            <button
+              type="button"
+              class="home-hero__indicator"
+              [class.home-hero__indicator--active]="i === currentIndex()"
+              [attr.aria-current]="i === currentIndex() ? 'true' : null"
+              [attr.aria-label]="'Show featured movie ' + (i + 1) + ' of ' + movies().length"
+              (click)="select(i)"
+            ></button>
+          }
+        </div>
+
+        <div class="home-hero__arrows">
+          <button
+            type="button"
+            class="home-hero__arrow"
+            aria-label="Previous featured movie"
+            (click)="previous()"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            class="home-hero__arrow"
+            aria-label="Next featured movie"
+            (click)="next()"
+          >
+            ›
+          </button>
+        </div>
+      </div>
+    }
   </section>
 }

@@ -1,0 +1,73 @@
+// Compact Recently Viewed entry: 329×87 card with a cropped poster and the red
+// age-rating accent of the Home surface.
+:host {
+  display: block;
+}
+
+.recently-viewed-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 20.5625rem; // 329px
+  height: 5.4375rem; // 87px
+  padding: 0.625rem;
+  border-radius: 1rem;
+  background: #1e2031;
+  color: #fff;
+  font-family:
+    'Archivo',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  text-decoration: none;
+
+  &:hover {
+    background: #242639;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ec3013;
+    outline-offset: 2px;
+  }
+}
+
+.recently-viewed-card__poster {
+  width: 5.4375rem; // 87px
+  height: 4.1875rem; // 67px
+  flex-shrink: 0;
+  border-radius: 0.5rem;
+  object-fit: cover;
+}
+
+.recently-viewed-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.recently-viewed-card__title {
+  overflow: hidden;
+  font-size: 0.875rem;
+  font-weight: 800;
+  line-height: 1.125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recently-viewed-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: #a9a9a9;
+  font-size: 0.75rem;
+}
+
+.recently-viewed-card__rating {
+  padding: 0.0625rem 0.375rem;
+  border: 1px solid #ec3013;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 800;
+}

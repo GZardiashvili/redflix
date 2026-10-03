@@ -1,14 +1,18 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Movie } from '../../../../core/models/movie';
+import { RecentlyViewedService } from '../../../../core/services/recently-viewed.service';
+
+/** Delay between automatic slide advances of the hero carousel. */
+const AUTOPLAY_INTERVAL_MS = 6000;
 
 /**
- * Home hero base rendering: the first featured movie as the active title.
+ * Home hero carousel: the featured movies with previous/next controls,
+ * slide indicators and autoplay.
  *
- * Data comes from `/movies/featured` through the Home page; this component
- * owns only presentation. Carousel behavior (autoplay, transitions,
- * previous/next, indicator interaction) belongs to Task 09, so the controls
- * below render in place but stay non-interactive for now.
+ * Autoplay resets on every interaction, pauses while the document is hidden
+ * and is disabled entirely under `prefers-reduced-motion`, which also removes
+ * the slide transition. Manual navigation wraps around both ends.
  */
 @Component({
   imports: [RouterLink],
@@ -16,13 +20,102 @@ import { Movie } from '../../../../core/models/movie';
   styleUrl: './home-hero.scss',
   templateUrl: './home-hero.html',
 })
-export class HomeHero {
-  /** Featured movies in API order; the first is the active title. */
+export class HomeHero implements OnInit {
+  /** Featured movies in API order; index 0 starts as the active title. */
   readonly movies = input.required<Movie[]>();
 
-  protected readonly activeMovie = computed(() => this.movies()[0]);
+  /** Raw slide index; normalised against the current movie count on read. */
+  private readonly activeIndex = signal(0);
+
+  /** The slide currently shown, `undefined` only while the list is empty. */
+  protected readonly currentIndex = computed(() => {
+    const count = this.movies().length;
+    return count === 0 ? 0 : this.activeIndex() % count;
+  });
+
+  protected readonly activeMovie = computed(() => this.movies()[this.currentIndex()]);
+
+  private readonly recentlyViewed = inject(RecentlyViewedService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  private autoplayTimer: number | null = null;
+  private readonly motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  private readonly onVisibilityChange = () => this.handleVisibilityChange();
+  private readonly onMotionChange = () => this.restartAutoplay();
+
+  constructor() {
+    document.addEventListener('visibilitychange', this.onVisibilityChange);
+    this.motionQuery.addEventListener('change', this.onMotionChange);
+
+    this.destroyRef.onDestroy(() => {
+      document.removeEventListener('visibilitychange', this.onVisibilityChange);
+      this.motionQuery.removeEventListener('change', this.onMotionChange);
+      this.clearAutoplay();
+    });
+  }
+
+  ngOnInit(): void {
+    // Inputs are set before `ngOnInit`, so the movie count is safe to read here.
+    this.restartAutoplay();
+  }
+
+  /** Shows the slide at `index`, wrapping around, and restarts autoplay. */
+  protected select(index: number): void {
+    const count = this.movies().length;
+    if (count === 0) {
+      return;
+    }
+
+    this.activeIndex.set(((index % count) + count) % count);
+    this.restartAutoplay();
+  }
+
+  protected previous(): void {
+    this.select(this.currentIndex() - 1);
+  }
+
+  protected next(): void {
+    this.select(this.currentIndex() + 1);
+  }
+
+  /** Opens a hero CTA: the visited title is snapshotted into Recently Viewed. */
+  protected recordView(): void {
+    const movie = this.activeMovie();
+    if (movie !== undefined) {
+      this.recentlyViewed.record(movie);
+    }
+  }
 
   protected genreNames(movie: Movie): string {
     return movie.genres.map((genre) => genre.name).join(' • ');
+  }
+
+  private restartAutoplay(): void {
+    this.clearAutoplay();
+
+    if (this.movies().length < 2 || document.hidden || this.motionQuery.matches) {
+      return;
+    }
+
+    this.autoplayTimer = window.setTimeout(() => {
+      this.autoplayTimer = null;
+      // `select` schedules the next tick, keeping the interval self-perpetuating.
+      this.select(this.currentIndex() + 1);
+    }, AUTOPLAY_INTERVAL_MS);
+  }
+
+  private clearAutoplay(): void {
+    if (this.autoplayTimer !== null) {
+      window.clearTimeout(this.autoplayTimer);
+      this.autoplayTimer = null;
+    }
+  }
+
+  private handleVisibilityChange(): void {
+    if (document.hidden) {
+      this.clearAutoplay();
+    } else {
+      this.restartAutoplay();
+    }
   }
 }

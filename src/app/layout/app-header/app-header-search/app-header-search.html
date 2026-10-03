@@ -1,0 +1,184 @@
+<div class="header-search">
+  <div class="header-search__bar">
+    @if (query().length > 0) {
+      <svg class="header-search__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+        <circle cx="8.5" cy="8.5" r="5.75" fill="none" stroke="currentColor" stroke-width="1.5" />
+        <path
+          d="M12.75 12.75 16.5 16.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+      </svg>
+    }
+
+    <input
+      #searchInput
+      class="header-search__input"
+      type="text"
+      role="combobox"
+      aria-label="Search films and live events"
+      placeholder="Search films and live events"
+      autocomplete="off"
+      spellcheck="false"
+      aria-autocomplete="list"
+      aria-controls="header-search-panel"
+      [attr.aria-expanded]="open()"
+      [attr.aria-activedescendant]="activeDescendant()"
+      [value]="query()"
+      (input)="onQueryChange($any($event.target).value)"
+      (focus)="open.set(true)"
+      (keydown)="onInputKeydown($event)"
+    />
+
+    @if (query().length > 0) {
+      <button
+        class="header-search__clear"
+        type="button"
+        aria-label="Clear search"
+        (click)="clearQuery()"
+      >
+        ×
+      </button>
+    }
+  </div>
+
+  <div
+    id="header-search-panel"
+    class="header-search__panel"
+    [class.header-search__panel--results]="status() === 'results'"
+    [attr.hidden]="!open() || null"
+  >
+    @if (open()) {
+      @switch (status()) {
+        @case ('prompt') {
+          <div class="header-search__state">
+            <span class="header-search__state-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path
+                  d="M7.5 10c-1.5 0-2.6-1.1-2.6-2.4 0-1.2.9-2.2 2-2.4.2-1.4 1.4-2.5 2.9-2.5 1.1 0 2 .5 2.5 1.4.5-.9 1.5-1.5 2.6-1.5 1.8 0 3.2 1.4 3.3 3.1 1.2.3 2.1 1.4 2.1 2.6 0 1.5-1.2 2.7-2.7 2.7"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M7.5 10h9l-1 9.2a1.5 1.5 0 0 1-1.5 1.3h-3a1.5 1.5 0 0 1-1.5-1.3L7.5 10Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M10.6 10 10 20.5M13.4 10l.6 10.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </span>
+
+            <p class="header-search__state-title">{{ promptTitle }}</p>
+            <p class="header-search__state-message">{{ promptMessage }}</p>
+
+            <a class="header-search__cta" routerLink="/sessions" (click)="closePanel()">
+              Browse all sessions
+            </a>
+          </div>
+        }
+
+        @case ('loading') {
+          <div class="header-search__state">
+            <app-loading-indicator label="Searching films and live events" />
+          </div>
+        }
+
+        @case ('results') {
+          <div class="header-search__head">
+            <span class="header-search__head-label">Films &amp; events</span>
+            <span class="header-search__head-count">{{ resultCountText() }}</span>
+          </div>
+
+          <div class="header-search__list" role="listbox" aria-label="Search results">
+            @for (movie of results(); track movie.id; let i = $index) {
+              <div
+                class="header-search__row"
+                [class.header-search__row--active]="i === activeIndex()"
+                role="option"
+                [attr.id]="'header-search-option-' + i"
+                [attr.aria-selected]="i === activeIndex()"
+                (click)="openMovie(movie)"
+                (keydown.enter)="openMovie(movie)"
+                (mouseenter)="activeIndex.set(i)"
+              >
+                <img class="header-search__poster" [src]="movie.posterUrl" alt="" loading="lazy" />
+
+                <span class="header-search__row-main">
+                  <span class="header-search__row-title">{{ movie.title }}</span>
+
+                  <span class="header-search__row-meta">
+                    <span>{{ kindLabel(movie.kind) }}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{{ movie.ageRating.code }}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{{ movie.runtimeMinutes }} min</span>
+                  </span>
+                </span>
+
+                @if (movie.isComingSoon) {
+                  <span class="header-search__soon">Coming Soon</span>
+                } @else {
+                  <span class="header-search__price">from ₾{{ movie.fromPrice }}</span>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @case ('empty') {
+          <div class="header-search__state">
+            <span class="header-search__state-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle
+                  cx="10.5"
+                  cy="10.5"
+                  r="6.75"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                />
+                <path
+                  d="m15.6 15.6 4.9 4.9"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </span>
+
+            <p class="header-search__state-title">{{ noResultsTitle() }}</p>
+            <p class="header-search__state-message">{{ noResultsMessage }}</p>
+
+            <a class="header-search__cta" routerLink="/sessions" (click)="closePanel()">
+              Browse all sessions
+            </a>
+          </div>
+        }
+
+        @case ('error') {
+          <div class="header-search__state">
+            <app-error-state
+              [message]="errorMessage()"
+              [canRetry]="true"
+              retryLabel="Try again"
+              (retry)="retrySearch()"
+            />
+          </div>
+        }
+      }
+    }
+  </div>
+</div>

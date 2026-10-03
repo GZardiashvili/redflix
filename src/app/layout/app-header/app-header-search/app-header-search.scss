@@ -1,0 +1,278 @@
+// Header typeahead: 480×41 blurred pill with a 5px-gapped dropdown panel below.
+:host {
+  position: relative;
+  display: block;
+  width: 30rem; // 480px
+  font-family:
+    'Archivo',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+}
+
+.header-search__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  height: 2.5625rem; // 41px
+  padding: 0 1rem;
+  border: 1px solid #2a2c3d;
+  border-radius: 999px;
+  background: rgb(7 12 28 / 55%);
+  color: #505261;
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+
+  &:focus-within {
+    border-color: #ec3013;
+    color: #a9a9a9;
+  }
+}
+
+.header-search__icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+}
+
+.header-search__input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  background: none;
+  color: #fff;
+  font-family:
+    'Archivo',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  outline: none;
+
+  &::placeholder {
+    color: #505261;
+  }
+}
+
+.header-search__clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #1e2031;
+  color: #a9a9a9;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    color: #fff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ec3013;
+    outline-offset: 2px;
+  }
+}
+
+.header-search__panel {
+  position: absolute;
+  top: calc(100% + 0.3125rem); // 5px gap
+  left: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 15.5rem; // 248px (prompt / no-results / error)
+  padding: 1rem;
+  border: 1px solid #2a2c3d;
+  border-radius: 1rem;
+  background: rgb(7 12 28 / 96%);
+  box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 45%);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+
+  // `display: flex` above beats the UA `[hidden]` rule, so the closed panel
+  // must be hidden explicitly — otherwise the empty box stays on screen.
+  &[hidden] {
+    display: none;
+  }
+}
+
+.header-search__panel--results {
+  height: 21.375rem; // 342px
+  padding: 0.5rem; // rows land on the 464px content width
+}
+
+// Centred prompt / empty / error branch.
+.header-search__state {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.5rem;
+  text-align: center;
+}
+
+// Circular badge behind the prompt (popcorn) and empty (magnifier) icons.
+.header-search__state-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem; // 64px
+  height: 4rem;
+  margin-bottom: 0.5rem;
+  border-radius: 50%;
+  background: #1e2031;
+  color: #fff;
+
+  svg {
+    width: 1.75rem; // 28px
+    height: 1.75rem;
+  }
+}
+
+.header-search__state-title {
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.header-search__state-message {
+  color: #a9a9a9;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.header-search__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 11.4375rem; // 183px
+  height: 2.5625rem; // 41px
+  margin-top: 0.75rem;
+  border-radius: 999px;
+  background: #1e2031;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-decoration: none;
+
+  &:hover {
+    background: #2a2c3d;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+.header-search__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  // Left inset matches the row padding so the label lines up with the posters.
+  padding: 0.5rem 0.5rem 0.75rem 0.75rem;
+}
+
+.header-search__head-label {
+  color: #a9a9a9;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.125rem;
+  text-transform: uppercase;
+}
+
+.header-search__head-count {
+  // Muted grey: matches the design and passes AA on the panel (unlike #505261).
+  color: #a9a9a9;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.header-search__list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.3125rem; // 5px
+  overflow-y: auto;
+}
+
+.header-search__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 4.5rem; // 72px
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+
+  &:hover,
+  &--active {
+    background: #1e2031;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ec3013;
+    outline-offset: -2px;
+  }
+}
+
+.header-search__poster {
+  width: 2.5rem; // 40px
+  height: 3.5rem; // 56px
+  flex-shrink: 0;
+  border-radius: 0.375rem;
+  object-fit: cover;
+}
+
+.header-search__row-main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.header-search__row-title {
+  overflow: hidden;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-search__row-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: #a9a9a9;
+  font-size: 0.75rem;
+}
+
+.header-search__price {
+  flex-shrink: 0;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.header-search__soon {
+  flex-shrink: 0;
+  color: #e27e04;
+  font-size: 0.875rem;
+  font-weight: 700;
+}

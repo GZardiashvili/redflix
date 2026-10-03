@@ -2,8 +2,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Service, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ApiResponse } from '../api/api-response';
-import { API_ENDPOINTS, apiUrl } from '../config/api.config';
-import { Movie } from '../models/movie';
+import { API_ENDPOINTS, apiUrl, notifyMovieUrl } from '../config/api.config';
+import { Movie, MovieNotifyResponse } from '../models/movie';
 
 /**
  * Reusable owner of the movie catalogue endpoints.
@@ -29,6 +29,36 @@ export class MoviesService {
   /** Unreleased titles (no sessions); `limit` caps the Home row. */
   getComingSoon(limit?: number): Promise<Movie[]> {
     return this.getMovies(API_ENDPOINTS.comingSoonMovies, limit);
+  }
+
+  /**
+   * Catalogue search for the header typeahead.
+   *
+   * The API matches prefixes and caps the page at 6 items itself; an empty or
+   * unmatched query resolves to an empty array, never an error.
+   */
+  async search(query: string): Promise<Movie[]> {
+    const params = new HttpParams().set('q', query);
+    const response = await firstValueFrom(
+      this.http.get<ApiResponse<Movie[]>>(apiUrl(API_ENDPOINTS.search), { params }),
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Subscribes the current user to release notifications for a movie.
+   *
+   * A duplicate subscription resolves with the server's `subscribed: true`
+   * state instead of failing; `401` and `404` propagate for the feature layer
+   * to surface (the 401 replay flow is handled by the auth interceptor).
+   */
+  async notifyMovie(movieSlug: string): Promise<MovieNotifyResponse> {
+    const response = await firstValueFrom(
+      this.http.post<ApiResponse<MovieNotifyResponse>>(notifyMovieUrl(movieSlug), null),
+    );
+
+    return response.data;
   }
 
   private async getMovies(

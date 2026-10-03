@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
@@ -17,6 +18,9 @@ describe('AppHeader', () => {
       imports: [AppHeader],
       providers: [
         provideRouter([]),
+        // The header embeds the search typeahead, whose MoviesService needs an
+        // HttpClient; no request is made during these tests.
+        provideHttpClient(),
         {
           provide: AuthService,
           useValue: {

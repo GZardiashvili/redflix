@@ -1,12 +1,30 @@
 .home-hero {
   position: relative;
-  display: flex;
-  align-items: flex-end;
   min-height: 47.5rem;
   overflow: hidden;
   border-radius: 1.25rem;
   background: #070c1c;
   color: #fff;
+}
+
+// Absolute full-bleed slide: recreating this element per active movie replays
+// the entrance animation.
+.home-hero__slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  animation: home-hero-slide-in 500ms ease both;
+}
+
+@keyframes home-hero-slide-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .home-hero__backdrop {
@@ -108,11 +126,40 @@
   gap: 1rem;
 }
 
-.home-hero__progress {
-  width: 6rem;
-  height: 0.25rem;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 25%);
+.home-hero__indicators {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.home-hero__indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+
+  &::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 30%);
+  }
+
+  &--active::before {
+    background: #ec3013;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ec3013;
+    outline-offset: 2px;
+    border-radius: 999px;
+  }
 }
 
 .home-hero__arrows {
@@ -126,7 +173,23 @@
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
+  padding: 0;
   border: 1px solid rgb(255 255 255 / 40%);
   border-radius: 50%;
+  background: none;
+  color: #fff;
   font-size: 1.25rem;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #ec3013;
+    outline-offset: 2px;
+  }
+}
+
+// Reduced motion: no slide transition, no autoplay (the TS side skips the timer too).
+@media (prefers-reduced-motion: reduce) {
+  .home-hero__slide {
+    animation: none;
+  }
 }

@@ -43,6 +43,32 @@
   color: #fff;
 }
 
+.coming-soon-card__error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ff8f80;
+  font-size: 0.75rem;
+}
+
+.coming-soon-card__retry {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #ec3013;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
 .coming-soon-card__action {
   align-self: flex-start;
   margin-top: auto;
