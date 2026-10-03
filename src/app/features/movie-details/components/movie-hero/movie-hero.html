@@ -1,0 +1,55 @@
+<section class="hero">
+  <div class="hero__banner">
+    @if (movie().backdropUrl; as backdropUrl) {
+      <img class="hero__backdrop" [src]="backdropUrl" alt="" aria-hidden="true" />
+    }
+
+    <div class="hero__poster">
+      @if (movie().posterUrl; as posterUrl) {
+        <img class="hero__poster-image" [src]="posterUrl" [alt]="movie().title + ' poster'" />
+      }
+    </div>
+
+    <div class="hero__content">
+      @if (statusLabel(); as label) {
+        <span class="hero__status">{{ label }}</span>
+      }
+
+      <div class="hero__heading">
+        <h1 class="hero__title">{{ movie().title }}</h1>
+
+        @if (tagline(); as text) {
+          <p class="hero__tagline">{{ text }}</p>
+        }
+      </div>
+
+      <ul class="hero__badges">
+        <li class="hero__badge hero__badge--rating">
+          <span
+            class="hero__badge-text"
+            [title]="movie().ageRating.description"
+            [attr.aria-label]="
+              'Rated ' + movie().ageRating.code + '. ' + movie().ageRating.description
+            "
+          >
+            {{ movie().ageRating.code }}
+          </span>
+        </li>
+
+        <li class="hero__badge hero__badge--chip">
+          <svg class="hero__badge-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="13" r="8" />
+            <path d="M12 9v4l2.5 1.5M9 2h6" />
+          </svg>
+          <span class="hero__badge-text">{{ runtimeLabel() }}</span>
+        </li>
+
+        @if (formatLabel(); as format) {
+          <li class="hero__badge hero__badge--chip">
+            <span class="hero__badge-text">{{ format }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</section>

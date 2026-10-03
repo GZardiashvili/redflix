@@ -1,1 +1,46 @@
-<h1>Movie details</h1>
+@if (loading()) {
+  <div class="movie-details__loading" role="status" aria-label="Loading movie details">
+    <div class="movie-details__loading-hero">
+      <span class="movie-details__loading-poster"><app-skeleton /></span>
+
+      <span class="movie-details__loading-text">
+        <app-skeleton variant="text" />
+        <app-skeleton variant="text" />
+      </span>
+    </div>
+
+    <div class="movie-details__loading-body">
+      <app-skeleton variant="text" />
+      <app-skeleton variant="text" />
+    </div>
+  </div>
+} @else if (notFound()) {
+  <app-empty-state
+    title="Movie not found"
+    message="We could not find that movie. It may have been removed from the schedule."
+  >
+    <a class="movie-details__action" routerLink="/">Back to home</a>
+  </app-empty-state>
+} @else if (error(); as message) {
+  <app-error-state
+    title="Movie unavailable"
+    [message]="message"
+    [canRetry]="true"
+    (retry)="retry()"
+  />
+} @else if (movie(); as current) {
+  <app-movie-hero [movie]="current" [statusLabel]="statusLabel()" />
+
+  <div class="movie-details__body">
+    <!-- Showtimes and screening buttons belong to Task 15; the detail row is the slot. -->
+    <section class="movie-details__synopsis" aria-labelledby="movie-synopsis-heading">
+      <h2 class="movie-details__section-title" id="movie-synopsis-heading">Synopsis</h2>
+
+      @if (current.synopsis; as text) {
+        <p class="movie-details__synopsis-text">{{ text }}</p>
+      }
+    </section>
+
+    <app-movie-details-panel [movie]="current" [releaseDate]="releaseDate()" />
+  </div>
+}

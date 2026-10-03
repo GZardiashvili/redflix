@@ -1,0 +1,62 @@
+<section class="details" aria-labelledby="movie-details-heading">
+  <h2 class="details__title" id="movie-details-heading">Details</h2>
+
+  <dl class="details__list">
+    @if (movie().director; as director) {
+      <div class="details__row">
+        <dt class="details__label">Director</dt>
+        <dd class="details__value">{{ director }}</dd>
+      </div>
+    }
+
+    @if (movie().cast; as cast) {
+      <div class="details__row">
+        <dt class="details__label">Main cast</dt>
+        <dd class="details__value">{{ cast }}</dd>
+      </div>
+    }
+
+    <div class="details__row">
+      <dt class="details__label">Duration</dt>
+      <dd class="details__value">{{ durationLabel() }}</dd>
+    </div>
+
+    @if (genreNames(); as genres) {
+      <div class="details__row">
+        <dt class="details__label">Genres</dt>
+        <dd class="details__value">{{ genres }}</dd>
+      </div>
+    }
+
+    @if (releaseDate(); as date) {
+      <div class="details__row">
+        <dt class="details__label">Release date</dt>
+        <dd class="details__value">{{ date }}</dd>
+      </div>
+    }
+
+    @if (formatNames(); as formats) {
+      <div class="details__row">
+        <dt class="details__label">Formats</dt>
+        <dd class="details__value">{{ formats }}</dd>
+      </div>
+    }
+
+    @if (movie().fromPrice; as price) {
+      <div class="details__row">
+        <dt class="details__label">From</dt>
+        <dd class="details__value">₾{{ price }}</dd>
+      </div>
+    }
+  </dl>
+
+  @if (movie().ageRating.description; as note) {
+    <div class="details__note">
+      <p class="details__note-label">Rating note</p>
+      <p class="details__note-body">
+        <span class="details__note-code">{{ movie().ageRating.code }}</span>
+        <span class="details__note-text">{{ note }}</span>
+      </p>
+    </div>
+  }
+</section>

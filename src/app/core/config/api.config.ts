@@ -28,10 +28,18 @@ export function apiUrl(endpoint: ApiEndpoint): string {
 }
 
 /**
+ * Builds the absolute URL of a single movie: `GET /movies/{movie}`, where `{movie}`
+ * is the movie **slug** (the API 404s an id-based path).
+ */
+export function movieUrl(movieSlug: string): string {
+  return `${API_BASE_URL}/movies/${encodeURIComponent(movieSlug)}`;
+}
+
+/**
  * Builds the absolute URL of the notification subscription endpoint:
  * `POST /movies/{movie}/notify`, where `{movie}` is the movie **slug**
  * (the API 404s an id-based path).
  */
 export function notifyMovieUrl(movieSlug: string): string {
-  return `${API_BASE_URL}/movies/${encodeURIComponent(movieSlug)}/notify`;
+  return `${movieUrl(movieSlug)}/notify`;
 }

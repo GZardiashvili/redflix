@@ -2,8 +2,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Service, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ApiResponse } from '../api/api-response';
-import { API_ENDPOINTS, apiUrl, notifyMovieUrl } from '../config/api.config';
-import { Movie, MovieNotifyResponse } from '../models/movie';
+import { API_ENDPOINTS, apiUrl, movieUrl, notifyMovieUrl } from '../config/api.config';
+import { Movie, MovieDetail, MovieNotifyResponse } from '../models/movie';
 
 /**
  * Reusable owner of the movie catalogue endpoints.
@@ -42,6 +42,19 @@ export class MoviesService {
     const response = await firstValueFrom(
       this.http.get<ApiResponse<Movie[]>>(apiUrl(API_ENDPOINTS.search), { params }),
     );
+
+    return response.data;
+  }
+
+  /**
+   * A single movie by slug: `GET /movies/{movie}`.
+   *
+   * The path segment is the slug, never the id — the API 404s an id-based path.
+   * `404` and other failures propagate so the feature layer can distinguish
+   * "not found" from a transport or server error.
+   */
+  async getMovie(slug: string): Promise<MovieDetail> {
+    const response = await firstValueFrom(this.http.get<ApiResponse<MovieDetail>>(movieUrl(slug)));
 
     return response.data;
   }

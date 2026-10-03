@@ -1,0 +1,78 @@
+// The design's right-hand card: a title, a label/value list and the amber
+// rating note. Rows are 12px grey labels above 14px bold values.
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.0625rem; // 17px
+  padding: 0 1.625rem; // 26px
+  border-radius: 1.25rem; // 20px
+}
+
+.details__title {
+  font-size: 1.25rem; // 20px
+  font-weight: 800;
+  line-height: 1.375rem; // 22px
+}
+
+.details__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem; // 14px
+  margin: 0;
+}
+
+.details__row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4375rem; // 7px
+}
+
+.details__label {
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 0.8125rem; // 13px
+}
+
+.details__value {
+  margin: 0;
+  font-size: 0.875rem; // 14px
+  font-weight: 600;
+  line-height: 0.9375rem; // 15px
+}
+
+// Tint/Warning treatment from the design.
+.details__note {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4375rem; // 7px
+  padding: 0.5625rem 0.8125rem; // 9px 13px
+  border-radius: 0.75rem; // 12px
+  background: rgb(226 126 4 / 10%);
+}
+
+.details__note-label {
+  color: #e27e04;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 0.8125rem; // 13px
+}
+
+.details__note-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4375rem; // 7px
+  color: #e27e04;
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+
+.details__note-code {
+  font-weight: 600;
+}
+
+.details__note-text {
+  flex: 1;
+  min-width: 0;
+}

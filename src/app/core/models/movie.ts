@@ -35,6 +35,27 @@ export interface Genre {
 }
 
 /**
+ * Full movie record returned by `GET /movies/{movie}`.
+ *
+ * It extends the catalogue {@link Movie} with the four fields only the detail
+ * endpoint sends — the summary shape is a strict subset, so a detail response is
+ * also a valid `Movie` (which is what Recently Viewed and the notify flow store).
+ */
+export interface MovieDetail extends Movie {
+  /** Long description. Empty/null when the API has none; never invented here. */
+  synopsis: string | null;
+  /** Director credit, as the API supplies it. */
+  director: string | null;
+  /**
+   * Lead cast as a single formatted string, e.g. `"A. Name, B. Name"`. The API
+   * ships one string rather than a cast list, so it is displayed as given.
+   */
+  cast: string | null;
+  /** Days the movie plays, `YYYY-MM-DD`. Empty for a coming-soon title. */
+  availableDates: string[];
+}
+
+/**
  * Successful payload of `POST /movies/{movie}/notify`.
  *
  * `subscribed` is the server's authoritative subscription state and may be
