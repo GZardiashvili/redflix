@@ -1,0 +1,62 @@
+// One seat: a 52×52 tile from the design, on the raised surface colour with a
+// hairline border and a soft drop shadow.
+//
+// Availability is carried by colour alone here — there is no selected state yet,
+// so nothing is painted in the accent colour.
+
+.seat {
+  position: relative;
+  display: flex;
+  width: 3.25rem; // 52px
+  height: 3.25rem; // 52px
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #505261;
+  border-radius: 0.625rem; // 10px
+  background: #1e2031;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+  color: #fff;
+  font-size: 0.875rem; // 14px
+  font-weight: 800;
+  line-height: 0.9375rem; // 15px
+}
+
+.seat__label {
+  font-variant-numeric: tabular-nums;
+}
+
+// Sold: dimmed right down, with the number following the seat so it stays
+// readable while clearly reading as unavailable.
+.seat--sold {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  color: #505261;
+}
+
+// Held by another visitor: the diagonal "taped over" hatch from the design. It
+// stays legible and, unlike `sold`, signals something temporary.
+.seat--held {
+  border-color: transparent;
+  background: #1e2031;
+  box-shadow: none;
+  color: #a9a9a9;
+  overflow: hidden;
+
+  &::before {
+    position: absolute;
+    width: 5.25rem; // 84px, wide enough to cross the tile at the design's angle
+    height: 1.25rem; // 20px
+    background: rgb(169 169 169 / 12%);
+    content: '';
+    transform: rotate(-37.44deg);
+  }
+}
+
+// The visitor's own live hold. Kept visibly its own thing so the hold-recovery
+// step can build on it; `isMine` is not treated as a fifth seat state.
+.seat--mine {
+  border-color: #ec3013;
+  box-shadow: 0 0 0 1px #ec3013;
+}

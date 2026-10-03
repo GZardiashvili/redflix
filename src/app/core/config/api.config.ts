@@ -44,6 +44,17 @@ export function movieSessionsUrl(movieSlug: string): string {
 }
 
 /**
+ * Builds the absolute URL of a screening's seat map:
+ * `GET /sessions/{session}/seats`.
+ *
+ * `{session}` is the **numeric session id** that comes from the booking context
+ * — never a movie slug or movie id, which this endpoint does not accept.
+ */
+export function sessionSeatsUrl(sessionId: number): string {
+  return `${API_BASE_URL}/sessions/${encodeURIComponent(String(sessionId))}/seats`;
+}
+
+/**
  * Builds the absolute URL of the notification subscription endpoint:
  * `POST /movies/{movie}/notify`, where `{movie}` is the movie **slug**
  * (the API 404s an id-based path).

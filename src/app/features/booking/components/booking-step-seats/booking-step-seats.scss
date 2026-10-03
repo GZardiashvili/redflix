@@ -1,13 +1,27 @@
 // Content area of the booking dialog's first step.
 //
-// The design's Step 1 is a 720px seat-map column next to a 321px summary column
-// separated by a 1px rule, so the shell establishes that geometry now and the
-// seat map, seat summary, legend and totals drop into it later.
+// The seat map is taller than the panel in every real hall, so it scrolls inside
+// this slot while the dialog header and step indicator stay put. The scroll is
+// local to the map: the page behind the dialog must not move while the visitor
+// reads the seating.
 
-.booking-step {
+.booking-step__scroll {
+  max-height: 28.25rem; // 452px, the design's content height
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2c3d transparent;
+}
+
+// Loading, error and the (unexpected) empty layout all occupy the same area, so
+// the step never collapses or jumps between states.
+//
+// The shared loading, error and empty states carry no colours of their own and
+// inherit from here, so the muted text tone is set on this container to stay
+// legible on the dialog's dark surface.
+.booking-step__status {
   display: flex;
-  width: 100%;
-  min-height: 28.25rem; // 452px, the design's content height
+  min-height: 28.25rem; // 452px
   align-items: center;
   justify-content: center;
   padding: 2rem; // 32px
@@ -15,5 +29,4 @@
   border-radius: 1.25rem; // 20px
   color: #a9a9a9;
   font-size: 0.875rem; // 14px
-  text-align: center;
 }

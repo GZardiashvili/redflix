@@ -1,0 +1,44 @@
+// One row: a 20px label gutter, then the seats on an 8px rhythm.
+//
+// The seat list is a flex line so its width follows the data: nothing here
+// declares a column count, which is what lets rows of different lengths — and
+// sections of different shapes — coexist without being forced into one grid.
+
+.seat-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; // 8px
+}
+
+.seat-row__label {
+  display: flex;
+  width: 1.25rem; // 20px
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 0.8125rem; // 13px
+}
+
+.seat-row__seats {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; // 8px
+}
+
+// An `unavailable` position: no seat exists there, but the row must still span
+// it, so the space is reserved at full seat width.
+.seat-row__gap {
+  width: 3.25rem; // 52px
+  height: 3.25rem; // 52px
+  flex: 0 0 auto;
+}
+
+// The gangway the API marks with `aisleAfter`, drawn between two seats.
+.seat-row__aisle {
+  width: 0.5rem; // 8px
+  height: 3.25rem; // 52px
+  flex: 0 0 auto;
+}

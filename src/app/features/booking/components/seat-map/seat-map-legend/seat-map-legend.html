@@ -1,0 +1,9 @@
+<ul class="legend" aria-label="Seat map key">
+  @for (item of items; track item.key) {
+    <li class="legend__item">
+      <span class="legend__swatch legend__swatch--{{ item.key }}" aria-hidden="true"></span>
+
+      <span class="legend__label">{{ item.label }}</span>
+    </li>
+  }
+</ul>

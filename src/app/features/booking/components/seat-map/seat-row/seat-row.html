@@ -1,0 +1,17 @@
+<div class="seat-row" role="group" [attr.aria-label]="'Row ' + row().label">
+  <span class="seat-row__label" aria-hidden="true">{{ row().label }}</span>
+
+  <div class="seat-row__seats">
+    @for (seat of row().seats; track seat.id) {
+      @if (seat.state === 'unavailable') {
+        <span class="seat-row__gap" aria-hidden="true"></span>
+      } @else {
+        <app-seat [seat]="seat" />
+      }
+
+      @if (seat.aisleAfter) {
+        <span class="seat-row__aisle" aria-hidden="true"></span>
+      }
+    }
+  </div>
+</div>

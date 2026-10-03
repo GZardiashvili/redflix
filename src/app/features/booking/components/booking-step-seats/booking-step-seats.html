@@ -1,3 +1,27 @@
-<section class="booking-step booking-step--seats" aria-label="Seat selection">
-  <p class="booking-step__placeholder">Seat selection for this screening will appear here.</p>
-</section>
+@if (loading()) {
+  <div class="booking-step__status" role="status" aria-label="Loading seat map">
+    <app-loading-indicator size="md" label="Loading seat map" />
+  </div>
+} @else if (error(); as message) {
+  <div class="booking-step__status">
+    <app-error-state
+      title="Seat map unavailable"
+      [message]="message"
+      [canRetry]="true"
+      (retry)="retry()"
+    />
+  </div>
+} @else if (map(); as layout) {
+  @if (isEmpty()) {
+    <div class="booking-step__status">
+      <app-empty-state
+        title="No seat map"
+        message="This hall has no seating information for this screening."
+      />
+    </div>
+  } @else {
+    <div class="booking-step__scroll">
+      <app-seat-map [map]="layout" />
+    </div>
+  }
+}

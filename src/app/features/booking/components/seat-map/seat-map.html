@@ -1,0 +1,11 @@
+<div class="seat-map" role="group" aria-label="Seat map">
+  <p class="seat-map__screen" aria-hidden="true">Screen</p>
+
+  <div class="seat-map__sections">
+    @for (section of map().sections; track section.name) {
+      <app-seat-section [section]="section" />
+    }
+  </div>
+
+  <app-seat-map-legend />
+</div>

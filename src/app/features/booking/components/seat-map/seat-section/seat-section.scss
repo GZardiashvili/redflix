@@ -1,0 +1,26 @@
+// One section of the hall: a small caption above its rows.
+//
+// Rows are laid out in a column and each keeps its own width, so a narrow
+// section and a wide one both read as the shapes the API describes. The row
+// rhythm is the design's 10px, and sections are 32px apart.
+
+.seat-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; // 12px
+}
+
+.seat-section__name {
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 0.8125rem; // 13px
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.seat-section__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem; // 10px
+}

@@ -8,8 +8,10 @@ import {
   movieSessionsUrl,
   movieUrl,
   notifyMovieUrl,
+  sessionSeatsUrl,
 } from '../config/api.config';
 import { Movie, MovieDetail, MovieNotifyResponse } from '../models/movie';
+import { SessionSeatsResponse } from '../models/seat';
 import { MovieSessionsResponse } from '../models/session';
 
 /**
@@ -81,6 +83,22 @@ export class MoviesService {
     const params = new HttpParams().set('date', date);
 
     return this.http.get<MovieSessionsResponse>(movieSessionsUrl(movieSlug), { params });
+  }
+
+  /**
+   * A screening's hall layout: `GET /sessions/{session}/seats`.
+   *
+   * `{session}` is the numeric session id the booking flow is holding — never a
+   * movie slug or id. The endpoint is public; when a token happens to be sent the
+   * API additionally flags the visitor's own held seats through `isMine`, so
+   * authenticated requests work unchanged.
+   *
+   * Failures (including `401`, which the auth interceptor replays through the
+   * existing login flow) propagate to the caller rather than being swallowed, so
+   * the feature can show a real error and retry.
+   */
+  getSessionSeats(sessionId: number): Observable<SessionSeatsResponse> {
+    return this.http.get<SessionSeatsResponse>(sessionSeatsUrl(sessionId));
   }
 
   /**

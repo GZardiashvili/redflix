@@ -1,0 +1,62 @@
+// Key to the seat states, centred under the map with the design's 24px rhythm.
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem; // 24px
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legend__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; // 8px
+}
+
+.legend__swatch {
+  width: 1rem; // 16px
+  height: 1rem; // 16px
+  flex: 0 0 auto;
+  border-radius: 0.3125rem; // 5px
+}
+
+.legend__label {
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  line-height: 1.3; // 16px
+  white-space: nowrap;
+}
+
+// The swatches repeat the seat treatments at a smaller size, so the key cannot
+// drift from what the map actually draws.
+.legend__swatch--available {
+  border: 1px solid #505261;
+  background: #1e2031;
+}
+
+.legend__swatch--sold {
+  background: #1e2031;
+}
+
+.legend__swatch--held {
+  background:
+    linear-gradient(
+      to bottom right,
+      transparent 45%,
+      rgb(169 169 169 / 30%) 45%,
+      rgb(169 169 169 / 30%) 55%,
+      transparent 55%
+    ),
+    #1e2031;
+}
+
+// No seat in that position: shown as empty space rather than a colour, because
+// that is exactly how it appears in the row.
+.legend__swatch--gap {
+  border: 1px dashed #2a2c3d;
+  background: transparent;
+}

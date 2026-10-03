@@ -1,0 +1,9 @@
+<section class="seat-section" role="group" [attr.aria-label]="section().name">
+  <h4 class="seat-section__name">{{ section().name }}</h4>
+
+  <div class="seat-section__rows">
+    @for (row of section().rows; track row.label) {
+      <app-seat-row [row]="row" />
+    }
+  </div>
+</section>
