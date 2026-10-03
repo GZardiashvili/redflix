@@ -1,0 +1,9 @@
+<section class="empty-state">
+  <h2 class="empty-state__title">{{ title() }}</h2>
+
+  @if (message(); as text) {
+    <p class="empty-state__message">{{ text }}</p>
+  }
+
+  <ng-content />
+</section>

@@ -1,0 +1,52 @@
+:host {
+  // Lets the overlay behave as a direct child of whatever holds <app-modal>, so positioning
+  // and stacking stay predictable.
+  display: contents;
+}
+
+.modal__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  // `align-items: flex-start` plus `margin: auto` on the dialog centres it while still letting
+  // the overlay scroll when the content is taller than the viewport.
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 1rem;
+  // Neutral dimming only: the Figma pass owns the final overlay treatment.
+  background: rgb(0 0 0 / 50%);
+}
+
+.modal__dialog {
+  margin: auto;
+  width: min(100%, 32rem);
+  // Neutral surface: final colours and elevation arrive with the Figma work.
+  background: #fff;
+  padding: 1.5rem;
+}
+
+.modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.modal__title {
+  font-size: 1.25rem;
+}
+
+.modal__close {
+  padding: 0.25rem;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.modal__body {
+  margin-top: 1rem;
+}

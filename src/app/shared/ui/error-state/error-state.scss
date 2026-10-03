@@ -1,0 +1,23 @@
+:host {
+  display: block;
+}
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.error-state__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.error-state__retry {
+  padding: 0.5rem 1rem;
+  border: 0;
+  cursor: pointer;
+}
