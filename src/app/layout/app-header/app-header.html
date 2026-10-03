@@ -3,10 +3,41 @@
 
   <nav class="app-header__nav" aria-label="Main navigation">
     <a routerLink="/sessions">Sessions</a>
-    <a routerLink="/profile">Profile</a>
-    <button class="app-header__auth" type="button" (click)="loginRequested.emit()">Log in</button>
-    <button class="app-header__auth" type="button" (click)="registerRequested.emit()">
-      Sign up
-    </button>
+
+    @if (auth.user(); as user) {
+      <div class="app-header__account">
+        <button
+          class="app-header__identity"
+          type="button"
+          [attr.aria-expanded]="menuOpen()"
+          [attr.aria-controls]="menuOpen() ? 'app-header-menu' : null"
+          (click)="toggleMenu()"
+        >
+          @if (user.avatar; as avatar) {
+            <img class="app-header__avatar" [src]="avatar" alt="" />
+          } @else {
+            <span class="app-header__avatar app-header__avatar--initials" aria-hidden="true">
+              {{ initial() }}
+            </span>
+          }
+          <span class="app-header__name">{{ displayName() }}</span>
+          <span class="app-header__chevron" aria-hidden="true">▾</span>
+        </button>
+
+        @if (menuOpen()) {
+          <div id="app-header-menu" class="app-header__menu">
+            <a class="app-header__menu-item" routerLink="/profile" (click)="closeMenu()">
+              My Profile
+            </a>
+            <button class="app-header__menu-item" type="button" (click)="logout()">Logout</button>
+          </div>
+        }
+      </div>
+    } @else {
+      <button class="app-header__auth" type="button" (click)="loginRequested.emit()">Log in</button>
+      <button class="app-header__auth" type="button" (click)="registerRequested.emit()">
+        Sign up
+      </button>
+    }
   </nav>
 </header>

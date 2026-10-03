@@ -13,6 +13,9 @@ export const API_ENDPOINTS = {
   register: 'register',
   logout: 'logout',
   me: 'me',
+  featuredMovies: 'movies/featured',
+  nowPlayingMovies: 'movies/now-playing',
+  comingSoonMovies: 'movies/coming-soon',
 } as const;
 
 export type ApiEndpoint = (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS];

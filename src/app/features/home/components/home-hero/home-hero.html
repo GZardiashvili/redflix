@@ -1,0 +1,41 @@
+@if (activeMovie(); as movie) {
+  <section class="home-hero" aria-label="Featured movie">
+    <img
+      class="home-hero__backdrop"
+      [src]="movie.backdropUrl"
+      [alt]="movie.title + ' backdrop'"
+      fetchpriority="high"
+    />
+    <div class="home-hero__overlay" aria-hidden="true"></div>
+
+    <div class="home-hero__content">
+      <p class="home-hero__kicker">Featured</p>
+      <h2 class="home-hero__title">{{ movie.title }}</h2>
+
+      <p class="home-hero__meta">
+        <span class="home-hero__rating">{{ movie.ageRating.code }}</span>
+        <span aria-hidden="true">•</span>
+        <span>{{ movie.runtimeMinutes }} min</span>
+        @if (genreNames(movie); as genres) {
+          <span aria-hidden="true">•</span>
+          <span>{{ genres }}</span>
+        }
+      </p>
+
+      <p class="home-hero__price">From {{ movie.fromPrice }} ₾</p>
+
+      <div class="home-hero__actions">
+        <a class="home-hero__primary" [routerLink]="['/movies', movie.slug]">Buy Ticket</a>
+        <a class="home-hero__secondary" [routerLink]="['/movies', movie.slug]">More Info</a>
+      </div>
+    </div>
+
+    <div class="home-hero__controls" aria-hidden="true">
+      <span class="home-hero__progress"></span>
+      <span class="home-hero__arrows">
+        <span class="home-hero__arrow">‹</span>
+        <span class="home-hero__arrow">›</span>
+      </span>
+    </div>
+  </section>
+}
