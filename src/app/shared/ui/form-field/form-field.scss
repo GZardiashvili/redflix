@@ -1,0 +1,21 @@
+:host {
+  display: block;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field__label {
+  font-weight: 600;
+}
+
+.form-field__error {
+  font-size: 0.875rem;
+}
+
+.form-field__hint {
+  font-size: 0.875rem;
+}
