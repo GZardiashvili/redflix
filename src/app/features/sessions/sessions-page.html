@@ -5,11 +5,11 @@
   </header>
 
   <div class="sessions-page__layout">
-    <!-- Sticky slot for the Task 11 filter groups. -->
-    <aside class="sessions-sidebar" aria-labelledby="sessions-filters-heading">
-      <div class="sessions-sidebar__card">
-        <h2 id="sessions-filters-heading" class="sessions-sidebar__title">Filters</h2>
-      </div>
+    <aside class="sessions-sidebar" aria-label="Session filters">
+      <app-sessions-filters (filtersChanged)="onFiltersChange($event)">
+        <!-- Projected so the date picker sits between the Venue and Format groups. -->
+        <app-date-selector [selected]="selectedDate()" (dateSelected)="onDateChange($event)" />
+      </app-sessions-filters>
     </aside>
 
     <section class="sessions-content" aria-label="Showtimes">

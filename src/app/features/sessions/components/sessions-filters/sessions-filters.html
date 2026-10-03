@@ -1,0 +1,97 @@
+<div class="filters">
+  <h2 class="filters__title">Filters</h2>
+
+  <section class="filters__group" aria-labelledby="filters-venue-heading">
+    <h3 class="filters__legend" id="filters-venue-heading">Venue</h3>
+
+    <div class="filters__options">
+      @for (venue of venues(); track venue.slug) {
+        <label class="filter-option">
+          <input
+            class="filter-option__box"
+            type="checkbox"
+            [checked]="selectedVenues().includes(venue.slug)"
+            (change)="toggleVenue(venue.slug)"
+          />
+          <span class="filter-option__name">{{ venue.name }}</span>
+          <span class="filter-option__hint">· {{ venue.city }}</span>
+        </label>
+      }
+    </div>
+  </section>
+
+  <hr class="filters__divider" />
+
+  <!-- The date selector is its own component, projected here to sit between Venue and Format. -->
+  <ng-content />
+
+  <hr class="filters__divider" />
+
+  <section class="filters__group" aria-labelledby="filters-format-heading">
+    <h3 class="filters__legend" id="filters-format-heading">Format</h3>
+
+    <div class="filters__options">
+      @for (format of availableFormats(); track format.slug) {
+        <label class="filter-option">
+          <input
+            class="filter-option__box"
+            type="checkbox"
+            [checked]="selectedFormats().includes(format.slug)"
+            (change)="toggleFormat(format.slug)"
+          />
+          <span class="filter-option__name">{{ format.name }}</span>
+        </label>
+      }
+    </div>
+  </section>
+
+  <hr class="filters__divider" />
+
+  <section class="filters__group" aria-labelledby="filters-language-heading">
+    <h3 class="filters__legend" id="filters-language-heading">Language</h3>
+
+    <div class="filters__options">
+      @for (language of languages(); track language.slug) {
+        <label class="filter-option">
+          <input
+            class="filter-option__box"
+            type="checkbox"
+            [checked]="selectedLanguages().includes(language.slug)"
+            (change)="toggleLanguage(language.slug)"
+          />
+          <span class="filter-option__name">{{ language.name }}</span>
+        </label>
+      }
+    </div>
+  </section>
+
+  <hr class="filters__divider" />
+
+  <section class="filters__group" aria-labelledby="filters-time-heading">
+    <h3 class="filters__legend" id="filters-time-heading">Time of day</h3>
+
+    <div class="filters__options">
+      @for (band of bands(); track band.id) {
+        <label class="filter-option">
+          <input
+            class="filter-option__box"
+            type="checkbox"
+            [checked]="selectedBands().includes(band.id)"
+            (change)="toggleBand(band.id)"
+          />
+          <span class="filter-option__name">{{ band.name }}</span>
+          @if (band.hint; as hint) {
+            <span class="filter-option__hint">· {{ hint }}</span>
+          }
+        </label>
+      }
+    </div>
+  </section>
+
+  <hr class="filters__divider" />
+
+  <footer class="filters__footer">
+    <button class="filters__clear" type="button" (click)="clearAll()">Clear filters</button>
+    <p class="filters__count">{{ activeCount() }} filters active</p>
+  </footer>
+</div>

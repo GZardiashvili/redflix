@@ -42,21 +42,6 @@
   top: 1.5rem;
 }
 
-.sessions-sidebar__card {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem; // 24px
-  padding: 1.5rem; // 24px
-  border-radius: 1rem;
-  background: #1e2031;
-}
-
-.sessions-sidebar__title {
-  font-size: 1.125rem; // 18px
-  font-weight: 800;
-  line-height: 1.25rem; // 20px
-}
-
 .sessions-content {
   display: flex;
   min-width: 0;

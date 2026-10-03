@@ -1,0 +1,136 @@
+// Sidebar card: 24px padding and 24px between the heading, each filter group and
+// the footer, with a 1px divider between sections. The projected date selector
+// participates in this column, so it inherits the same rhythm.
+$check-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.2 6.2 4.8 9 9.8 3.4' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+
+:host {
+  display: block;
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; // 24px
+  padding: 1.5rem; // 24px
+  border-radius: 1rem;
+  background: #1e2031;
+  color: #fff;
+}
+
+.filters__title {
+  font-size: 1.125rem; // 18px
+  font-weight: 800;
+  line-height: 1.25rem; // 20px
+}
+
+.filters__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; // 12px between the legend and its options
+}
+
+.filters__legend {
+  margin: 0;
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 1.0625rem; // 13px
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.filters__options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; // 12px between rows
+}
+
+.filters__divider {
+  height: 1px;
+  margin: 0;
+  border: 0;
+  background: #2a2c3d;
+}
+
+.filters__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem; // 12px
+}
+
+.filters__clear {
+  width: 100%;
+  padding: 0.5625rem 0.75rem; // 9px 12px
+  border: 1px solid #a9a9a9;
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 0.8125rem; // 13px
+  cursor: pointer;
+
+  &:hover {
+    background: rgb(255 255 255 / 8%);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ec3013;
+    outline-offset: 2px;
+  }
+}
+
+.filters__count {
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  line-height: 1.3;
+}
+
+// One checkbox row: a styled native checkbox keeps keyboard and screen-reader
+// behaviour intact while matching the 18px rounded-square design.
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem; // 10px
+  cursor: pointer;
+}
+
+.filter-option__box {
+  width: 1.125rem; // 18px
+  height: 1.125rem;
+  flex-shrink: 0;
+  margin: 0;
+  appearance: none;
+  border: 1.5px solid #505261;
+  border-radius: 5px;
+  background-color: transparent;
+  cursor: pointer;
+
+  &:checked {
+    border-color: #ec3013;
+    background-color: #ec3013;
+    background-image: $check-icon;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 0.625rem;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ec3013;
+    outline-offset: 2px;
+  }
+}
+
+.filter-option__name {
+  color: #fff;
+  font-size: 0.875rem; // 14px
+  font-weight: 600;
+  line-height: 0.9375rem; // 15px
+}
+
+.filter-option__hint {
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  line-height: 1.3;
+}

@@ -1,0 +1,19 @@
+<div class="date-selector">
+  <h3 class="date-selector__legend">Date</h3>
+
+  <div class="date-selector__list" role="group" aria-label="Showtime date">
+    @for (option of options; track option.iso) {
+      <button
+        class="date-selector__day"
+        type="button"
+        [class.date-selector__day--selected]="option.iso === selected()"
+        [attr.aria-pressed]="option.iso === selected()"
+        [attr.aria-label]="option.label"
+        (click)="dateSelected.emit(option.iso)"
+      >
+        <span class="date-selector__weekday" aria-hidden="true">{{ option.weekday }}</span>
+        <span class="date-selector__number" aria-hidden="true">{{ option.day }}</span>
+      </button>
+    }
+  </div>
+</div>
