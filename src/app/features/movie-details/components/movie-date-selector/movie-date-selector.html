@@ -1,0 +1,18 @@
+<div class="date-strip" role="group" aria-label="Showtime date">
+  @for (day of days(); track day.iso) {
+    <button
+      class="date-strip__day"
+      type="button"
+      [class.date-strip__day--selected]="day.iso === selected()"
+      [class.date-strip__day--unavailable]="!day.available"
+      [disabled]="!day.available"
+      [attr.aria-pressed]="day.iso === selected()"
+      [attr.aria-label]="day.available ? day.label : unavailableLabel(day)"
+      [title]="day.available ? day.label : unavailableLabel(day)"
+      (click)="dateSelected.emit(day.iso)"
+    >
+      <span class="date-strip__weekday" aria-hidden="true">{{ day.weekday }}</span>
+      <span class="date-strip__number" aria-hidden="true">{{ day.day }}</span>
+    </button>
+  }
+</div>

@@ -32,14 +32,28 @@
   <app-movie-hero [movie]="current" [statusLabel]="statusLabel()" />
 
   <div class="movie-details__body">
-    <!-- Showtimes and screening buttons belong to Task 15; the detail row is the slot. -->
-    <section class="movie-details__synopsis" aria-labelledby="movie-synopsis-heading">
-      <h2 class="movie-details__section-title" id="movie-synopsis-heading">Synopsis</h2>
+    <div class="movie-details__primary">
+      <section class="movie-details__synopsis" aria-labelledby="movie-synopsis-heading">
+        <h2 class="movie-details__section-title" id="movie-synopsis-heading">Synopsis</h2>
 
-      @if (current.synopsis; as text) {
-        <p class="movie-details__synopsis-text">{{ text }}</p>
-      }
-    </section>
+        @if (current.synopsis; as text) {
+          <p class="movie-details__synopsis-text">{{ text }}</p>
+        }
+      </section>
+
+      <app-movie-showtimes
+        [groups]="groups()"
+        [selectedDate]="date()"
+        [availableDates]="availableDates()"
+        [loading]="sessionsAreLoading()"
+        [error]="sessionsFailure()"
+        [ageRestricted]="ageRestricted()"
+        [restrictionMessage]="restrictionCopy()"
+        (dateSelected)="onDateSelected($event)"
+        (retry)="retrySessions()"
+        (screeningSelected)="onScreeningSelected($event)"
+      />
+    </div>
 
     <app-movie-details-panel [movie]="current" [releaseDate]="releaseDate()" />
   </div>

@@ -23,11 +23,13 @@ export interface Format {
   priceUplift: number;
 }
 
-/** A language option (dub or subtitles). */
+/** A language option (dub or subtitles), with the short badge code of the design. */
 export interface Language {
   id: number;
   slug: string;
   name: string;
+  /** Short badge label, e.g. `ENG`. */
+  code: string;
 }
 
 /** A time-of-day band for filtering showtimes; the id values are owned by the API. */

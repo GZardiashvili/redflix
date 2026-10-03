@@ -18,7 +18,7 @@ const filterOptions: FilterOptions = {
     },
   ],
   formats: [{ id: 1, slug: 'standard', name: 'Standard', priceUplift: 0 }],
-  languages: [{ id: 1, slug: 'georgian-dub', name: 'Georgian Dub' }],
+  languages: [{ id: 1, slug: 'georgian-dub', name: 'Georgian Dub', code: 'GEO' }],
   timeBands: [{ id: 'morning', label: 'Morning (before 12:00)' }],
   sorts: [{ id: 'time_asc', label: 'Showtime: earliest first' }],
   ticketTypes: [

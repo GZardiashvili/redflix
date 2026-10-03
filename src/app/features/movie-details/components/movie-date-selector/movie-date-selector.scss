@@ -1,0 +1,67 @@
+// The design's date row: a 79×77 day tile per day with 10px gaps, rounded to 12px.
+// Seven tiles fit the showtimes column without scrolling, so the row is a plain
+// flex line; unavailable days stay in place, dimmed, rather than being removed.
+
+.date-strip {
+  display: flex;
+  gap: 0.625rem; // 10px
+}
+
+.date-strip__day {
+  display: flex;
+  width: 4.9375rem; // 79px
+  min-height: 4.8125rem; // 77px
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem; // 10px
+  padding: 0.625rem 0.375rem;
+  border: 0;
+  border-radius: 0.75rem; // 12px
+  background: #2a2c3d;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+  color: #fff;
+  cursor: pointer;
+
+  &:hover:not(:disabled):not(.date-strip__day--selected) {
+    filter: brightness(1.15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ec3013;
+    outline-offset: 2px;
+  }
+
+  // Kept visible but inert: the movie does not play that day.
+  &--unavailable {
+    background: #1a1c29;
+    color: #5c5f6e;
+    cursor: not-allowed;
+  }
+
+  &--selected {
+    background: #ec3013;
+    color: #fff;
+  }
+
+  // A selected day the movie does not play keeps an accent outline rather than a
+  // fill, so the active choice stays obvious even while it is unselectable.
+  &--selected#{&}--unavailable {
+    background: #1a1c29;
+    color: #a9a9a9;
+    box-shadow: inset 0 0 0 2px #ec3013;
+  }
+}
+
+.date-strip__weekday {
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 1;
+}
+
+.date-strip__number {
+  font-size: 1.0625rem; // 17px
+  font-weight: 800;
+  line-height: 1.2;
+}

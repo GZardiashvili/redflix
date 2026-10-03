@@ -1,0 +1,68 @@
+<section class="showtimes" aria-labelledby="movie-sessions-heading">
+  <h2 class="showtimes__title" id="movie-sessions-heading">Sessions</h2>
+
+  <app-movie-date-selector
+    [selected]="selectedDate()"
+    [availableDates]="availableDates()"
+    (dateSelected)="dateSelected.emit($event)"
+  />
+
+  @if (ageRestricted() && restrictionMessage(); as message) {
+    <p class="showtimes__restriction" role="status">{{ message }}</p>
+  }
+
+  @if (loading()) {
+    <div class="showtimes__skeleton" role="status" aria-label="Loading screenings">
+      @for (row of skeletonRows; track row) {
+        <div class="showtimes__skeleton-venue">
+          <app-skeleton variant="text" />
+
+          <div class="showtimes__skeleton-hall">
+            @for (tile of skeletonTiles; track tile) {
+              <span class="showtimes__skeleton-tile">
+                <app-skeleton />
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (error(); as message) {
+    <app-error-state
+      title="Showtimes unavailable"
+      [message]="message"
+      [canRetry]="true"
+      (retry)="retry.emit()"
+    />
+  } @else if (isEmpty()) {
+    <app-empty-state title="No screenings" [message]="emptyMessage()" />
+  } @else {
+    @for (venue of venues(); track venue.name) {
+      <section class="showtimes__venue" [attr.aria-label]="venue.name">
+        <h3 class="showtimes__venue-name">{{ venue.name }}</h3>
+
+        <div class="showtimes__halls">
+          @for (hall of venue.halls; track hall.name) {
+            <section
+              class="showtimes__hall"
+              [attr.aria-label]="venue.name + ' · Hall ' + hall.name"
+            >
+              <h4 class="showtimes__hall-name">Hall {{ hall.name }}</h4>
+
+              <div class="showtimes__tiles">
+                @for (session of hall.sessions; track session.id) {
+                  <app-movie-screening
+                    [session]="session"
+                    [disabled]="session.isSoldOut || ageRestricted()"
+                    [ageRestricted]="ageRestricted()"
+                    (selected)="screeningSelected.emit($event)"
+                  />
+                }
+              </div>
+            </section>
+          }
+        </div>
+      </section>
+    }
+  }
+</section>

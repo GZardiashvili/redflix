@@ -16,6 +16,15 @@
   padding: 2.625rem 3.1875rem 4rem; // 42px top, 51px gutters
 }
 
+// The left column stacks the synopsis above the Sessions column, with the 32px
+// gap the design leaves between the two blocks.
+.movie-details__primary {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2rem; // 32px
+}
+
 .movie-details__synopsis {
   display: flex;
   flex-direction: column;

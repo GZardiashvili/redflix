@@ -52,6 +52,20 @@ export interface MovieSessionGroup {
   sessions: MovieSession[];
 }
 
+/**
+ * One venue's sessions of a single movie, as returned by
+ * `GET /movies/{movie}/sessions`. The same session records as `/sessions` —
+ * only the grouping differs, so {@link MovieSession} is reused rather than
+ * duplicated.
+ */
+export interface VenueSessions {
+  venue: SessionVenue;
+  sessions: MovieSession[];
+}
+
+/** Envelope of `GET /movies/{movie}/sessions`: venue groups for one date. */
+export type MovieSessionsResponse = ApiResponse<VenueSessions[]>;
+
 /** Pagination and date block returned alongside `data`. */
 export interface SessionsMeta {
   currentPage: number;

@@ -36,6 +36,14 @@ export function movieUrl(movieSlug: string): string {
 }
 
 /**
+ * Builds the absolute URL of a movie's showtimes: `GET /movies/{movie}/sessions`,
+ * where `{movie}` is the movie **slug** (the API 404s an id-based path).
+ */
+export function movieSessionsUrl(movieSlug: string): string {
+  return `${movieUrl(movieSlug)}/sessions`;
+}
+
+/**
  * Builds the absolute URL of the notification subscription endpoint:
  * `POST /movies/{movie}/notify`, where `{movie}` is the movie **slug**
  * (the API 404s an id-based path).

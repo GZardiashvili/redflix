@@ -1,0 +1,126 @@
+// A screening tile from the design: a 208×86 dark card split by a dashed vertical
+// rule into a time/details half and a price/availability half.
+
+.screening {
+  display: flex;
+  width: 13rem; // 208px
+  min-height: 5.375rem; // 86px
+  flex-shrink: 0;
+  align-items: stretch;
+  gap: 0.75rem; // 12px
+  padding: 0.875rem 1rem; // 14px 16px
+  border: 0;
+  border-radius: 0.75rem; // 12px
+  background: #171a29;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ec3013;
+    outline-offset: 2px;
+  }
+
+  // Sold out stays on screen but muted, so the time is still legible.
+  &--sold-out {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  // Age-restricted tiles read as blocked rather than unavailable.
+  &--restricted {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.screening__info {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.625rem; // 10px
+}
+
+.screening__time {
+  font-size: 1.125rem; // 18px
+  font-weight: 800;
+  line-height: 1.25rem; // 20px
+}
+
+.screening__tags {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; // 8px
+}
+
+.screening__language {
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 1;
+}
+
+.screening__format {
+  padding: 0.25rem 0.5rem; // 4px 8px
+  border-radius: 999px;
+  background: #2a2c3d;
+  font-size: 0.6875rem; // 11px
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+// Dashed vertical rule between the two halves of the tile.
+.screening__divider {
+  width: 0;
+  align-self: stretch;
+  border-left: 1px dashed #3a3d52;
+}
+
+.screening__aside {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.625rem; // 10px
+}
+
+.screening__price {
+  color: #ec3013;
+  font-size: 1.125rem; // 18px
+  font-weight: 800;
+  line-height: 1.25rem; // 20px
+}
+
+.screening__seats {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem; // 4px
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  line-height: 1;
+  white-space: nowrap;
+
+  &--low {
+    color: #ec3013;
+  }
+
+  &--sold-out {
+    color: #a9a9a9;
+    font-weight: 600;
+  }
+}
+
+.screening__seats-icon {
+  width: 0.75rem; // 12px
+  height: 0.75rem;
+  flex-shrink: 0;
+  fill: currentColor;
+}

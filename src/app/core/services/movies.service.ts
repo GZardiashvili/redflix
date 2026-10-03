@@ -1,9 +1,16 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Service, inject } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { ApiResponse } from '../api/api-response';
-import { API_ENDPOINTS, apiUrl, movieUrl, notifyMovieUrl } from '../config/api.config';
+import {
+  API_ENDPOINTS,
+  apiUrl,
+  movieSessionsUrl,
+  movieUrl,
+  notifyMovieUrl,
+} from '../config/api.config';
 import { Movie, MovieDetail, MovieNotifyResponse } from '../models/movie';
+import { MovieSessionsResponse } from '../models/session';
 
 /**
  * Reusable owner of the movie catalogue endpoints.
@@ -57,6 +64,23 @@ export class MoviesService {
     const response = await firstValueFrom(this.http.get<ApiResponse<MovieDetail>>(movieUrl(slug)));
 
     return response.data;
+  }
+
+  /**
+   * A movie's showtimes on one date: `GET /movies/{movie}/sessions?date=YYYY-MM-DD`.
+   *
+   * The path segment is the slug and `date` is a local calendar day, exactly as on
+   * the Sessions page. An empty `data` array is a success — a coming-soon movie has
+   * no sessions on any date — so the caller gets `[]` rather than a failure.
+   *
+   * Returns an Observable (not the Promise style used above) because the Movie
+   * Details page switches between dates and needs the previous request cancelled:
+   * `switchMap` unsubscribes the in-flight one instead of racing it.
+   */
+  getMovieSessions(movieSlug: string, date: string): Observable<MovieSessionsResponse> {
+    const params = new HttpParams().set('date', date);
+
+    return this.http.get<MovieSessionsResponse>(movieSessionsUrl(movieSlug), { params });
   }
 
   /**

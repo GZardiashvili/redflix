@@ -1,0 +1,35 @@
+<button
+  class="screening"
+  type="button"
+  [class.screening--sold-out]="session().isSoldOut"
+  [class.screening--restricted]="ageRestricted()"
+  [disabled]="disabled()"
+  [attr.aria-label]="ariaLabel()"
+  (click)="selected.emit(session())"
+>
+  <span class="screening__info">
+    <span class="screening__time">{{ session().time }}</span>
+
+    <span class="screening__tags">
+      <span class="screening__language">{{ session().language.code }}</span>
+      <span class="screening__format">{{ session().format.name }}</span>
+    </span>
+  </span>
+
+  <span class="screening__divider" aria-hidden="true"></span>
+
+  <span class="screening__aside">
+    <span class="screening__price">₾{{ session().price }}</span>
+
+    @if (session().isSoldOut) {
+      <span class="screening__seats screening__seats--sold-out">Sold out</span>
+    } @else {
+      <span class="screening__seats" [class.screening__seats--low]="isLow()">
+        <svg class="screening__seats-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M2 6h20v4a2 2 0 0 0 0 4v4H2v-4a2 2 0 0 0 0-4V6Z" />
+        </svg>
+        {{ session().seatsLeft }} left
+      </span>
+    }
+  </span>
+</button>

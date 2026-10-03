@@ -1,0 +1,102 @@
+// Sessions column: the heading, the date row and the venue groups. Venues stack
+// with 32px between them; a venue's halls sit side by side and wrap, and the
+// screening tiles inside a hall scroll horizontally rather than wrap mid-row.
+
+.showtimes {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; // 24px between heading, date row and groups
+}
+
+.showtimes__title {
+  font-size: 1.25rem; // 20px
+  font-weight: 800;
+  line-height: 1.375rem; // 22px
+}
+
+// Amber notice above the blocked screenings, matching the details card's rating
+// note so the two age-related messages read as one voice.
+.showtimes__restriction {
+  padding: 0.5625rem 0.8125rem; // 9px 13px
+  border-radius: 0.75rem; // 12px
+  background: rgb(226 126 4 / 10%);
+  color: #e27e04;
+  font-size: 0.75rem; // 12px
+  line-height: 1.3;
+}
+
+.showtimes__venue {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem; // 14px between the venue name and its halls
+}
+
+.showtimes__venue-name {
+  font-size: 0.875rem; // 14px
+  font-weight: 800;
+  line-height: 1.25rem; // 20px
+}
+
+.showtimes__halls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1rem; // 16px between halls of the same venue
+}
+
+.showtimes__hall {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.75rem; // 12px between the hall name and its tiles
+  padding: 0.875rem 1rem; // 14px 16px
+  border-radius: 1rem; // 16px
+  background: #1e2031;
+}
+
+.showtimes__hall-name {
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 0.8125rem; // 13px
+}
+
+.showtimes__tiles {
+  display: flex;
+  gap: 0.75rem; // 12px
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding-bottom: 0.25rem;
+  scrollbar-width: thin;
+}
+
+// Loading placeholders. The shared skeleton's neutral fill is tuned for light
+// surfaces, so the host gets a translucent white to stay visible here.
+.showtimes__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem; // 32px, matching the gap between venues
+}
+
+.showtimes__skeleton-venue {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.showtimes__skeleton-hall {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.showtimes__skeleton-tile {
+  width: 13rem; // 208px, matches a screening tile
+  height: 5.375rem; // 86px
+  flex-shrink: 0;
+}
+
+.showtimes__skeleton-tile app-skeleton {
+  height: 100%;
+  border-radius: 0.75rem; // 12px
+  background: rgb(255 255 255 / 8%);
+}

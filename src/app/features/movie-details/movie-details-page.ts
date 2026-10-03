@@ -1,19 +1,26 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { EMPTY, catchError, of, switchMap } from 'rxjs';
 import { toApiError } from '../../core/api/api-error';
 import { MovieDetail } from '../../core/models/movie';
+import { MovieSession, VenueSessions } from '../../core/models/session';
+import { AuthService } from '../../core/services/auth.service';
 import { MoviesService } from '../../core/services/movies.service';
+import { todayIso } from '../sessions/session-date';
+import { BookingEntryService } from '../booking/booking-entry.service';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../shared/ui/error-state/error-state';
 import { Skeleton } from '../../shared/ui/skeleton/skeleton';
 import { MovieDetailsPanel } from './components/movie-details-panel/movie-details-panel';
 import { MovieHero } from './components/movie-hero/movie-hero';
+import { MovieShowtimes } from './components/movie-showtimes/movie-showtimes';
 import { formatReleaseDate } from './movie-release-date';
+import { ageEligibility, restrictionMessage } from './screening-eligibility';
 
 /**
- * Movie Details page at `/movies/:slug`, showing one title's backdrop, poster and
- * every detail field the API supplies.
+ * Movie Details page at `/movies/:slug`: the title's backdrop, poster and detail
+ * fields, plus its showtimes for a chosen day.
  *
  * The slug comes from the route, so the page works when opened directly or
  * refreshed. It listens to `ActivatedRoute.paramMap` rather than reading the
@@ -21,11 +28,24 @@ import { formatReleaseDate } from './movie-release-date';
  * reloads the new slug and clears the previous result instead of leaving stale
  * content on screen.
  *
- * Showtimes, venues and screening buttons are Task 15's scope and are absent here;
- * this task renders the movie itself only.
+ * The movie and its sessions are two independent requests with two independent
+ * states: the detail request owns the full-page skeleton and the not-found and
+ * error branches, while the session request only ever occupies the Sessions
+ * column. That way switching date never blanks the hero or the details card.
+ *
+ * Seat selection and payment are a later task: clicking an eligible screening
+ * hands it to {@link BookingEntryService} and stops there.
  */
 @Component({
-  imports: [EmptyState, ErrorState, MovieDetailsPanel, MovieHero, RouterLink, Skeleton],
+  imports: [
+    EmptyState,
+    ErrorState,
+    MovieDetailsPanel,
+    MovieHero,
+    MovieShowtimes,
+    RouterLink,
+    Skeleton,
+  ],
   selector: 'app-movie-details-page',
   styleUrl: './movie-details-page.scss',
   templateUrl: './movie-details-page.html',
@@ -33,6 +53,8 @@ import { formatReleaseDate } from './movie-release-date';
 export class MovieDetailsPage {
   private readonly movies = inject(MoviesService);
   private readonly route = inject(ActivatedRoute);
+  private readonly auth = inject(AuthService);
+  private readonly booking = inject(BookingEntryService);
 
   /** The loaded movie, or `null` while loading or after a failure. */
   protected readonly movie = signal<MovieDetail | null>(null);
@@ -51,6 +73,28 @@ export class MovieDetailsPage {
   protected readonly notFound = signal(false);
 
   /**
+   * Calendar day the Sessions column is showing, `YYYY-MM-DD`. Always starts on
+   * today and is reset to today whenever the slug changes, so a second movie
+   * never inherits the first movie's day.
+   */
+  private readonly selectedDate = signal(todayIso());
+
+  /** Venue groups for {@link selectedDate}, exactly as the API grouped them. */
+  private readonly sessionGroups = signal<VenueSessions[]>([]);
+
+  /** Whether the sessions request is in flight. */
+  private readonly sessionsLoading = signal(false);
+
+  /** Failure message of the sessions request, `null` otherwise. */
+  private readonly sessionsError = signal<string | null>(null);
+
+  /** Bumped by Retry so the sessions request re-runs for the same day. */
+  private readonly sessionsRetry = signal(0);
+
+  /** The slug currently shown, so a late response can be matched against it. */
+  private readonly currentSlug = signal('');
+
+  /**
    * Monotonic request token. A response from a slug the user has already left is
    * discarded, so a slow request cannot overwrite the movie now on screen.
    */
@@ -64,6 +108,45 @@ export class MovieDetailsPage {
     this.movie()?.isComingSoon ? 'COMING SOON' : 'NOW PLAYING',
   );
 
+  /** Days the movie plays, straight from the detail response. */
+  protected readonly availableDates = computed(() => this.movie()?.availableDates ?? []);
+
+  /** The day the Sessions column is showing. */
+  protected readonly date = this.selectedDate.asReadonly();
+
+  /** Venue groups for the selected day, for the Sessions column. */
+  protected readonly groups = this.sessionGroups.asReadonly();
+
+  /** Whether the Sessions column is loading. */
+  protected readonly sessionsAreLoading = this.sessionsLoading.asReadonly();
+
+  /** Sessions failure message, `null` otherwise. */
+  protected readonly sessionsFailure = this.sessionsError.asReadonly();
+
+  /**
+   * Whether this account is blocked from buying this movie's screenings.
+   *
+   * The movie's own `ageRating.minAge` decides, and a guest is never blocked —
+   * the check belongs after login. An authenticated account the server can give no
+   * age for counts as blocked, so missing data cannot slip past the rating.
+   */
+  protected readonly ageRestricted = computed(() => {
+    const movie = this.movie();
+
+    if (movie === null) {
+      return false;
+    }
+
+    return ageEligibility(this.auth.user(), movie.ageRating.minAge) !== 'eligible';
+  });
+
+  /** The assignment's restriction copy, shown above blocked screenings. */
+  protected readonly restrictionCopy = computed(() => {
+    const movie = this.movie();
+
+    return movie === null ? '' : restrictionMessage(movie.ageRating.code);
+  });
+
   constructor() {
     // `paramMap` replays the current slug on subscribe, so this performs the
     // initial load as well as every later slug change.
@@ -74,6 +157,52 @@ export class MovieDetailsPage {
         this.loadMovie(slug);
       }
     });
+
+    // Selected date drives the request, so switching days cancels whatever is in
+    // flight: a slow response for day A can never land on top of day B's results.
+    // The retry signal is part of the same stream, so Retry re-requests the day
+    // that is currently selected rather than a remembered one.
+    toObservable(
+      computed(() => ({
+        slug: this.currentSlug(),
+        date: this.selectedDate(),
+        retry: this.sessionsRetry(),
+      })),
+    )
+      .pipe(
+        switchMap(({ slug, date }) => {
+          if (slug === '') {
+            return EMPTY;
+          }
+
+          this.sessionsLoading.set(true);
+          this.sessionsError.set(null);
+          // Cleared up front: the previous day's sessions must never sit under
+          // the newly selected one while its own request is pending.
+          this.sessionGroups.set([]);
+
+          return this.movies.getMovieSessions(slug, date).pipe(
+            switchMap((response) => of(response.data)),
+            catchError((failure: unknown) => {
+              const apiError = toApiError(failure);
+
+              this.sessionsError.set(
+                apiError.body?.message ?? 'Could not load showtimes. Please try again.',
+              );
+              this.sessionsLoading.set(false);
+
+              // Swallowed: the error is rendered in place, so the column keeps its
+              // own state and the rest of the page is untouched.
+              return EMPTY;
+            }),
+          );
+        }),
+        takeUntilDestroyed(),
+      )
+      .subscribe((groups) => {
+        this.sessionGroups.set(groups);
+        this.sessionsLoading.set(false);
+      });
   }
 
   /** Loads one movie by slug, showing the page's loading state meanwhile. */
@@ -86,6 +215,12 @@ export class MovieDetailsPage {
     this.notFound.set(false);
     // Cleared up front: the previous movie must never sit under the new slug.
     this.movie.set(null);
+
+    // The Sessions column belongs to the new movie: today is selected again and
+    // the slug signal drives a fresh request for it. Setting it before the detail
+    // response means the two requests are genuinely independent.
+    this.currentSlug.set(slug);
+    this.selectedDate.set(todayIso());
 
     this.movies.getMovie(slug).then(
       (movie) => {
@@ -117,5 +252,43 @@ export class MovieDetailsPage {
     if (slug !== null && slug !== '') {
       this.loadMovie(slug);
     }
+  }
+
+  /**
+   * A day was picked in the Sessions column. Availability is enforced by the date
+   * selector being disabled, so this only ever moves between days the movie plays;
+   * setting the signal is what triggers the request for the new day.
+   */
+  protected onDateSelected(date: string): void {
+    this.selectedDate.set(date);
+  }
+
+  /**
+   * Retry for the Sessions column: re-requests the same movie and the same
+   * selected day, leaving the rest of the page untouched.
+   */
+  protected retrySessions(): void {
+    this.sessionsRetry.update((attempt) => attempt + 1);
+  }
+
+  /**
+   * An eligible screening was chosen.
+   *
+   * Sold-out and age-blocked tiles are disabled and never reach this handler; the
+   * two guards are kept as the last line of defence so a future caller cannot
+   * start booking from an ineligible screening.
+   *
+   * A guest is not turned away here — the assignment places the age check after
+   * login — so the selection is recorded and the existing login flow is joined,
+   * leaving the intended screening ready for the booking screen.
+   */
+  protected onScreeningSelected(session: MovieSession): void {
+    const movie = this.movie();
+
+    if (movie === null || session.isSoldOut || this.ageRestricted()) {
+      return;
+    }
+
+    this.booking.select(session, movie.slug);
   }
 }
