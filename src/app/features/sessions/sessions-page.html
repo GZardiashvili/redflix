@@ -13,6 +13,15 @@
     </aside>
 
     <section class="sessions-content" aria-label="Showtimes">
+      <app-sessions-top-bar
+        [totalSessions]="totalSessionCount()"
+        [search]="search()"
+        [sort]="sort()"
+        [sortOptions]="sortOptions()"
+        (searchChanged)="onSearchInput($event)"
+        (sortChanged)="onSortChange($event)"
+      />
+
       @if (loading()) {
         <div class="sessions-content__skeleton" role="status" aria-label="Loading sessions">
           @for (group of skeletonGroups; track group) {
@@ -45,8 +54,6 @@
           (retry)="loadSessions()"
         />
       } @else if (groups().length > 0) {
-        <p class="sessions-content__summary">{{ summary() }}</p>
-
         <div class="sessions-content__groups">
           @for (group of groups(); track group.movie.id; let last = $last) {
             <app-session-movie-card [group]="group" (select)="onSelectSession($event)" />
@@ -56,6 +63,12 @@
             }
           }
         </div>
+
+        <app-sessions-pagination
+          [currentPage]="resolvedPage()"
+          [lastPage]="resolvedLastPage()"
+          (pageChanged)="onPageChange($event)"
+        />
       } @else {
         <app-empty-state title="No showtimes" message="No sessions found for this date." />
       }

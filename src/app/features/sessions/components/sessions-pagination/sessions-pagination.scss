@@ -1,0 +1,68 @@
+// Page navigation: a centred row of 40px circles, the current page filled in the
+// accent red, and the two arrow buttons capped in the card colour.
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; // 8px
+}
+
+.pagination__arrow,
+.pagination__page {
+  display: flex;
+  width: 2.5rem; // 40px
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #a9a9a9;
+  font-size: 0.875rem; // 14px
+  font-weight: 500;
+  line-height: 1.375rem; // 22px
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #1e2031;
+    color: #fff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ec3013;
+    outline-offset: 2px;
+  }
+}
+
+.pagination__arrow {
+  background: #1e2031;
+
+  &:disabled {
+    background: transparent;
+    color: #505261;
+    cursor: not-allowed;
+  }
+}
+
+.pagination__page--active,
+.pagination__page--active:hover {
+  background: #ec3013;
+  color: #fff;
+}
+
+.pagination__chevron {
+  width: 1rem; // 16px
+  height: 1rem;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 1.33;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pagination__gap {
+  color: #a9a9a9;
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+}

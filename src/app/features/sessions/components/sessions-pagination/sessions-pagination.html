@@ -1,0 +1,44 @@
+@if (hasPages()) {
+  <nav class="pagination" aria-label="Sessions pages">
+    <button
+      class="pagination__arrow"
+      type="button"
+      [disabled]="isFirst()"
+      aria-label="Previous page"
+      (click)="previous()"
+    >
+      <svg class="pagination__chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M15 5.5 8.5 12 15 18.5" />
+      </svg>
+    </button>
+
+    @for (item of pages(); track $index) {
+      @if (item === 'gap') {
+        <span class="pagination__gap" aria-hidden="true">…</span>
+      } @else {
+        <button
+          class="pagination__page"
+          type="button"
+          [class.pagination__page--active]="item === currentPage()"
+          [attr.aria-current]="item === currentPage() ? 'page' : null"
+          [attr.aria-label]="'Page ' + item"
+          (click)="goTo(item)"
+        >
+          {{ item }}
+        </button>
+      }
+    }
+
+    <button
+      class="pagination__arrow"
+      type="button"
+      [disabled]="isLast()"
+      aria-label="Next page"
+      (click)="next()"
+    >
+      <svg class="pagination__chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M9 5.5 15.5 12 9 18.5" />
+      </svg>
+    </button>
+  </nav>
+}

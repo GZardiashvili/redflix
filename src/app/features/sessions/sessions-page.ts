@@ -1,8 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, firstValueFrom } from 'rxjs';
 import { toApiError } from '../../core/api/api-error';
+import { SortOption } from '../../core/models/filter-options';
 import {
   MovieSession,
   MovieSessionGroup,
@@ -10,43 +11,65 @@ import {
   SessionsQuery,
   SessionTimeBand,
 } from '../../core/models/session';
+import { FilterOptionsService } from '../../core/services/filter-options.service';
 import { SessionsService } from '../../core/services/sessions.service';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../shared/ui/error-state/error-state';
 import { Skeleton } from '../../shared/ui/skeleton/skeleton';
 import { DateSelector } from './components/date-selector/date-selector';
 import { SessionMovieCard } from './components/session-movie-card/session-movie-card';
+import { SessionsPagination } from './components/sessions-pagination/sessions-pagination';
 import {
   SessionsFilters,
   SessionsFiltersValue,
 } from './components/sessions-filters/sessions-filters';
+import { SessionsTopBar } from './components/sessions-top-bar/sessions-top-bar';
 import {
+  FIRST_PAGE,
   parseSessionsUrl,
   serializeSessionsUrl,
   SessionsUrlState,
 } from './utils/sessions-url.utils';
 
+/** Quiet period after the last keystroke before the search becomes a request. */
+const SEARCH_DEBOUNCE_MS = 400;
+
+/** Sort list used only before `/filter-options` has resolved. */
+const EMPTY_SORT_OPTIONS: SortOption[] = [];
+
 /**
  * Sessions page: sticky filter sidebar (date picker + filter groups) plus the
  * showtimes list grouped by movie.
  *
- * The query parameters are the single source of truth for the date and filter
- * selection: the page reads them on init, mirrors them into the child components
- * and refetches, and writes every user action back to the URL. Because that
- * round-trip is idempotent, Back/Forward restores a previous view without the
- * children re-emitting. Only filters and date are synchronized here; sorting,
- * search and paging belong to the follow-up task.
+ * The query parameters are the single source of truth for the date, filters, sort,
+ * search and page: the page reads them on init, mirrors them into the child
+ * components and refetches, and writes every user action back to the URL. Because
+ * that round-trip is idempotent, Back/Forward restores a previous view without the
+ * children re-emitting.
  */
 @Component({
-  imports: [DateSelector, EmptyState, ErrorState, SessionMovieCard, SessionsFilters, Skeleton],
+  imports: [
+    DateSelector,
+    EmptyState,
+    ErrorState,
+    SessionMovieCard,
+    SessionsFilters,
+    SessionsPagination,
+    SessionsTopBar,
+    Skeleton,
+  ],
   selector: 'app-sessions-page',
   styleUrl: './sessions-page.scss',
   templateUrl: './sessions-page.html',
 })
 export class SessionsPage {
   private readonly sessions = inject(SessionsService);
+  private readonly filterOptions = inject(FilterOptionsService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+
+  /** Raw search text from the toolbar; debounced before it reaches the URL. */
+  private readonly searchInput = new Subject<string>();
 
   /** URL state at construction, so the very first render already matches the address bar. */
   private readonly initialState = parseSessionsUrl(this.route.snapshot.queryParams);
@@ -56,6 +79,20 @@ export class SessionsPage {
 
   /** Sidebar selection; mirrored from the URL and owned by this page. */
   protected readonly filters = signal<SessionsFiltersValue>(toFiltersValue(this.initialState));
+
+  /** Sort id; mirrored from the URL, defaulting to the API's own default. */
+  protected readonly sort = signal(this.initialState.sort);
+
+  /** Film-title search; mirrored from the URL. */
+  protected readonly search = signal(this.initialState.search);
+
+  /** Requested page; mirrored from the URL. */
+  protected readonly page = signal(this.initialState.page);
+
+  /** Sort options owned by `/filter-options`, for the toolbar dropdown. */
+  protected readonly sortOptions = computed(
+    () => this.filterOptions.value()?.sorts ?? EMPTY_SORT_OPTIONS,
+  );
 
   /** Movie groups of the current page, as grouped by the API. */
   protected readonly groups = signal<MovieSessionGroup[]>([]);
@@ -69,11 +106,24 @@ export class SessionsPage {
   /** Failure message of the last load, `null` while healthy. */
   protected readonly error = signal<string | null>(null);
 
-  /** Summary line above the list, e.g. `Showing 68 sessions`. */
-  protected readonly summary = computed(() => {
-    const total = this.meta()?.totalSessions ?? 0;
-    return `Showing ${total} ${total === 1 ? 'session' : 'sessions'}`;
+  /**
+   * Page the API actually returned. It clamps `meta.currentPage`, so a stale URL
+   * pointing past the end (e.g. `?page=99`) still highlights a real page.
+   */
+  protected readonly resolvedPage = computed(() => {
+    const meta = this.meta();
+    return meta ? meta.currentPage : this.page();
   });
+
+  /** Last page the API reports for the current filters. */
+  protected readonly resolvedLastPage = computed(() => this.meta()?.lastPage ?? 1);
+
+  /**
+   * Total sessions from `meta.totalSessions` — the API's own count. The page must
+   * not use the length of `groups()`: that array holds one entry per *movie*, so it
+   * would under-report whenever a movie has several showtimes.
+   */
+  protected readonly totalSessionCount = computed(() => this.meta()?.totalSessions ?? 0);
 
   /** Placeholder groups / pills of the loading skeleton. */
   protected readonly skeletonGroups = [0, 1, 2];
@@ -81,11 +131,18 @@ export class SessionsPage {
 
   constructor() {
     // `queryParams` replays its current value on subscribe, so this performs the
-    // initial load and then reacts to every later change — a filter or date click
-    // as well as a Back/Forward navigation.
+    // initial load and then reacts to every later change — a filter, date, sort,
+    // search or page change, as well as a Back/Forward navigation.
     this.route.queryParams
       .pipe(takeUntilDestroyed())
       .subscribe((params) => this.applyUrlState(params));
+
+    // Keystrokes are debounced and de-duplicated, so only a settled query becomes
+    // a request. This feeds off the toolbar's output rather than the URL, so the
+    // URL echo that follows a search cannot start another one.
+    this.searchInput
+      .pipe(debounceTime(SEARCH_DEBOUNCE_MS), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe((search) => this.onSearchChange(search));
   }
 
   /** Fetches the showtimes for the current date and filter selection. */
@@ -113,13 +170,33 @@ export class SessionsPage {
   /** A day was picked in the sidebar; reflect it and push it to the URL. */
   protected onDateChange(date: string): void {
     this.selectedDate.set(date);
-    this.navigate({ date, ...this.filters() });
+    this.navigate({ ...this.currentState(), date, page: FIRST_PAGE });
   }
 
   /** A filter checkbox changed; reflect it and push it to the URL. */
   protected onFiltersChange(filters: SessionsFiltersValue): void {
     this.filters.set(filters);
-    this.navigate({ date: this.selectedDate(), ...filters });
+    this.navigate({ ...this.currentState(), ...filters, page: FIRST_PAGE });
+  }
+
+  /** A keystroke in the toolbar's search field; debounced before it is applied. */
+  protected onSearchInput(value: string): void {
+    this.searchInput.next(value);
+  }
+
+  /** A settled search term; applied like any other filter, so the page resets. */
+  protected onSearchChange(search: string): void {
+    this.navigate({ ...this.currentState(), search, page: FIRST_PAGE });
+  }
+
+  /** A sort was chosen in the toolbar; applied like any other filter. */
+  protected onSortChange(sort: string): void {
+    this.navigate({ ...this.currentState(), sort, page: FIRST_PAGE });
+  }
+
+  /** A page was requested. This is the one change that keeps the current page. */
+  protected onPageChange(page: number): void {
+    this.navigate({ ...this.currentState(), page });
   }
 
   /**
@@ -130,19 +207,33 @@ export class SessionsPage {
     // Intentionally empty until the booking flow lands.
   }
 
+  /** The URL state the page is currently showing. */
+  private currentState(): SessionsUrlState {
+    return {
+      ...this.filters(),
+      date: this.selectedDate(),
+      sort: this.sort(),
+      search: this.search(),
+      page: this.page(),
+    };
+  }
+
   /** Mirrors URL params into the signals the children render, then refetches. */
   private applyUrlState(params: Params): void {
     const state = parseSessionsUrl(params);
 
     this.selectedDate.set(state.date);
     this.filters.set(toFiltersValue(state));
+    this.sort.set(state.sort);
+    this.search.set(state.search);
+    this.page.set(state.page);
     this.loadSessions();
   }
 
   /**
-   * Writes state to the URL. `merge` keeps parameters this task does not own
-   * (sort/search/page) intact, and leaving `replaceUrl` at its default records a
-   * history entry, so Back steps through the user's filter changes.
+   * Writes state to the URL. `merge` keeps any parameter this task does not own
+   * intact, and leaving `replaceUrl` at its default records a history entry, so
+   * Back steps through the user's changes.
    */
   private navigate(state: SessionsUrlState): void {
     void this.router.navigate([], {
@@ -153,21 +244,24 @@ export class SessionsPage {
   }
 
   /**
-   * Request for the current date and sidebar selection. Date and filters live
-   * together here so every request reflects one consistent state; sorting and
-   * paging will join them in the follow-up task.
+   * Request for the date, filters, sort, search and page currently in the URL.
+   * They are assembled in one place so every request reflects a single consistent
+   * state.
    */
   private buildQuery(): SessionsQuery {
-    const filters = this.filters();
+    const state = this.currentState();
 
     return {
-      date: this.selectedDate(),
-      venues: filters.venues,
-      formats: filters.formats,
-      languages: filters.languages,
+      date: state.date,
+      venues: state.venues,
+      formats: state.formats,
+      languages: state.languages,
       // Band slugs come from `/filter-options`, whose ids are the API's own time
       // bands, so the values are already `SessionTimeBand`s.
-      bands: filters.bands as SessionTimeBand[],
+      bands: state.bands as SessionTimeBand[],
+      sort: state.sort,
+      search: state.search,
+      page: state.page,
     };
   }
 }
