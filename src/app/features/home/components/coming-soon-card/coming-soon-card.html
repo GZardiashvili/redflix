@@ -1,0 +1,29 @@
+<article class="coming-soon-card">
+  <img
+    class="coming-soon-card__poster"
+    [src]="movie().posterUrl"
+    [alt]="movie().title + ' poster'"
+    loading="lazy"
+  />
+
+  <div class="coming-soon-card__body">
+    <h3 class="coming-soon-card__title">{{ movie().title }}</h3>
+
+    <p class="coming-soon-card__meta">
+      <span class="coming-soon-card__rating">{{ movie().ageRating.code }}</span>
+      <span aria-hidden="true">•</span>
+      <span>{{ movie().runtimeMinutes }} min</span>
+      <span aria-hidden="true">•</span>
+      <span>Releases {{ movie().releaseDate }}</span>
+    </p>
+
+    <button
+      class="coming-soon-card__action"
+      type="button"
+      [disabled]="movie().isNotified"
+      (click)="notifyRequested.emit(movie())"
+    >
+      {{ movie().isNotified ? 'Notified' : 'Notify Me' }}
+    </button>
+  </div>
+</article>

@@ -1,1 +1,102 @@
-<h1>Home</h1>
+<div class="home-page">
+  @if (featured(); as section) {
+    @if (section.loading) {
+      <div class="home-page__hero-loading" role="status">
+        <app-loading-indicator label="Loading featured movies" />
+      </div>
+    } @else if (section.error; as message) {
+      <app-error-state
+        title="Featured movies unavailable"
+        [message]="message"
+        [canRetry]="true"
+        (retry)="loadFeatured()"
+      />
+    } @else if (section.data; as movies) {
+      @if (movies.length > 0) {
+        <app-home-hero [movies]="movies" />
+      } @else {
+        <app-empty-state
+          title="No featured movies"
+          message="Check back soon for featured titles."
+        />
+      }
+    }
+  }
+
+  <section class="home-page__section" aria-labelledby="now-playing-heading">
+    <div class="home-page__section-head">
+      <h2 id="now-playing-heading" class="home-page__section-title">Now Playing</h2>
+      <a class="home-page__see-all" routerLink="/sessions">See all</a>
+    </div>
+
+    @if (nowPlaying(); as section) {
+      @if (section.loading) {
+        <div class="home-page__loading" role="status">
+          <app-loading-indicator label="Loading now playing movies" />
+        </div>
+      } @else if (section.error; as message) {
+        <app-error-state
+          title="Now playing unavailable"
+          [message]="message"
+          [canRetry]="true"
+          (retry)="loadNowPlaying()"
+        />
+      } @else if (section.data; as movies) {
+        @if (movies.length > 0) {
+          <div class="home-page__cards">
+            @for (movie of movies; track movie.id) {
+              <app-movie-card [movie]="movie" />
+            }
+          </div>
+        } @else {
+          <app-empty-state
+            title="No movies playing now"
+            message="Check back soon for new showtimes."
+          />
+        }
+      }
+    }
+  </section>
+
+  <section class="home-page__section" aria-labelledby="coming-soon-heading">
+    <div class="home-page__section-head">
+      <h2 id="coming-soon-heading" class="home-page__section-title">Coming Soon</h2>
+    </div>
+
+    @if (comingSoon(); as section) {
+      @if (section.loading) {
+        <div class="home-page__loading" role="status">
+          <app-loading-indicator label="Loading coming soon movies" />
+        </div>
+      } @else if (section.error; as message) {
+        <app-error-state
+          title="Coming soon unavailable"
+          [message]="message"
+          [canRetry]="true"
+          (retry)="loadComingSoon()"
+        />
+      } @else if (section.data; as movies) {
+        @if (movies.length > 0) {
+          <div class="home-page__cards home-page__cards--coming-soon">
+            @for (movie of movies; track movie.id) {
+              <app-coming-soon-card [movie]="movie" />
+            }
+          </div>
+        } @else {
+          <app-empty-state
+            title="No coming soon titles"
+            message="Check back soon for upcoming releases."
+          />
+        }
+      }
+    }
+  </section>
+
+  <section class="home-page__section" aria-labelledby="recently-viewed-heading">
+    <div class="home-page__section-head">
+      <h2 id="recently-viewed-heading" class="home-page__section-title">Recently Viewed</h2>
+    </div>
+
+    <app-empty-state title="Nothing viewed yet" message="Movies you open will appear here." />
+  </section>
+</div>

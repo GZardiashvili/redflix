@@ -1,0 +1,20 @@
+<article class="movie-card">
+  <img
+    class="movie-card__poster"
+    [src]="movie().posterUrl"
+    [alt]="movie().title + ' poster'"
+    loading="lazy"
+  />
+
+  <h3 class="movie-card__title">{{ movie().title }}</h3>
+
+  <p class="movie-card__meta">
+    <span class="movie-card__rating">{{ movie().ageRating.code }}</span>
+    <span aria-hidden="true">•</span>
+    <span>{{ movie().runtimeMinutes }} min</span>
+  </p>
+
+  <p class="movie-card__price">From {{ movie().fromPrice }} ₾</p>
+
+  <a class="movie-card__action" [routerLink]="['/movies', movie().slug]">Buy Ticket</a>
+</article>
