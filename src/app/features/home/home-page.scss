@@ -66,15 +66,24 @@
 }
 
 // "See all": the Figma label — Archivo SemiBold 14/15 in the accent red. The
-// only link in a section head, so it never needs a hover colour of its own to
+// only control in a section head, so it never needs a hover colour of its own to
 // read as interactive: it stays red and gains a focus ring.
+//
+// Rendered as a `<button>` on Coming Soon (it expands the row in place) and an
+// `<a>` on Now Playing (it navigates to /sessions), so the button's own
+// defaults — border, background, padding, font — are all reset here.
 .home-page__see-all {
+  padding: 0;
+  border: 0;
+  background: none;
   color: #ec3013;
+  cursor: pointer;
   font-family: 'Archivo', sans-serif;
   font-style: normal;
   font-size: 0.875rem; // 14px
   font-weight: 600;
   line-height: 0.9375rem; // 15px
+  text-align: left;
   text-decoration: none;
 
   &:focus-visible {

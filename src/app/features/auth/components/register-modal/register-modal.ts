@@ -79,80 +79,53 @@ export class RegisterModal implements OnDestroy {
   /** Client-side or server-side avatar message, or `null`. */
   protected readonly avatarError = signal<string | null>(null);
 
+  /**
+   * Username message, or `null`.
+   *
+   * `null` in both directions that matter: before the field has been engaged, and
+   * the moment it satisfies its validators — so correcting the value clears the
+   * message on that keystroke, with no further blur or click.
+   */
   protected usernameError(): string | null {
-    const control = this.form.controls.username;
-
-    if (!(control.touched || control.dirty)) {
-      return null;
-    }
-
-    if (control.hasError('server')) {
-      return control.getError('server') as string;
-    }
-
-    if (control.hasError('required')) {
-      return 'Username is required.';
-    }
-
-    return 'Username must be at least 3 characters.';
+    return fieldError(this.form.controls.username, {
+      required: 'Username is required.',
+      minlength: 'Username must be at least 3 characters.',
+    });
   }
 
+  /** Email message, or `null`, under the same rules as the username field. */
   protected emailError(): string | null {
-    const control = this.form.controls.email;
-
-    if (!(control.touched || control.dirty)) {
-      return null;
-    }
-
-    if (control.hasError('server')) {
-      return control.getError('server') as string;
-    }
-
-    if (control.hasError('required')) {
-      return 'Email is required.';
-    }
-
-    return 'Enter a valid email address.';
+    return fieldError(this.form.controls.email, {
+      required: 'Email is required.',
+      email: 'Enter a valid email address.',
+    });
   }
 
+  /** Password message, or `null`, under the same rules as the username field. */
   protected passwordError(): string | null {
-    const control = this.form.controls.password;
-
-    if (!(control.touched || control.dirty)) {
-      return null;
-    }
-
-    if (control.hasError('server')) {
-      return control.getError('server') as string;
-    }
-
-    if (control.hasError('required')) {
-      return 'Password is required.';
-    }
-
-    return 'Password must be at least 3 characters.';
+    return fieldError(this.form.controls.password, {
+      required: 'Password is required.',
+      minlength: 'Password must be at least 3 characters.',
+    });
   }
 
+  /**
+   * Confirmation message, or `null`.
+   *
+   * The mismatch is a form-level error, so it is read off the group rather than
+   * the control; it still disappears the instant the two values agree.
+   */
   protected passwordConfirmationError(): string | null {
     const control = this.form.controls.password_confirmation;
+    const required = fieldError(control, { required: 'Please confirm your password.' });
 
-    if (!(control.touched || control.dirty)) {
-      return null;
+    if (required !== null) {
+      return required;
     }
 
-    if (control.hasError('server')) {
-      return control.getError('server') as string;
-    }
-
-    if (control.hasError('required')) {
-      return 'Please confirm your password.';
-    }
-
-    if (this.form.hasError('passwordMismatch')) {
-      return 'Passwords do not match.';
-    }
-
-    return null;
+    return this.form.hasError('passwordMismatch') && isEngaged(control)
+      ? 'Passwords do not match.'
+      : null;
   }
 
   protected onAvatarSelected(event: Event): void {
@@ -271,6 +244,45 @@ export class RegisterModal implements OnDestroy {
   ngOnDestroy(): void {
     this.revokePreview();
   }
+}
+
+/**
+ * Whether the visitor has engaged a control yet.
+ *
+ * A pristine field shows nothing: flagging an untouched form as full of errors
+ * would be noise, and the messages are there the moment they type and blur.
+ */
+function isEngaged(control: AbstractControl): boolean {
+  return control.touched || control.dirty;
+}
+
+/**
+ * The message for a control's *current* errors, or `null` when it has none.
+ *
+ * Every branch is keyed to a specific validator key, so a control that satisfies
+ * its validators resolves to `null` and its message disappears on the keystroke
+ * that fixed it — no fall-through "always show something" return, which is what
+ * left the stale message behind. A `422` from the server outranks the local copy.
+ */
+function fieldError(
+  control: AbstractControl,
+  messages: Partial<Record<'required' | 'minlength' | 'email', string>>,
+): string | null {
+  if (!isEngaged(control) || control.valid) {
+    return null;
+  }
+
+  if (control.hasError('server')) {
+    return control.getError('server') as string;
+  }
+
+  for (const key of Object.keys(messages) as (keyof typeof messages)[]) {
+    if (control.hasError(key)) {
+      return messages[key] ?? null;
+    }
+  }
+
+  return null;
 }
 
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {

@@ -167,6 +167,20 @@
     border-color: #e63d2e;
     outline: none;
   }
+
+  // Validity, from the classes Angular applies to a `formControlName` element.
+  // Gated on `.ng-touched`/`.ng-dirty` so the form does not greet the visitor
+  // with a red border on four empty fields before they have typed anything, and
+  // so the border settles the moment the value that coloured it is corrected.
+  &.ng-touched.ng-invalid,
+  &.ng-dirty.ng-invalid {
+    border-color: #e63d2e;
+  }
+
+  &.ng-touched.ng-valid,
+  &.ng-dirty.ng-valid {
+    border-color: #4ade80;
+  }
 }
 
 .register-modal__passwords {

@@ -44,6 +44,17 @@ export class HomePage implements OnInit {
   protected readonly nowPlaying = signal<HomeSection<Movie[]>>(pendingSection());
   protected readonly comingSoon = signal<HomeSection<Movie[]>>(pendingSection());
 
+  /**
+   * Whether the Coming Soon row shows the full unreleased catalogue.
+   *
+   * The row starts as a capped teaser (`limit`), and "See all" swaps it for the
+   * complete list in place. It deliberately does **not** navigate: `GET /sessions`
+   * only carries released movies, so an unreleased title has no showtime to open
+   * — the session grid would show the same films as Now Playing and silently omit
+   * every card the visitor just clicked on.
+   */
+  protected readonly comingSoonExpanded = signal(false);
+
   /** Per-movie notify flow state, keyed by movie id. */
   private readonly notifyStates = signal<Record<number, NotifyState>>({});
 
@@ -77,9 +88,35 @@ export class HomePage implements OnInit {
   }
 
   protected loadComingSoon(): void {
+    // The capped teaser on first paint; the retry control re-runs the same state
+    // the visitor is looking at rather than snapping back to the teaser.
+    this.loadComingSoonMovies(this.comingSoonExpanded() ? undefined : COMING_SOON_LIMIT);
+  }
+
+  /**
+   * "See all" on Coming Soon: expands the row to the full catalogue in place.
+   *
+   * Two requests, no navigation. Expanded sends **no** `limit` — the documented
+   * way to ask for every unreleased title — and collapses back to the capped
+   * teaser. Now Playing keeps its own link to `/sessions`, which is the correct
+   * destination for released films.
+   */
+  protected toggleComingSoon(): void {
+    const expanded = !this.comingSoonExpanded();
+    this.comingSoonExpanded.set(expanded);
+
+    this.loadComingSoonMovies(expanded ? undefined : COMING_SOON_LIMIT);
+  }
+
+  /** Label of the Coming Soon toggle, describing what the click will do. */
+  protected get comingSoonToggleLabel(): string {
+    return this.comingSoonExpanded() ? 'Show less' : 'See all';
+  }
+
+  private loadComingSoonMovies(limit: number | undefined): void {
     this.comingSoon.set(pendingSection());
 
-    this.movies.getComingSoon(COMING_SOON_LIMIT).then(
+    this.movies.getComingSoon(limit).then(
       (data) => this.comingSoon.set({ loading: false, data, error: null }),
       (error: unknown) =>
         this.comingSoon.set({ loading: false, data: null, error: sectionError(error) }),

@@ -84,7 +84,19 @@
   <section class="home-page__section" aria-labelledby="coming-soon-heading">
     <div class="home-page__section-head">
       <h2 id="coming-soon-heading" class="home-page__section-title">Coming Soon…</h2>
-      <a class="home-page__see-all" routerLink="/sessions">See all</a>
+      <!--
+        Not a link: unreleased films have no showtimes, so /sessions would show
+        Now Playing's films instead. This expands the row in place instead.
+      -->
+      <button
+        type="button"
+        class="home-page__see-all"
+        [attr.aria-expanded]="comingSoonExpanded()"
+        aria-controls="coming-soon-list"
+        (click)="toggleComingSoon()"
+      >
+        {{ comingSoonToggleLabel }}
+      </button>
     </div>
 
     @if (comingSoon(); as section) {
@@ -101,7 +113,7 @@
         />
       } @else if (section.data; as movies) {
         @if (movies.length > 0) {
-          <div class="home-page__cards home-page__cards--coming-soon">
+          <div id="coming-soon-list" class="home-page__cards home-page__cards--coming-soon">
             @for (movie of movies; track movie.id) {
               <app-coming-soon-card
                 [movie]="movie"
