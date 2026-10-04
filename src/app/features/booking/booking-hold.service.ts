@@ -63,7 +63,13 @@ const EXPIRED_MESSAGE = 'Your hold time expired. Please re-select your seats.';
  * release: that hold is still wanted, and the API replaces it when the next
  * submission arrives, so no `DELETE` is needed first. On expiry the server has
  * already released the hold, so the client only stops treating the seats as
- * reserved.
+ * reserved. Once the order is paid for, {@link complete} drops it instead — the
+ * seats are sold, so there is nothing left to free.
+ *
+ * The teardown itself lives in {@link expire} and {@link reconcileConflict},
+ * which checkout reuses when `POST /orders` ends the hold instead of the clock
+ * doing so. That is the point of keeping them here: one hold, one way to lose
+ * it, whichever request discovers the loss.
  */
 @Service()
 export class BookingHoldService {
@@ -314,15 +320,10 @@ export class BookingHoldService {
     const failure = toApiError(error);
 
     if (failure.status === 409) {
-      const contested = parseContested(failure);
-
-      this.selection.removeByCodes(contested);
-      this.seatMap.refresh();
-      this.failureState.set({
-        kind: 'conflict',
-        message: failure.body?.message ?? 'Some of those seats were just taken. Please pick again.',
-        contested,
-      });
+      this.reconcileConflict(
+        parseContested(failure),
+        failure.body?.message ?? 'Some of those seats were just taken. Please pick again.',
+      );
 
       return;
     }
@@ -335,23 +336,64 @@ export class BookingHoldService {
   }
 
   /**
-   * Handles the countdown reaching `expiresAt`.
+   * Reconciles a `409` from any booking request: the seats named as
+   * `contested` leave the selection, the rest stay, the map is refetched, and
+   * the flow returns to Step 1 with the API's own sentence.
    *
-   * The server releases the hold at that moment on its own, so nothing is sent
-   * here: the client simply stops treating the seats as reserved. The selection
-   * is cleared, because those seats are free again and may already be gone; the
-   * map is refetched to show the current truth; and the flow returns to Step 1
-   * with the API's own wording for what happened.
+   * Returned to Step 1 rather than left where it was: during checkout the visitor
+   * is on Step 2, and there is nothing left to pay for, so Step 1 is the only step
+   * that means anything. During hold creation they are already there, making this
+   * a no-op rather than a second behaviour.
+   *
+   * One implementation for both places a conflict can arrive — creating the hold
+   * and paying for it — because the reconciliation is the same fact about the
+   * server's seat map either way. Duplicating it would let the two paths drift
+   * into disagreeing about which seats are still ours.
    */
-  private expire(): void {
+  reconcileConflict(contested: readonly string[], message: string): void {
+    this.selection.removeByCodes(contested);
+    this.seatMap.refresh();
+    this.failureState.set({ kind: 'conflict', message, contested: [...contested] });
+
+    // The order could not be paid for, so there is nothing to check out: the
+    // visitor goes back to the seats and picks again from the refreshed map.
+    this.booking.showStep1();
+  }
+
+  /**
+   * Ends the hold because the server has stopped honouring it.
+   *
+   * Called by the countdown when it reaches `expiresAt`, and by checkout when
+   * `POST /orders` refuses the order for a rule reason. The second case is the
+   * same outcome arrived at later: the seats are no longer reserved, so the
+   * selection is cleared, the map refetched and the flow returned to Step 1 with
+   * the API's own wording for why.
+   *
+   * `message` is passed rather than assumed so the visitor is told what the
+   * server actually said; the countdown supplies {@link EXPIRED_MESSAGE} because
+   * by then the server has stopped answering.
+   */
+  expire(message: string = EXPIRED_MESSAGE): void {
     this.holdState.set(null);
     this.selection.clear();
     this.seatMap.refresh();
-    this.failureState.set({ kind: 'error', message: EXPIRED_MESSAGE, contested: [] });
+    this.failureState.set({ kind: 'error', message, contested: [] });
 
     // Step 2 has no meaning without a hold, so the flow falls back to Step 1
     // whether or not the dialog is the thing currently on screen.
     this.booking.showStep1();
+  }
+
+  /**
+   * Consumes the hold, because the order it was holding has now been paid for.
+   *
+   * Deliberately **not** a release: the seats are sold, so there is nothing left
+   * to free and no `DELETE` is sent — the hold id no longer names a hold. Only
+   * the local state is dropped, which also stops the countdown that would
+   * otherwise report an expiry for a booking that succeeded.
+   */
+  complete(): void {
+    this.holdState.set(null);
   }
 }
 

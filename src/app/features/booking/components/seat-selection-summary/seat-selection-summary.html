@@ -101,8 +101,9 @@
     </div>
 
     <!--
-      Only Step 1 has a way onward: on Step 2 the seats are held, so the forward
-      action belongs to the checkout form that this task does not build yet.
+      Only Step 1 has a way onward. On Step 2 the seats are held, so the forward
+      action belongs to the checkout form, which pays for the hold — a button
+      here would be a second, differently-behaving path to the same submission.
     -->
     @if (!readOnly()) {
       <button

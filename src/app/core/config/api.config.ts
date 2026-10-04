@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   register: 'register',
   logout: 'logout',
   me: 'me',
+  orders: 'orders',
   search: 'search',
   sessions: 'sessions',
   featuredMovies: 'movies/featured',

@@ -9,14 +9,158 @@
     <h3 class="checkout__heading" id="checkout-heading">Checkout</h3>
 
     <div class="checkout__layout">
-      <!--
-        The left column the design reserves for the checkout form. Its height is
-        what keeps the step the same size as Step 1; the form itself belongs to a
-        later task, so for now the column holds only the way back.
-      -->
-      <div class="checkout__form">
-        <button type="button" class="checkout__back" (click)="backToSeats()">Back to seats</button>
-      </div>
+      <form class="checkout__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <!--
+          The general sentence for a field-level 422. It sits above the form
+          because it is about the submission as a whole; each field's own reason
+          appears under that field instead, so this never repeats what a specific
+          control already says.
+        -->
+        @if (fieldFailureMessage(); as message) {
+          <p class="checkout__alert" role="alert">{{ message }}</p>
+        }
+
+        <div class="checkout__group">
+          <app-form-field
+            label="Full Name"
+            controlId="checkout-full-name"
+            [required]="true"
+            [error]="errorFor('fullName')"
+          >
+            <input
+              id="checkout-full-name"
+              class="checkout__input"
+              type="text"
+              formControlName="fullName"
+              placeholder="e.g. Jane Dolidze"
+              autocomplete="name"
+            />
+          </app-form-field>
+
+          <div class="checkout__row">
+            <app-form-field
+              label="Email"
+              controlId="checkout-email"
+              [required]="true"
+              [error]="errorFor('email')"
+            >
+              <input
+                id="checkout-email"
+                class="checkout__input"
+                type="email"
+                formControlName="email"
+                placeholder="e.g. user@example.com"
+                autocomplete="email"
+                inputmode="email"
+              />
+            </app-form-field>
+
+            <app-form-field
+              label="Mobile Number"
+              controlId="checkout-mobile"
+              [required]="true"
+              [error]="errorFor('mobileNumber')"
+            >
+              <input
+                id="checkout-mobile"
+                class="checkout__input"
+                type="tel"
+                formControlName="mobileNumber"
+                placeholder="e.g. 599 123 456"
+                autocomplete="tel"
+                inputmode="tel"
+              />
+            </app-form-field>
+          </div>
+        </div>
+
+        <div class="checkout__group">
+          <app-form-field
+            label="Card Number"
+            controlId="checkout-card-number"
+            [required]="true"
+            [error]="errorFor('cardNumber')"
+          >
+            <input
+              id="checkout-card-number"
+              class="checkout__input"
+              type="text"
+              formControlName="cardNumber"
+              placeholder="e.g. 4242 4242 4242 4242"
+              autocomplete="cc-number"
+              inputmode="numeric"
+              maxlength="23"
+            />
+          </app-form-field>
+
+          <div class="checkout__row">
+            <app-form-field
+              label="Expiry"
+              controlId="checkout-expiry"
+              [required]="true"
+              [error]="errorFor('expiry')"
+            >
+              <input
+                id="checkout-expiry"
+                class="checkout__input"
+                type="text"
+                formControlName="expiry"
+                placeholder="MM/YY"
+                autocomplete="cc-exp"
+                inputmode="numeric"
+                maxlength="5"
+              />
+            </app-form-field>
+
+            <app-form-field
+              label="CVV"
+              controlId="checkout-cvv"
+              [required]="true"
+              [error]="errorFor('cvv')"
+            >
+              <!--
+                A password field, not a number one: `type="number"` would discard
+                the leading zeros a CVV may have, and offers no way to hide what
+                was typed.
+              -->
+              <input
+                id="checkout-cvv"
+                class="checkout__input"
+                type="password"
+                formControlName="cvv"
+                placeholder="123"
+                autocomplete="cc-csc"
+                inputmode="numeric"
+                maxlength="3"
+              />
+            </app-form-field>
+          </div>
+        </div>
+
+        <div class="checkout__actions">
+          <button type="button" class="checkout__back" (click)="backToSeats()">
+            Back to seats
+          </button>
+
+          <!--
+            Disabled while the request is in flight, not merely while the form is
+            empty: that is what makes a second click impossible while the first is
+            still on its way to the server.
+          -->
+          <button
+            class="checkout__pay"
+            type="submit"
+            [disabled]="!canSubmit()"
+            [attr.aria-busy]="submitting()"
+          >
+            @if (submitting()) {
+              <app-loading-indicator size="sm" label="Completing order" />
+            } @else {
+              Pay: Complete order
+            }
+          </button>
+        </div>
+      </form>
 
       <app-seat-selection-summary class="checkout__summary" [readOnly]="true" />
     </div>
