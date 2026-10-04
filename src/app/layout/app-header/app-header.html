@@ -1,64 +1,251 @@
 <header class="app-header">
-  <a class="app-header__brand" routerLink="/">Redflix</a>
+  <div class="app-header__left">
+    <a class="app-header__brand" routerLink="/" aria-label="Kino XII home"
+      >KINO <span class="app-header__brand-accent">XII</span></a
+    >
 
-  <app-header-search />
+    <nav class="app-header__nav" aria-label="Main navigation">
+      <a class="app-header__sessions" routerLink="/sessions">SESSIONS</a>
+    </nav>
+  </div>
 
-  <nav class="app-header__nav" aria-label="Main navigation">
-    <a routerLink="/sessions">Sessions</a>
+  <div class="app-header__right">
+    <app-header-search />
 
     @if (auth.user(); as user) {
       <div class="app-header__account">
+        <!--
+          The profile control: opens and closes the account dropdown. The
+          expanded state and the control it owns are exposed to assistive
+          technology through aria-expanded / aria-controls / aria-haspopup.
+        -->
         <button
+          #triggerButton
           class="app-header__identity"
           type="button"
+          aria-haspopup="menu"
           [attr.aria-expanded]="menuOpen()"
           [attr.aria-controls]="menuOpen() ? 'app-header-menu' : null"
           (click)="toggleMenu()"
         >
-          @if (user.avatar; as avatar) {
-            <img class="app-header__avatar" [src]="avatar" alt="" />
-          } @else {
-            <span class="app-header__avatar app-header__avatar--initials" aria-hidden="true">
-              {{ initial() }}
+          <span class="app-header__avatar-wrap">
+            @if (user.avatar; as avatar) {
+              <img class="app-header__avatar" [src]="avatar" alt="" />
+            } @else {
+              <span class="app-header__avatar app-header__avatar--initials" aria-hidden="true">
+                {{ initials() }}
+              </span>
+            }
+            <span
+              class="app-header__avatar-dot"
+              [class.app-header__avatar-dot--incomplete]="!user.profileComplete"
+              [class.app-header__avatar-dot--complete]="user.profileComplete"
+              aria-hidden="true"
+            ></span>
+            <span class="visually-hidden">
+              {{ user.profileComplete ? 'Profile complete' : 'Profile incomplete' }}
             </span>
-          }
-          <span class="app-header__name">{{ displayName() }}</span>
-          <span class="app-header__chevron" aria-hidden="true">▾</span>
+          </span>
+          <span class="app-header__name">{{ firstName() }}</span>
+          <svg class="app-header__chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="m3.5 6 4.5 4.5L12.5 6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
         </button>
 
         @if (menuOpen()) {
-          <div id="app-header-menu" class="app-header__menu">
-            <a class="app-header__menu-item" routerLink="/profile" (click)="closeMenu()">
-              My Profile
-              <!--
-                The profile completion indicator: yellow while the API reports
-                the profile incomplete, green once it reports complete — the same
-                `profileComplete` the profile page and booking gate read, so a
-                successful save flips it without a refresh.
-              -->
-              @if (user.profileComplete) {
-                <span
-                  class="app-header__profile-dot app-header__profile-dot--complete"
+          <!-- The account dropdown of the supplied design: a 302px panel with
+               the identity, the profile completion status and the actions. -->
+          <div id="app-header-menu" class="app-header__menu" role="menu" aria-label="Account">
+            <div class="app-header__menu-top" role="presentation">
+              <!-- Identity: avatar carrying the completion dot, then name and email. -->
+              <div class="app-header__menu-profile">
+                <span class="app-header__menu-avatar">
+                  @if (user.avatar; as avatar) {
+                    <img class="app-header__menu-avatar-image" [src]="avatar" alt="" />
+                  } @else {
+                    <span aria-hidden="true">{{ initials() }}</span>
+                  }
+                  <!--
+                    The profile completion indicator, from `user.profileComplete`
+                    alone: orange while the profile is incomplete, green once the
+                    API reports it complete. Decorative here — the status banner
+                    below carries the same information as text.
+                  -->
+                  <span
+                    class="app-header__menu-avatar-dot"
+                    [class.app-header__menu-avatar-dot--incomplete]="!user.profileComplete"
+                    [class.app-header__menu-avatar-dot--complete]="user.profileComplete"
+                    aria-hidden="true"
+                  ></span>
+                </span>
+
+                <span class="app-header__menu-identity">
+                  <span class="app-header__menu-name">{{ displayName() }}</span>
+                  <span class="app-header__menu-email">{{ user.email }}</span>
+                </span>
+              </div>
+
+              <!-- Profile completion status, rendered as text so the indicator
+                   never relies on colour alone. -->
+              <div class="app-header__menu-status">
+                @if (user.profileComplete) {
+                  <div class="app-header__status app-header__status--complete">
+                    <span class="app-header__status-title">Profile Complete</span>
+                    <svg
+                      class="app-header__status-check"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path
+                        d="M20 6 9 17l-5-5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
+                } @else {
+                  <div class="app-header__status app-header__status--incomplete">
+                    <span class="app-header__status-title">Profile incomplete</span>
+                    <span class="app-header__status-body">
+                      Please complete your profile to enable booking.
+                    </span>
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="app-header__menu-actions">
+              <div class="app-header__menu-group">
+                <!--
+                  "My Tickets" routes to the existing Profile page — the same
+                  destination the order confirmation's "My Tickets" action uses
+                  — so the designed item reuses supported behavior instead of
+                  inventing a second tickets route.
+                -->
+                <a
+                  class="app-header__menu-item"
+                  role="menuitem"
+                  routerLink="/profile"
+                  (click)="closeMenu()"
+                >
+                  <svg
+                    class="app-header__menu-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <circle
+                      cx="12"
+                      cy="7"
+                      r="4"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                    />
+                    <path
+                      d="M4 21v-1a5 5 0 0 1 5-5h6a5 5 0 0 1 5 5v1"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  My Profile
+                </a>
+                <a
+                  class="app-header__menu-item"
+                  role="menuitem"
+                  routerLink="/profile"
+                  (click)="closeMenu()"
+                >
+                  <svg
+                    class="app-header__menu-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path
+                      d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.5a2.5 2.5 0 0 0 0 5V16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.5a2.5 2.5 0 0 0 0-5V8Z"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M13 6v2.5M13 11v2M13 15.5V18"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  My Tickets
+                </a>
+              </div>
+
+              <div class="app-header__menu-divider" role="separator"></div>
+
+              <button
+                class="app-header__menu-item app-header__menu-item--danger"
+                type="button"
+                role="menuitem"
+                (click)="logout()"
+              >
+                <svg
+                  class="app-header__menu-icon"
+                  viewBox="0 0 24 24"
                   aria-hidden="true"
-                ></span>
-                <span class="visually-hidden">Profile complete</span>
-              } @else {
-                <span
-                  class="app-header__profile-dot app-header__profile-dot--incomplete"
-                  aria-hidden="true"
-                ></span>
-                <span class="visually-hidden">Profile incomplete</span>
-              }
-            </a>
-            <button class="app-header__menu-item" type="button" (click)="logout()">Logout</button>
+                  focusable="false"
+                >
+                  <path
+                    d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="m10 17 5-5-5-5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M15 12H3"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                Log out
+              </button>
+            </div>
           </div>
         }
       </div>
     } @else {
-      <button class="app-header__auth" type="button" (click)="loginRequested.emit()">Log in</button>
-      <button class="app-header__auth" type="button" (click)="registerRequested.emit()">
-        Sign up
-      </button>
+      <div class="app-header__guest">
+        <button class="app-header__auth" type="button" (click)="loginRequested.emit()">
+          Log in
+        </button>
+        <button class="app-header__auth" type="button" (click)="registerRequested.emit()">
+          Sign up
+        </button>
+      </div>
     }
-  </nav>
+  </div>
 </header>

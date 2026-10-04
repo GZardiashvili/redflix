@@ -3,9 +3,54 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem;
+  min-height: 4.5rem; // 72px bar in the supplied header screenshot
+  padding: 0.75rem 3rem; // 12px 48px
+  background: #000; // screenshot bar: black, not the #070C1C dropdown canvas
+  color: #fff;
+
+  // Brand and primary navigation are plain white labels in the design, never
+  // the browser's default link treatment.
+  &__brand {
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  &__brand-accent {
+    color: #ec3013;
+  }
+
+  // Left cluster: brand + primary navigation. Right cluster: search + account.
+  &__left,
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    min-width: 0;
+  }
+
+  &__right {
+    flex: 1;
+    justify-content: flex-end;
+  }
 
   &__nav {
+    display: flex;
+    align-items: center;
+  }
+
+  &__sessions {
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+  }
+
+  &__guest {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -18,11 +63,11 @@
   &__identity {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.625rem; // 10px: avatar / first name / chevron
     max-width: 14rem;
-    padding: 0.25rem 0.625rem 0.25rem 0.25rem;
-    border: 1px solid #2a2c3d;
-    border-radius: 999px;
+    padding: 0;
+    border: 0;
+    border-radius: 0.5rem;
     background: none;
     color: inherit;
     font-size: 0.875rem;
@@ -35,19 +80,46 @@
     }
   }
 
+  &__avatar-wrap {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  // Completion indicator on the trigger avatar: the same 8px dot the
+  // dropdown avatar carries, ringed with the bar colour.
+  &__avatar-dot {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 0.5rem; // 8px
+    height: 0.5rem;
+    border: 1px solid #000;
+    border-radius: 999px;
+    transform: translate(25%, 25%);
+
+    &--incomplete {
+      background: #e27e04;
+    }
+
+    &--complete {
+      background: #4ade80;
+    }
+  }
+
   &__avatar {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 2.5rem; // 40px trigger avatar of the supplied header screenshot
+    height: 2.5rem;
     flex-shrink: 0;
-    border-radius: 50%;
+    border-radius: 0.625rem; // 10px rounded square, matching the screenshot
     object-fit: cover;
-    background: #1e2031;
+    background: #2a2c3d;
     color: #fff;
-    font-size: 0.75rem;
-    font-weight: 800;
+    font-size: 0.875rem;
+    font-weight: 700;
 
     &--initials {
       // The placeholder text must stay centred like the image variant.
@@ -62,10 +134,14 @@
   }
 
   &__chevron {
+    width: 1rem;
+    height: 1rem;
     flex-shrink: 0;
-    font-size: 0.75rem;
   }
 
+  // The account dropdown of the supplied design: a 302px panel opened below
+  // the profile control. Placement (below the control, right-aligned) is the
+  // existing project convention — the design references do not position it.
   &__menu {
     position: absolute;
     top: calc(100% + 0.5rem);
@@ -73,24 +149,188 @@
     z-index: 10;
     display: flex;
     flex-direction: column;
-    min-width: 10rem;
-    padding: 0.5rem;
+    gap: 0.25rem; // 4px between the identity/status block and the actions
+    width: 18.875rem; // 302px, the design's panel width
+    padding: 0 0 0.625rem; // 0 0 10px
     border: 1px solid #2a2c3d;
-    border-radius: 0.75rem;
+    border-radius: 1rem; // 16px
     background: #070c1c;
     box-shadow: 0 0.75rem 1.5rem rgb(0 0 0 / 35%);
   }
 
+  // Frame 468: identity row and completion status, 16px apart.
+  &__menu-top {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; // 16px
+  }
+
+  // Frame 404: avatar and identity, inset 20px from the panel's top-left.
+  &__menu-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem; // 10px
+    padding: 1.25rem 0 0 1.25rem; // 20px 0 0 20px
+  }
+
+  &__menu-avatar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.625rem; // 42px
+    height: 2.625rem;
+    flex-shrink: 0;
+    border-radius: 0.5rem; // 8px
+    background: #1e2031;
+    color: #fff;
+    font-size: 0.75rem; // 12px Label/S
+    font-weight: 600;
+    line-height: 0.8125rem; // 13px
+  }
+
+  &__menu-avatar-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 0.5rem; // 8px
+    object-fit: cover;
+  }
+
+  // The completion indicator of the design: an 8px dot in the avatar's
+  // bottom-right corner, ringed with the panel colour. Its state still comes
+  // from `user.profileComplete`; the status banner states the same thing in
+  // words, so the dot is never the only carrier of the meaning.
+  &__menu-avatar-dot {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 0.5rem; // 8px
+    height: 0.5rem;
+    border: 1px solid #070c1c;
+    border-radius: 999px;
+
+    &--incomplete {
+      background: #e27e04;
+    }
+
+    &--complete {
+      background: #4ade80;
+    }
+  }
+
+  &__menu-identity {
+    display: flex;
+    min-width: 0;
+    width: 11.875rem; // 190px
+    flex-direction: column;
+    gap: 0.125rem; // 2px
+  }
+
+  &__menu-name {
+    overflow: hidden;
+    color: #fff;
+    font-size: 0.875rem; // 14px Label/M
+    font-weight: 600;
+    line-height: 0.9375rem; // 15px
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__menu-email {
+    overflow: hidden;
+    color: #a9a9a9;
+    font-size: 0.75rem; // 12px Body/S
+    font-weight: 400;
+    line-height: 1.3; // 130%
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Frame 467: the status banner, inset 20px from both panel edges.
+  &__menu-status {
+    padding: 0 1.25rem; // 0 20px
+  }
+
+  // Profile status: a tinted banner whose colour and text always say the same
+  // thing — warning tint + orange copy when incomplete, green tint + green
+  // copy and a check when complete.
+  &__status {
+    display: flex;
+    padding: 0.625rem 0.75rem; // 10px 12px
+    border-radius: 0.625rem; // 10px
+
+    &--incomplete {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.125rem; // 2px between title and body
+      background: rgb(226 126 4 / 10%);
+      color: #e27e04;
+    }
+
+    &--complete {
+      align-items: center;
+      gap: 0.375rem; // 6px between title and check
+      background: rgb(74 222 128 / 10%);
+      color: #4ade80;
+    }
+  }
+
+  &__status-title {
+    font-size: 0.875rem; // 14px Label/M
+    font-weight: 600;
+    line-height: 0.9375rem; // 15px
+  }
+
+  &__status-body {
+    color: #a9a9a9;
+    font-size: 0.75rem; // 12px Body/S
+    font-weight: 400;
+    line-height: 1.3; // 130%
+  }
+
+  &__status-check {
+    width: 1rem; // 16px
+    height: 1rem;
+    flex-shrink: 0;
+  }
+
+  // Frame 405: the actions, 4px apart, above the panel's 10px bottom padding.
+  &__menu-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem; // 4px
+  }
+
+  // Menu: the rows above the divider, starting 4px into the block.
+  &__menu-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem; // 2px
+    padding-top: 0.25rem; // 4px
+  }
+
+  &__menu-divider {
+    height: 1px;
+    background: rgb(255 255 255 / 10%);
+  }
+
+  // Profile button of the design: icon + label, left-inset 20px, on a 10px
+  // radius. Hover and focus keep the existing project treatment — the design
+  // references specify no interaction state for these rows.
   &__menu-item {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
+    gap: 0.5rem; // 8px
+    height: 2.5rem; // 40px
+    padding: 0.625rem 0 0.625rem 1.25rem; // 10px 0 10px 20px
     border: 0;
-    border-radius: 0.5rem;
+    border-radius: 0.625rem; // 10px
     background: none;
     color: #fff;
-    font-size: 0.875rem;
+    font-family: inherit;
+    font-size: 0.875rem; // 14px Label/M
+    font-weight: 600;
+    line-height: 0.9375rem; // 15px
     text-align: left;
     text-decoration: none;
     cursor: pointer;
@@ -99,23 +339,16 @@
     &:focus-visible {
       background: #1e2031;
     }
+
+    &--danger {
+      height: 2.25rem; // 36px, the design's Log out row
+      color: #ec3013;
+    }
   }
 
-  // The profile completion indicator on the "My Profile" link: yellow while the
-  // API reports the profile incomplete, green once it reports complete.
-  &__profile-dot {
-    width: 0.5rem; // 8px
-    height: 0.5rem;
+  &__menu-icon {
+    width: 1rem; // 16px
+    height: 1rem;
     flex-shrink: 0;
-    margin-left: auto;
-    border-radius: 999px;
-
-    &--incomplete {
-      background: #f5b83d;
-    }
-
-    &--complete {
-      background: #4ade80;
-    }
   }
 }
