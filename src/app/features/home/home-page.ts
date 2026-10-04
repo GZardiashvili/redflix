@@ -17,6 +17,7 @@ import { ComingSoonCard } from './components/coming-soon-card/coming-soon-card';
 import { HomeHero } from './components/home-hero/home-hero';
 import { MovieCard } from './components/movie-card/movie-card';
 import { RecentlyViewedCard } from './components/recently-viewed-card/recently-viewed-card';
+import { ScrollFade } from './scroll-fade.directive';
 
 @Component({
   imports: [
@@ -28,6 +29,7 @@ import { RecentlyViewedCard } from './components/recently-viewed-card/recently-v
     MovieCard,
     RecentlyViewedCard,
     RouterLink,
+    ScrollFade,
   ],
   selector: 'app-home-page',
   styleUrl: './home-page.scss',

@@ -35,6 +35,16 @@ export interface Genre {
 }
 
 /**
+ * The genre names of a movie as a single label, `''` when it has none.
+ *
+ * Cards and details pages show the names the API sends, joined rather than picked
+ * between, so a title with two genres never hides one of them.
+ */
+export function formatGenres(genres: readonly Genre[]): string {
+  return genres.map((genre) => genre.name).join(', ');
+}
+
+/**
  * Full movie record returned by `GET /movies/{movie}`.
  *
  * It extends the catalogue {@link Movie} with the four fields only the detail

@@ -10,9 +10,13 @@
     <h3 class="recently-viewed-card__title">{{ movie().title }}</h3>
 
     <p class="recently-viewed-card__meta">
-      <span class="recently-viewed-card__rating">{{ movie().rating }}</span>
-      <span aria-hidden="true">•</span>
+      @if (genreLabel(); as genres) {
+        <span>{{ genres }}</span>
+        <span aria-hidden="true">•</span>
+      }
       <span>{{ movie().runtimeMinutes }} min</span>
     </p>
+
+    <app-rating-badge [code]="movie().rating" />
   </div>
 </a>

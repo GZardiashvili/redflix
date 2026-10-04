@@ -1,4 +1,25 @@
-// Key to the seat states, centred under the map with the design's 24px rhythm.
+// Key to the seat states, pinned to the bottom of the seat viewport.
+//
+// A large hall scrolls the map under the dialog, and the key explains what the
+// colours on the rows mean — so it is only useful while the rows are in view.
+// Pinned, it stays readable for the whole scroll instead of being the last thing
+// to leave the panel. The negative offset matches the map's own side padding so
+// the opaque background spans the full width of the scroll area, and the bottom
+// offset matches its bottom padding, so it does not jump when the row reaches
+// the end of the scroll.
+:host {
+  position: sticky;
+  bottom: -1.25rem; // -20px, the map's own bottom padding
+  z-index: 1;
+  display: block;
+  // The map centres its children, so the key has to claim the full width itself
+  // for its background to cover the rows scrolling behind it.
+  align-self: stretch;
+  margin-right: -1.25rem;
+  margin-left: -1.25rem;
+  padding: 0.75rem 1.25rem; // 12px 20px
+  background: #070c1c; // the dialog surface, so rows never show through the key
+}
 
 .legend {
   display: flex;

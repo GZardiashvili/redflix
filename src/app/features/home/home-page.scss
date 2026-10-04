@@ -95,11 +95,11 @@
 
 // Card rows: the design lets them overflow the 1588px content width and covers the
 // cut edge with a blurred page-coloured overlay. We mask the row instead, so the
-// cut edge dissolves into the page background. Each side fades in/out over the
-// first/last few percent of the row's own scroll range, which keeps the effect
-// tied to the actual scroll position instead of dimming the whole row while it
-// travels. A row that does not overflow has no scroll timeline, so no mask is
-// applied to it and it keeps its hard edges.
+// cut edge dissolves into the page background. How much of each edge dissolves is
+// not a stylesheet decision but a reading of where the row is scrolled to, so
+// `appScrollFade` measures the live position and writes the two mask insets the
+// rule below reads. A row that does not overflow is never measured as open at
+// either end and keeps its hard edges.
 @property --row-fade-left {
   syntax: '<percentage>';
   inherits: false;
@@ -110,40 +110,6 @@
   syntax: '<percentage>';
   inherits: false;
   initial-value: 0%;
-}
-
-// Hidden content sits to the right at scroll offset 0, so the right edge starts
-// faded and is gone as soon as the row has been scrolled a little; the left edge
-// only appears at the very end of the range.
-@keyframes home-row-fade-right {
-  0% {
-    --row-fade-right: 7%;
-  }
-
-  6%,
-  100% {
-    --row-fade-right: 0%;
-  }
-}
-
-@keyframes home-row-fade-left {
-  0%,
-  94% {
-    --row-fade-left: 0%;
-  }
-
-  100% {
-    --row-fade-left: 7%;
-  }
-}
-
-@supports (animation-timeline: scroll()) {
-  .home-page__cards {
-    animation:
-      home-row-fade-right ease-in-out both,
-      home-row-fade-left ease-in-out both;
-    animation-timeline: scroll(self inline), scroll(self inline);
-  }
 }
 
 .home-page__cards {

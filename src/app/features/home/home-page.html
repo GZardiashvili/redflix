@@ -33,7 +33,7 @@
           <h2 id="recently-viewed-heading" class="home-page__section-title">Recently viewed</h2>
         </div>
 
-        <div class="home-page__cards">
+        <div class="home-page__cards" appScrollFade>
           @for (item of items; track item.id) {
             <app-recently-viewed-card [movie]="item" />
           }
@@ -64,7 +64,7 @@
         />
       } @else if (section.data; as movies) {
         @if (movies.length > 0) {
-          <div class="home-page__cards">
+          <div class="home-page__cards" appScrollFade>
             @for (movie of movies; track movie.id) {
               <app-movie-card [movie]="movie" />
             }
@@ -113,7 +113,11 @@
         />
       } @else if (section.data; as movies) {
         @if (movies.length > 0) {
-          <div id="coming-soon-list" class="home-page__cards home-page__cards--coming-soon">
+          <div
+            id="coming-soon-list"
+            class="home-page__cards home-page__cards--coming-soon"
+            appScrollFade
+          >
             @for (movie of movies; track movie.id) {
               <app-coming-soon-card
                 [movie]="movie"

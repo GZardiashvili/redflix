@@ -10,12 +10,16 @@
     <h3 class="coming-soon-card__title">{{ movie().title }}</h3>
 
     <p class="coming-soon-card__meta">
-      <span class="coming-soon-card__rating">{{ movie().ageRating.code }}</span>
-      <span aria-hidden="true">•</span>
+      @if (genreLabel(); as genres) {
+        <span>{{ genres }}</span>
+        <span aria-hidden="true">•</span>
+      }
       <span>{{ movie().runtimeMinutes }} min</span>
       <span aria-hidden="true">•</span>
       <span>Releases {{ movie().releaseDate }}</span>
     </p>
+
+    <app-rating-badge [code]="movie().ageRating.code" />
 
     @if (notifyError(); as message) {
       <p class="coming-soon-card__error" role="alert">

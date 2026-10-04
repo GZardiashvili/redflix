@@ -9,7 +9,9 @@
   align-items: center;
   gap: 0.75rem;
   width: 20.5625rem; // 329px
-  height: 5.4375rem; // 87px
+  // The design stacks title, genres/runtime and the rating pill, so the card
+  // grows with its content instead of clipping the pill onto the next row.
+  min-height: 5.4375rem; // 87px
   padding: 0.625rem;
   border-radius: 1rem;
   background: #1e2031;
@@ -53,6 +55,7 @@
   font-weight: 800;
   line-height: 1.125rem;
   text-overflow: ellipsis;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -60,14 +63,8 @@
   display: flex;
   align-items: center;
   gap: 0.375rem;
+  overflow: hidden;
   color: #a9a9a9;
   font-size: 0.75rem;
-}
-
-.recently-viewed-card__rating {
-  padding: 0.0625rem 0.375rem;
-  border: 1px solid #ec3013;
-  border-radius: 999px;
-  color: #fff;
-  font-weight: 800;
+  white-space: nowrap;
 }

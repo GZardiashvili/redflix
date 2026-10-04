@@ -23,6 +23,11 @@ export interface RecentlyViewedMovie {
   posterUrl: string;
   rating: string;
   runtimeMinutes: number;
+  /**
+   * Genre names captured with the snapshot, so the card can show them without
+   * re-fetching the movie. Empty for a movie the API sent no genres for.
+   */
+  genreNames: string[];
 }
 
 /**
@@ -49,6 +54,7 @@ export class RecentlyViewedService {
       posterUrl: movie.posterUrl,
       rating: movie.ageRating.code,
       runtimeMinutes: movie.runtimeMinutes,
+      genreNames: movie.genres.map((genre) => genre.name),
     });
   }
 
@@ -81,8 +87,13 @@ function readStoredItems(): RecentlyViewedMovie[] {
     }
 
     // Ignore anything that does not carry the exact snapshot shape rather than
-    // letting a corrupted entry break the Home page.
-    return parsed.filter(isRecentlyViewedMovie).slice(0, LIMIT);
+    // letting a corrupted entry break the Home page. Entries stored before the
+    // card showed genres are kept and given an empty list, so a visitor does not
+    // lose their history because this release added a field to the snapshot.
+    return parsed
+      .filter(isRecentlyViewedMovie)
+      .map((item) => ({ ...item, genreNames: item.genreNames ?? [] }))
+      .slice(0, LIMIT);
   } catch {
     return [];
   }
@@ -109,6 +120,14 @@ function isRecentlyViewedMovie(value: unknown): value is RecentlyViewedMovie {
     typeof item.title === 'string' &&
     typeof item.posterUrl === 'string' &&
     typeof item.rating === 'string' &&
-    typeof item.runtimeMinutes === 'number'
+    typeof item.runtimeMinutes === 'number' &&
+    isGenreNames(item.genreNames)
+  );
+}
+
+/** Optional on stored entries: only entries written before the field existed lack it. */
+function isGenreNames(value: unknown): value is string[] | undefined {
+  return (
+    value === undefined || (Array.isArray(value) && value.every((name) => typeof name === 'string'))
   );
 }
