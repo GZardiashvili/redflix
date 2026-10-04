@@ -1,19 +1,30 @@
-// The host holds the row's layout: it is the flex item the `.home-page__cards` row
-// measures, so it keeps the collapsed 260px width. The card inside it grows past
-// that width on hover instead of the host growing with it — which is what keeps the
-// expansion out of the flow, so no neighbour in the row ever moves.
+// The expansion is in the flow, not an overlay: the host is the flex item the row
+// lays out, so growing it slides every card after it along rather than covering the
+// next one. `width` transitions on the host rather than on the card, so the row
+// follows the growth continuously instead of snapping once the transition ends.
+//
+// The host drives the state (it is what `:hover` and `:focus-within` land on) while
+// the card inside simply fills it, which keeps the two widths from having to be
+// kept in step by hand.
 :host {
   display: block;
   width: 16.25rem; // 260px
+  transition: width 0.3s ease;
+}
+
+:host(:hover),
+:host(:focus-within) {
+  // The design's expanded Card_large. This is a layout change, so the row reflows
+  // and the following cards move — deliberately, per the design's "push the row"
+  // expansion rather than an overlay that hides one of them.
+  width: 26.25rem; // 420px
 }
 
 .movie-card {
-  position: relative;
-  z-index: 0;
   display: flex;
   flex-direction: column;
   gap: 0.625rem;
-  width: 16.25rem; // 260px
+  width: 100%;
   min-height: 28.25rem; // 452px
   padding: 0.75rem;
   border-radius: 1.25rem;
@@ -21,41 +32,35 @@
   color: #fff;
   cursor: pointer;
   text-decoration: none;
-  // `width` rather than a scale transform: the design's expansion is a wider tile
-  // with a landscape crop, not a uniformly magnified one, and a transform would
-  // stretch the type along with the box. Neither property is a layout property of
-  // the host, so neither reflows the row.
   transition:
-    width 0.3s ease,
     background-color 0.3s ease,
     box-shadow 0.3s ease;
+}
 
-  &:hover,
-  &:focus-visible {
-    // Lifted above the neighbouring tiles it now overlaps.
-    z-index: 1;
-    width: 26.25rem; // 420px — the design's expanded Card_large
-    background: #242639;
-    box-shadow: 0 1.25rem 2.5rem rgb(0 0 0 / 45%);
+// The card fills the host, so it reaches the expanded width without its own width
+// transition — `:hover`/`:focus-within` land on the host, which is already sized.
+.movie-card:hover,
+.movie-card:focus-visible {
+  background: #242639;
+  box-shadow: 0 1.25rem 2.5rem rgb(0 0 0 / 45%);
 
-    .movie-card__poster {
-      // The expanded tile shows a landscape crop rather than the collapsed portrait
-      // one, so the poster gives up exactly the 58.8px the synopsis band takes. That
-      // balance is what holds the card's height steady across the transition: the
-      // band opens exactly as much as the poster closes.
-      height: 15.075rem; // 241.2px = 18.75rem - the 3.675rem band
-    }
-
-    .movie-card__synopsis {
-      max-height: 3.675rem;
-      opacity: 1;
-    }
+  .movie-card__poster {
+    // The expanded tile shows a landscape crop rather than the collapsed portrait
+    // one, so the poster gives up exactly the 58.8px the synopsis band takes. That
+    // balance is what holds the card's height steady across the transition: the
+    // band opens exactly as much as the poster closes.
+    height: 15.075rem; // 241.2px = 18.75rem - the 3.675rem band
   }
 
-  &:focus-visible {
-    outline: 2px solid #ec3013;
-    outline-offset: 2px;
+  .movie-card__synopsis {
+    max-height: 3.675rem;
+    opacity: 1;
   }
+}
+
+.movie-card:focus-visible {
+  outline: 2px solid #ec3013;
+  outline-offset: 2px;
 }
 
 // Derived from the card rather than fixed, so the image tracks the card's animated
@@ -143,8 +148,10 @@
 // icon; on the card the label alone keeps the pill's width proportional.
 //
 // A styled `<span>`, not a link: the card itself is the single link to the movie
-// (see the template), and an anchor inside an anchor is invalid HTML. Its hover
-// treatment is kept so the pill still responds, but the pointer belongs to the card.
+// (see the template), and an anchor inside an anchor is invalid HTML. It also
+// carries no hover colour of its own — the whole card changes colour under the
+// pointer, so a second shift on the pill would read as a separate control moving
+// inside a control that is already reacting.
 .movie-card__action {
   display: flex;
   align-items: center;
@@ -160,14 +167,13 @@
   line-height: 0.9375rem; // 15px
   text-decoration: none;
   white-space: nowrap;
-
-  .movie-card:hover & {
-    background: #ff4d30;
-  }
 }
 
 // Reduced motion: the expanded card is still revealed, it simply arrives at once.
+// `:host` carries the width transition now, so it has to be named here too or the row
+// would still slide while everything inside the card had already snapped.
 @media (prefers-reduced-motion: reduce) {
+  :host,
   .movie-card,
   .movie-card__poster,
   .movie-card__synopsis {
