@@ -33,14 +33,6 @@
 
   <div class="movie-details__body">
     <div class="movie-details__primary">
-      <section class="movie-details__synopsis" aria-labelledby="movie-synopsis-heading">
-        <h2 class="movie-details__section-title" id="movie-synopsis-heading">Synopsis</h2>
-
-        @if (current.synopsis; as text) {
-          <p class="movie-details__synopsis-text">{{ text }}</p>
-        }
-      </section>
-
       @if (bookingBlockedByProfile()) {
         <p class="movie-details__profile-notice" role="status">
           Complete your profile before buying tickets. Your chosen screening is kept.

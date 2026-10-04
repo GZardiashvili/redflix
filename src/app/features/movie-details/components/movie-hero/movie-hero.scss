@@ -88,11 +88,17 @@
   line-height: 2.75rem; // 44px
 }
 
-.hero__tagline {
-  max-width: 35rem; // 560px, the design's copy column
-  color: #fff;
-  font-size: 0.875rem;
-  line-height: 1.3;
+// The synopsis, in the design's Body/M column beneath the title: Archivo 400 at
+// 14px/150% in the muted grey. Deliberately unclamped and unellipsised — the hero is
+// the page's only copy of the text now, so it has to show all of it. The `max-width`
+// is what keeps a long synopsis to a readable measure rather than one very wide line.
+.hero__synopsis {
+  max-width: 45rem; // 720px, the design's body column
+  color: #a9a9a9;
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.875rem; // 14px
+  font-weight: 400;
+  line-height: 1.5; // 150%
 }
 
 .hero__badges {

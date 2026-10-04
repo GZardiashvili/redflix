@@ -18,8 +18,10 @@
       <div class="hero__heading">
         <h1 class="hero__title">{{ movie().title }}</h1>
 
-        @if (tagline(); as text) {
-          <p class="hero__tagline">{{ text }}</p>
+        <!-- The one place the synopsis appears on the page: the body below the hero
+             carries the profile notice and the showtimes, and no second copy. -->
+        @if (synopsis(); as text) {
+          <p class="hero__synopsis">{{ text }}</p>
         }
       </div>
 

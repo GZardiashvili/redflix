@@ -3,7 +3,7 @@ import { MovieDetail } from '../../../../core/models/movie';
 
 /**
  * Movie Details hero: the backdrop banner with the poster, status badge, title,
- * tagline, age rating, runtime and format.
+ * synopsis, age rating, runtime and format.
  *
  * Purely presentational. It renders the movie it is given and never fetches; the
  * page owns loading and the URL.
@@ -30,24 +30,13 @@ export class MovieHero {
    */
   protected readonly formatLabel = computed(() => this.movie().formats[0]?.name ?? '');
 
-  /** Short blurb for the hero: the synopsis, trimmed to a headline-sized line. */
-  protected readonly tagline = computed(() => firstSentence(this.movie().synopsis));
-}
-
-/**
- * The hero's one-line blurb. A full synopsis is far longer than the 36px line the
- * design allows, so it is cut at the first sentence break and capped; the complete
- * text is still rendered in the details panel.
- */
-function firstSentence(synopsis: string | null): string {
-  const text = (synopsis ?? '').trim();
-
-  if (text === '') {
-    return '';
-  }
-
-  const stop = text.search(/[.!?]\s/);
-  const sentence = stop === -1 ? text : text.slice(0, stop + 1);
-
-  return sentence.length > 220 ? `${sentence.slice(0, 219).trimEnd()}…` : sentence;
+  /**
+   * The full synopsis, shown once in the hero under the title.
+   *
+   * Rendered complete rather than trimmed to a line: the separate body section that
+   * used to carry the full text is gone, so anything cut here would simply be lost.
+   * Trimmed only to drop surrounding whitespace, and empty when the API sent no copy,
+   * so the paragraph is omitted rather than left blank.
+   */
+  protected readonly synopsis = computed(() => (this.movie().synopsis ?? '').trim());
 }
