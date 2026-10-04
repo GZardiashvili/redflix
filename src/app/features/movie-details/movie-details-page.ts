@@ -16,7 +16,7 @@ import { MovieDetailsPanel } from './components/movie-details-panel/movie-detail
 import { MovieHero } from './components/movie-hero/movie-hero';
 import { MovieShowtimes } from './components/movie-showtimes/movie-showtimes';
 import { formatReleaseDate } from './movie-release-date';
-import { ageEligibility, restrictionMessage } from './screening-eligibility';
+import { ageEligibility, restrictionMessage } from '../../shared/utils/screening-eligibility';
 
 /**
  * Movie Details page at `/movies/:slug`: the title's backdrop, poster and detail

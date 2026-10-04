@@ -4,6 +4,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { toApiError } from '../../core/api/api-error';
 import { SortOption } from '../../core/models/filter-options';
+import { Movie } from '../../core/models/movie';
 import {
   MovieSession,
   MovieSessionGroup,
@@ -11,11 +12,14 @@ import {
   SessionsQuery,
   SessionTimeBand,
 } from '../../core/models/session';
+import { AuthService } from '../../core/services/auth.service';
 import { FilterOptionsService } from '../../core/services/filter-options.service';
 import { SessionsService } from '../../core/services/sessions.service';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../shared/ui/error-state/error-state';
 import { Skeleton } from '../../shared/ui/skeleton/skeleton';
+import { BookingEntryService } from '../booking/booking-entry.service';
+import { ageEligibility, restrictionMessage } from '../../shared/utils/screening-eligibility';
 import { DateSelector } from './components/date-selector/date-selector';
 import { SessionMovieCard } from './components/session-movie-card/session-movie-card';
 import { SessionsPagination } from './components/sessions-pagination/sessions-pagination';
@@ -68,6 +72,8 @@ export class SessionsPage {
   private readonly filterOptions = inject(FilterOptionsService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
+  private readonly booking = inject(BookingEntryService);
 
   /** URL state at construction, so the very first render already matches the address bar. */
   private readonly initialState = parseSessionsUrl(this.route.snapshot.queryParams);
@@ -181,11 +187,43 @@ export class SessionsPage {
   }
 
   /**
-   * A session pill was clicked. Seat selection and the booking modal belong to
-   * a later task, so this handler is intentionally a stub for now.
+   * Whether a chosen screening is waiting on the account's profile being
+   * completed. The booking dialog stays closed in that case, so the page says so
+   * rather than letting the click look like it did nothing.
    */
-  protected onSelectSession(_session: MovieSession): void {
-    // Intentionally empty until the booking flow lands.
+  protected readonly bookingBlockedByProfile = this.booking.blockedByProfile;
+
+  /**
+   * Whether this movie's screenings are blocked by the account's age.
+   *
+   * A guest is never blocked — the age check belongs after login — so a guest
+   * clicking an 18+ pill goes through the login flow and is checked again once
+   * the account is known. An authenticated account the server can give no age
+   * for counts as blocked, so missing data cannot slip past the rating.
+   */
+  protected isAgeRestricted(movie: Movie): boolean {
+    return ageEligibility(this.auth.user(), movie.ageRating.minAge) !== 'eligible';
+  }
+
+  /** The restriction copy for this movie's blocked pills. */
+  protected restrictionCopy(movie: Movie): string {
+    return restrictionMessage(movie.ageRating.code);
+  }
+
+  /** A session pill was clicked; the movie it belongs to comes with it. */
+  protected onSelectSession(picked: { movie: Movie; session: MovieSession }): void {
+    // Last line of defence. The pill already disables itself for both cases, so
+    // this only guards against a future caller starting a booking from an
+    // ineligible screening — it never blocks an eligible one.
+    if (picked.session.isSoldOut || this.isAgeRestricted(picked.movie)) {
+      return;
+    }
+
+    this.booking.select(picked.session, {
+      slug: picked.movie.slug,
+      title: picked.movie.title,
+      ageRating: picked.movie.ageRating,
+    });
   }
 
   /** The URL state the page is currently showing. */

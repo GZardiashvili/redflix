@@ -2,8 +2,10 @@
   class="session-pill"
   type="button"
   [class.session-pill--sold-out]="session().isSoldOut"
-  [disabled]="session().isSoldOut"
+  [class.session-pill--restricted]="ageRestricted()"
+  [disabled]="session().isSoldOut || disabled()"
   [attr.aria-label]="ariaLabel()"
+  [attr.title]="restrictionReason() || null"
   (click)="select.emit(session())"
 >
   <span class="session-pill__top">
