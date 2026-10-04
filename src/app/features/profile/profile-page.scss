@@ -1,12 +1,18 @@
-// Profile page: the design's deep-navy surface with the 51px gutters, a heading
-// block closed by the divider line, the completion status, and the 880px form
-// column below it.
+// Profile page: the design's deep-navy surface with the 51px gutters, the "My
+// Profile" heading, the Personal Information / My Tickets section tabs closed
+// by the divider line, and the content column(s) below them.
+//
+// The screenshots pin the geometry: at the 1920px design width the content
+// spans edge 60px → 1875px (1815px wide) with 51px page gutters outside it;
+// the Personal Information form column is 1047px wide; the My Tickets column
+// fills the rest. The tabs row carries the 14px active underline state and the
+// red upcoming-count badge on My Tickets.
 
 .profile-page {
   display: flex;
   min-height: 100%;
   flex-direction: column;
-  gap: 1.5rem; // 24px between the heading, the status and the form
+  gap: 1.5rem; // 24px between the heading, the status and the content
   padding: 1.5rem 3.1875rem 4rem; // 51px side gutters, like the other pages
   background: #070c1c;
   color: #fff;
@@ -22,7 +28,6 @@
 
 .profile-page__header {
   display: flex;
-  max-width: 55rem; // 880px, the width of the form column it introduces
   flex-direction: column;
   gap: 0.75rem; // 12px
   padding-bottom: 1.75rem; // 28px to the divider, per the design
@@ -30,6 +35,7 @@
 }
 
 .profile-page__title {
+  margin: 0;
   font-size: 1.5rem; // 24px
   font-weight: 800;
   line-height: 1.625rem; // 26px
@@ -81,4 +87,85 @@
   flex-shrink: 0;
   border-radius: 999px;
   background: currentColor;
+}
+
+// The two top-level sections of the design: Personal Information and My Tickets
+// with its red upcoming-count badge, closed by the header's divider. The active
+// section carries the red underline and white text; the inactive one stays grey.
+.profile-page__tabs {
+  display: flex;
+  align-items: center;
+  gap: 2rem; // 32px between the sections, per the screenshots
+  margin-top: 0.5rem; // 8px below the status, above the divider
+}
+
+.profile-page__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem; // 8px between the label and the badge
+  padding: 0 0 0.875rem; // 14px for the underline to sit in, per the design
+  border: 0;
+  background: transparent;
+  color: #a9a9a9;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem; // 14px Label/M of the design
+  font-weight: 600;
+  line-height: 0.9375rem; // 15px
+
+  &::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    border-radius: 2px 2px 0 0;
+    background: transparent;
+    content: '';
+  }
+
+  &--active {
+    color: #fff;
+
+    &::after {
+      background: #ec3013;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+// The My Tickets upcoming-count badge: the red pill of the screenshots.
+.profile-page__tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem; // 20px
+  padding: 0.125rem 0.375rem; // 2px 6px
+  border-radius: 999px;
+  background: #ec3013;
+  color: #fff;
+  font-size: 0.75rem; // 12px Label/S
+  font-weight: 600;
+  line-height: 0.8125rem; // 13px
+}
+
+// The content below the tabs: one visible column at a time. The two children
+// stay mounted and are only hidden, so the form keeps its state while tickets
+// are visible and vice versa.
+.profile-page__columns {
+  display: block;
+  min-width: 0;
+}
+
+.profile-page__column {
+  min-width: 0;
+
+  &[hidden] {
+    display: none;
+  }
 }

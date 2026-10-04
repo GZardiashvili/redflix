@@ -4,7 +4,11 @@ import { AuthService } from '../../core/services/auth.service';
 import { ErrorState } from '../../shared/ui/error-state/error-state';
 import { LoadingIndicator } from '../../shared/ui/loading/loading-indicator';
 import { ProfileForm } from './profile-form/profile-form';
-import { ProfileTickets } from './tickets/profile-tickets';
+import { ProfileTickets, TicketsTab } from './tickets/profile-tickets';
+import { TicketsService } from './tickets/tickets.service';
+
+/** The two top-level sections of the Profile page, per the supplied design. */
+export type ProfileSection = 'info' | 'tickets';
 
 /**
  * The Personal Information page, and the gate in front of it.
@@ -22,6 +26,7 @@ import { ProfileTickets } from './tickets/profile-tickets';
  */
 @Component({
   imports: [ErrorState, LoadingIndicator, ProfileForm, ProfileTickets],
+  providers: [TicketsService],
   selector: 'app-profile-page',
   styleUrl: './profile-page.scss',
   templateUrl: './profile-page.html',
@@ -29,6 +34,23 @@ import { ProfileTickets } from './tickets/profile-tickets';
 export class ProfilePage {
   protected readonly auth = inject(AuthService);
   private readonly replay = inject(AuthReplayService);
+  private readonly ticketsService = inject(TicketsService);
+
+  /**
+   * Which top-level section is visible.
+   *
+   * Personal Information first, per the first supplied screenshot; My Tickets
+   * second, per the ticket screenshots. Both children stay mounted and are only
+   * hidden, so switching sections never destroys the profile form state and the
+   * ticket list keeps its loaded response.
+   */
+  protected readonly activeSection = signal<ProfileSection>('info');
+
+  /** Which Upcoming/Past list the tickets section shows. Owned by the page. */
+  protected readonly ticketsTab = signal<TicketsTab>('upcoming');
+
+  /** Upcoming ticket count for the My Tickets badge, from the shared service. */
+  protected readonly upcomingCount = this.ticketsService.upcomingCount;
 
   /** Whether the sign-in recovery flow was dismissed without signing in. */
   private readonly loginDismissed = signal(false);
@@ -72,6 +94,11 @@ export class ProfilePage {
   /** Retries the session restore the page failed to read; nothing is re-fetched here. */
   protected retrySession(): void {
     void this.auth.restoreSession();
+  }
+
+  /** Shows one top-level section; the other stays mounted but hidden. */
+  protected selectSection(section: ProfileSection): void {
+    this.activeSection.set(section);
   }
 
   /**

@@ -11,33 +11,67 @@
           <span>· Age {{ user.age }}</span>
         }
       </p>
+
+      <!--
+        Completion status, straight from the `profileComplete` the API reported —
+        the same value the navbar dot and the booking gate read. It is never
+        inferred from whether the local form happens to be valid.
+      -->
+      @if (user.profileComplete) {
+        <p class="profile-page__status profile-page__status--complete" role="status">
+          <span class="profile-page__dot" aria-hidden="true"></span>
+          Profile Complete ✓
+        </p>
+      } @else {
+        <p class="profile-page__status profile-page__status--incomplete" role="status">
+          <span class="profile-page__dot" aria-hidden="true"></span>
+          Please complete your profile to enable booking.
+        </p>
+      }
+      <!--
+        The two top-level sections of the supplied design: Personal Information
+        and My Tickets with its upcoming-ticket badge. Both children stay mounted
+        below and are only hidden, so the form state survives section switches.
+      -->
+      <nav class="profile-page__tabs" aria-label="Profile sections">
+        <button
+          class="profile-page__tab"
+          type="button"
+          [class.profile-page__tab--active]="activeSection() === 'info'"
+          [attr.aria-current]="activeSection() === 'info' ? 'page' : null"
+          (click)="selectSection('info')"
+        >
+          Personal Information
+        </button>
+        <button
+          class="profile-page__tab"
+          type="button"
+          [class.profile-page__tab--active]="activeSection() === 'tickets'"
+          [attr.aria-current]="activeSection() === 'tickets' ? 'page' : null"
+          (click)="selectSection('tickets')"
+        >
+          My Tickets
+          @if (upcomingCount() > 0) {
+            <span class="profile-page__tab-badge">{{ upcomingCount() }}</span>
+          }
+        </button>
+      </nav>
     </header>
 
-    <!--
-      Completion status, straight from the `profileComplete` the API reported —
-      the same value the navbar dot and the booking gate read. It is never
-      inferred from whether the local form happens to be valid.
-    -->
-    @if (user.profileComplete) {
-      <p class="profile-page__status profile-page__status--complete" role="status">
-        <span class="profile-page__dot" aria-hidden="true"></span>
-        Profile Complete ✓
-      </p>
-    } @else {
-      <p class="profile-page__status profile-page__status--incomplete" role="status">
-        <span class="profile-page__dot" aria-hidden="true"></span>
-        Please complete your profile to enable booking.
-      </p>
-    }
+    <div class="profile-page__columns">
+      <div class="profile-page__column" [hidden]="activeSection() !== 'info'">
+        <app-profile-form />
+      </div>
 
-    <app-profile-form />
-
-    <!--
-      My Tickets: the sibling section below Personal Information, fed by its own
-      `GET /tickets` request. It mounts beside — never instead of — the form, so
-      switching its Upcoming / Past tabs cannot touch form state.
-    -->
-    <app-profile-tickets />
+      <!--
+        My Tickets: the sibling section beside Personal Information, fed by its
+        own `GET /tickets` request through the page-provided TicketsService.
+        Hidden — never destroyed — while Personal Information is visible.
+      -->
+      <div class="profile-page__column" [hidden]="activeSection() !== 'tickets'">
+        <app-profile-tickets [(activeTab)]="ticketsTab" />
+      </div>
+    </div>
   </div>
 } @else if (auth.initializing()) {
   <!-- A stored token is still being exchanged through `/me`: wait for the real

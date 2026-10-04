@@ -1,6 +1,4 @@
-<section class="profile-tickets" aria-labelledby="profile-tickets-heading">
-  <h2 class="profile-tickets__heading" id="profile-tickets-heading">My Tickets</h2>
-
+<section class="profile-tickets" aria-label="My tickets">
   <!-- The two logical lists, with live counts once the response arrives. -->
   <div class="profile-tickets__tabs" role="tablist" aria-label="Ticket lists">
     <button
@@ -60,9 +58,75 @@
     <ul class="profile-tickets__list" aria-label="Tickets">
       @for (order of visible(); track order.id) {
         <li>
-          <app-ticket-card [order]="order" [showRefund]="activeTab() === 'upcoming'" />
+          <app-ticket-card
+            [order]="order"
+            [showRefund]="activeTab() === 'upcoming'"
+            [refunding]="refunding().includes(order.reference)"
+            (refundRequested)="askRefund(order)"
+          />
         </li>
       }
     </ul>
   }
+
+  <!--
+    Refund confirmation: no request leaves before the visitor explicitly
+    confirms an irreversible action. The dialog names the order being refunded
+    and keeps its own failure with a retry; cancelling sends nothing.
+  -->
+  <app-modal
+    variant="booking"
+    [open]="refundDialogOpen()"
+    title="Refund tickets"
+    closeLabel="Close refund dialog"
+    (closed)="cancelRefund()"
+  >
+    @if (pendingRefund(); as order) {
+      <div class="profile-tickets__refund">
+        <p class="profile-tickets__refund-lede">
+          This action cannot be undone. The seats will be released back onto the map.
+        </p>
+
+        <p class="profile-tickets__refund-order">
+          <span class="profile-tickets__refund-title">{{ order.session.movie.title }}</span>
+          <span class="profile-tickets__refund-meta">
+            Order #{{ order.reference }} · {{ order.session.venue.name }} · Hall
+            {{ order.session.hall.name }} · {{ order.session.date | date: 'EEE d MMM' : 'UTC' }} ·
+            {{ order.session.time }}
+          </span>
+        </p>
+
+        @if (confirmFailure(); as failure) {
+          <p class="profile-tickets__refund-error" role="alert">{{ failure }}</p>
+        }
+
+        <div class="profile-tickets__refund-actions">
+          <button
+            class="profile-tickets__refund-cancel"
+            type="button"
+            [disabled]="confirming()"
+            (click)="cancelRefund()"
+          >
+            Cancel
+          </button>
+
+          <button
+            class="profile-tickets__refund-confirm"
+            type="button"
+            [disabled]="confirming()"
+            [attr.aria-busy]="confirming()"
+            (click)="confirmRefund()"
+          >
+            @if (confirming()) {
+              <app-loading-indicator size="sm" label="Refunding your tickets" />
+            } @else if (confirmFailure()) {
+              Retry refund
+            } @else {
+              Confirm refund
+            }
+          </button>
+        </div>
+      </div>
+    }
+  </app-modal>
 </section>

@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { Order } from '../../../../core/models/order';
 
 /**
@@ -14,8 +14,8 @@ import { Order } from '../../../../core/models/order';
  * the order confirmation — as lari with cents, never recomputed from the lines.
  *
  * Refund eligibility is the server's `isRefundable`, never a client-side time
- * calculation; the button performs no mutation (Task 24 owns the refund call),
- * so it is rendered inert and disabled when the order is not refundable.
+ * calculation; the button emits a refund intent for the parent to confirm —
+ * the card itself never calls the API.
  */
 @Component({
   imports: [DatePipe],
@@ -32,6 +32,19 @@ export class TicketCard {
    * Past tickets render the same information with no refund action.
    */
   readonly showRefund = input(false);
+
+  /**
+   * Whether this order's refund request is currently in flight. While true the
+   * Refund control shows its loading state and stays disabled.
+   */
+  readonly refunding = input(false);
+
+  /**
+   * The visitor asked to refund this order. Emitted only from an enabled
+   * control — never for a non-refundable order — and handled by the parent,
+   * which confirms before sending any request.
+   */
+  readonly refundRequested = output<void>();
 
   /**
    * The total the server charged, in lari with cents.

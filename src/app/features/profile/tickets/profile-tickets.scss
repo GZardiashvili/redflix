@@ -1,21 +1,11 @@
-// My Tickets: the section below Personal Information — its heading, the
-// Upcoming / Past segmented control of the design, and the ticket list.
+// My Tickets: the Upcoming / Past segmented control of the design and the
+// ticket list. Rendered inside the page's My Tickets column, so it needs no
+// heading or divider of its own — the page tabs already name the section.
 
 .profile-tickets {
   display: flex;
   flex-direction: column;
   gap: 1.25rem; // 20px
-}
-
-// The section title mirrors the page title's type, so the two sections read as
-// peers rather than one subordinated to the other.
-.profile-tickets__heading {
-  margin: 0;
-  padding-top: 2rem;
-  border-top: 1px solid #1e2031;
-  font-size: 1.5rem; // 24px H1 of the design
-  font-weight: 800;
-  line-height: 1.625rem; // 26px
 }
 
 // The segmented pill of the design: the container holds both tabs, the active
@@ -75,4 +65,92 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+// Refund confirmation body inside the shared booking dialog: the irreversible
+// warning, the order being refunded, and the cancel / confirm pair.
+.profile-tickets__refund {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; // 16px
+  color: #fff;
+}
+
+.profile-tickets__refund-lede {
+  margin: 0;
+  color: #fca5a5; // light red, readable on the dark dialog surface
+  font-size: 0.875rem; // 14px
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.profile-tickets__refund-order {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem; // 4px
+  margin: 0;
+}
+
+.profile-tickets__refund-title {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.25rem;
+}
+
+.profile-tickets__refund-meta {
+  color: #a9a9a9;
+  font-size: 0.875rem; // 14px
+  line-height: 1.3;
+}
+
+.profile-tickets__refund-error {
+  margin: 0;
+  padding: 0.75rem 1rem; // 12px 16px
+  border-radius: 0.75rem; // 12px
+  background: rgb(236 48 19 / 12%);
+  color: #fca5a5;
+  font-size: 0.875rem; // 14px
+  line-height: 1.3;
+}
+
+.profile-tickets__refund-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem; // 12px
+}
+
+.profile-tickets__refund-cancel,
+.profile-tickets__refund-confirm {
+  display: inline-flex;
+  min-height: 2.5625rem; // 41px, the app's commit-action height
+  align-items: center;
+  justify-content: center;
+  padding: 0.8125rem 1.375rem; // 13px 22px
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem; // 14px Button of the design
+  font-weight: 800;
+  line-height: 0.9375rem; // 15px
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+.profile-tickets__refund-cancel {
+  background: rgb(255 255 255 / 10%);
+  color: #fff;
+}
+
+.profile-tickets__refund-confirm {
+  background: #ec3013;
+  color: #fff;
 }

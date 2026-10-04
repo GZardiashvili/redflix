@@ -79,6 +79,17 @@ export function holdUrl(holdId: string): string {
 }
 
 /**
+ * Builds the absolute URL of an order's refund endpoint:
+ * `POST /orders/{order}/refund`.
+ *
+ * `{order}` is the order's human-facing **reference** (e.g. `KX-7QF2LD`), never
+ * its numeric id — the API path expects the reference the visitor was shown.
+ */
+export function orderRefundUrl(orderReference: string): string {
+  return `${API_BASE_URL}/orders/${encodeURIComponent(orderReference)}/refund`;
+}
+
+/**
  * Builds the absolute URL of the notification subscription endpoint:
  * `POST /movies/{movie}/notify`, where `{movie}` is the movie **slug**
  * (the API 404s an id-based path).

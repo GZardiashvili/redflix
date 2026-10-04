@@ -65,21 +65,25 @@
 
     @if (showRefund()) {
       <!--
-        The Task 23 refund control: present on upcoming tickets, enabled only when
-        the server reports `isRefundable`, disabled with an explanation otherwise.
-        It performs no mutation — Task 24 owns the refund call — so it is a plain
-        inert button rather than a form submission.
+        The refund control: present on upcoming tickets, enabled only when the
+        server reports `isRefundable`, disabled with an explanation otherwise.
+        Clicking an enabled control only signals intent — the parent confirms
+        before any request is sent.
       -->
       <button
         class="ticket-card__refund"
         type="button"
-        [disabled]="!order().isRefundable"
-        [attr.aria-disabled]="!order().isRefundable"
+        [disabled]="!order().isRefundable || refunding()"
+        [attr.aria-disabled]="!order().isRefundable || refunding()"
+        [attr.aria-busy]="refunding()"
         [attr.title]="
-          order().isRefundable ? 'Refund available soon' : 'This ticket can no longer be refunded'
+          order().isRefundable
+            ? 'Request a refund for this order'
+            : 'This ticket can no longer be refunded'
         "
+        (click)="refundRequested.emit()"
       >
-        Refund
+        {{ refunding() ? 'Refunding…' : 'Refund' }}
       </button>
       @if (!order().isRefundable) {
         <p class="ticket-card__refund-note">This ticket can no longer be refunded</p>
