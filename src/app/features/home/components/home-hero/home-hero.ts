@@ -109,6 +109,17 @@ export class HomeHero implements OnInit {
     return movie.releaseDate !== '';
   }
 
+  /**
+   * Whether the slide has a synopsis to show under its badges.
+   *
+   * The catalogue contract does not guarantee `synopsis`, and the API sends `null`
+   * or an empty string for a title without copy — either way there is nothing to
+   * render, so the paragraph is omitted rather than left blank.
+   */
+  protected hasSynopsis(movie: Movie): boolean {
+    return (movie.synopsis ?? '').trim() !== '';
+  }
+
   private restartAutoplay(): void {
     this.clearAutoplay();
 

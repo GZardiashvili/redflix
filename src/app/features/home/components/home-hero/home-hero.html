@@ -54,6 +54,16 @@
             }
           </ul>
 
+          <!--
+            Long description from the same catalogue payload the rest of the slide
+            comes from — no extra request. The API treats it as optional on the
+            summary, so a title without copy renders no paragraph at all rather
+            than an empty gap; nothing is truncated or invented here.
+          -->
+          @if (hasSynopsis(slide)) {
+            <p class="home-hero__synopsis">{{ slide.synopsis }}</p>
+          }
+
           <p class="home-hero__price">From {{ slide.fromPrice }} ₾</p>
 
           <div class="home-hero__actions">
