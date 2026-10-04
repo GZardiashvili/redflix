@@ -30,6 +30,25 @@
           <div id="app-header-menu" class="app-header__menu">
             <a class="app-header__menu-item" routerLink="/profile" (click)="closeMenu()">
               My Profile
+              <!--
+                The profile completion indicator: yellow while the API reports
+                the profile incomplete, green once it reports complete — the same
+                `profileComplete` the profile page and booking gate read, so a
+                successful save flips it without a refresh.
+              -->
+              @if (user.profileComplete) {
+                <span
+                  class="app-header__profile-dot app-header__profile-dot--complete"
+                  aria-hidden="true"
+                ></span>
+                <span class="visually-hidden">Profile complete</span>
+              } @else {
+                <span
+                  class="app-header__profile-dot app-header__profile-dot--incomplete"
+                  aria-hidden="true"
+                ></span>
+                <span class="visually-hidden">Profile incomplete</span>
+              }
             </a>
             <button class="app-header__menu-item" type="button" (click)="logout()">Logout</button>
           </div>

@@ -1,1 +1,68 @@
-<h1>Profile</h1>
+@if (auth.user(); as user) {
+  <div class="profile-page">
+    <header class="profile-page__header">
+      <h1 class="profile-page__title">My Profile</h1>
+
+      <!-- Identity as the session holds it: the username, plus the age the
+           server derived — never recalculated here. -->
+      <p class="profile-page__identity">
+        {{ user.username }}
+        @if (user.age !== null) {
+          <span>· Age {{ user.age }}</span>
+        }
+      </p>
+    </header>
+
+    <!--
+      Completion status, straight from the `profileComplete` the API reported —
+      the same value the navbar dot and the booking gate read. It is never
+      inferred from whether the local form happens to be valid.
+    -->
+    @if (user.profileComplete) {
+      <p class="profile-page__status profile-page__status--complete" role="status">
+        <span class="profile-page__dot" aria-hidden="true"></span>
+        Profile Complete ✓
+      </p>
+    } @else {
+      <p class="profile-page__status profile-page__status--incomplete" role="status">
+        <span class="profile-page__dot" aria-hidden="true"></span>
+        Please complete your profile to enable booking.
+      </p>
+    }
+
+    <app-profile-form />
+  </div>
+} @else if (auth.initializing()) {
+  <!-- A stored token is still being exchanged through `/me`: wait for the real
+       user rather than rendering fabricated or stale profile values. -->
+  <div class="profile-page profile-page--centered">
+    <app-loading-indicator label="Restoring your session" />
+  </div>
+} @else if (sessionError()) {
+  <!-- The restore failed, so there is nothing to populate the form with. Retry
+       re-runs the same restore instead of issuing a page-owned copy of it. -->
+  <div class="profile-page profile-page--centered">
+    <app-error-state
+      title="Could not load your profile"
+      [message]="sessionErrorMessage()"
+      [canRetry]="true"
+      (retry)="retrySession()"
+    />
+  </div>
+} @else if (loginDismissed()) {
+  <!-- The recovery login was dismissed: an invitation to sign in, never
+       profile content. -->
+  <div class="profile-page profile-page--centered">
+    <app-error-state
+      title="Sign in required"
+      message="Log in to view and edit your personal information."
+      [canRetry]="true"
+      retryLabel="Log in"
+      (retry)="requestLogin()"
+    />
+  </div>
+} @else {
+  <div class="profile-page profile-page--centered">
+    <app-loading-indicator label="Waiting for sign in" />
+  </div>
+}

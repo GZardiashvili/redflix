@@ -83,6 +83,20 @@ export class AuthService {
   }
 
   /**
+   * Replaces the stored user with a server-returned copy of it.
+   *
+   * This is not a second profile cache: it writes the very same signal `/me`,
+   * {@link login} and {@link register} write, so the whole application — the
+   * navbar, the booking gate, this profile page — keeps reading one
+   * authoritative {@link User}. `PUT /profile` answers with the profile as the
+   * server stored it, including the derived `age` and `profileComplete`, so the
+   * response becomes the state instead of the values a form happened to submit.
+   */
+  applyUser(user: User): void {
+    this.userState.set(user);
+  }
+
+  /**
    * Drops a stale authentication session without contacting the API.
    *
    * Used by the 401 replay infrastructure: a protected request has proven the

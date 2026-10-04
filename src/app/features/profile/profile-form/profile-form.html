@@ -1,0 +1,115 @@
+<form class="profile-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <!--
+    The general sentence for a failed save. It appears only when the API named
+    no field, because a message about a specific control already lives under
+    that control and repeating it here would say the same thing twice.
+  -->
+  @if (saveError(); as message) {
+    <p class="profile-form__alert" role="alert">{{ message }}</p>
+  }
+
+  <app-form-field
+    label="Full Name"
+    controlId="profile-full-name"
+    [required]="true"
+    [error]="errorFor('fullName')"
+  >
+    <input
+      id="profile-full-name"
+      class="profile-form__input"
+      type="text"
+      formControlName="fullName"
+      placeholder="e.g. Meri Sanikidze"
+      autocomplete="name"
+    />
+  </app-form-field>
+
+  <!--
+    Email is established at registration and this endpoint does not change it:
+    the control is disabled, so it is never submitted and cannot be edited.
+  -->
+  <app-form-field
+    label="Email"
+    controlId="profile-email"
+    hint="Email is set at registration and cannot be changed here."
+  >
+    <input
+      id="profile-email"
+      class="profile-form__input profile-form__input--readonly"
+      type="email"
+      formControlName="email"
+      autocomplete="email"
+      readonly
+    />
+  </app-form-field>
+
+  <app-form-field
+    label="Mobile Number"
+    controlId="profile-mobile"
+    [required]="true"
+    [error]="errorFor('mobileNumber')"
+  >
+    <input
+      id="profile-mobile"
+      class="profile-form__input"
+      type="tel"
+      formControlName="mobileNumber"
+      placeholder="e.g. 599 123 456"
+      autocomplete="tel"
+      inputmode="tel"
+    />
+  </app-form-field>
+
+  <app-form-field
+    label="Date of Birth"
+    controlId="profile-date-of-birth"
+    [required]="true"
+    [error]="errorFor('dateOfBirth')"
+  >
+    <input
+      id="profile-date-of-birth"
+      class="profile-form__input profile-form__input--date"
+      type="date"
+      formControlName="dateOfBirth"
+      autocomplete="bday"
+    />
+  </app-form-field>
+
+  <!-- Optional, and the choices belong to the cached `/filter-options` payload. -->
+  <app-form-field
+    label="Preferred Venue"
+    controlId="profile-preferred-venue"
+    [error]="errorFor('preferredVenueId')"
+  >
+    <select
+      id="profile-preferred-venue"
+      class="profile-form__input profile-form__select"
+      formControlName="preferredVenueId"
+    >
+      <option [ngValue]="null">No preference</option>
+      @for (venue of venues(); track venue.id) {
+        <option [ngValue]="venue.id">{{ venue.name }}, {{ venue.city }}</option>
+      }
+    </select>
+  </app-form-field>
+
+  <div class="profile-form__actions">
+    <!--
+      Disabled while pristine, while the form is invalid and while a request is
+      in flight: that combination is what leaves exactly one `PUT /profile` per
+      save action, however fast the button is clicked.
+    -->
+    <button
+      class="profile-form__save"
+      type="submit"
+      [disabled]="form.pristine || form.invalid || saving()"
+      [attr.aria-busy]="saving()"
+    >
+      @if (saving()) {
+        <app-loading-indicator size="sm" label="Saving profile" />
+      } @else {
+        Save changes
+      }
+    </button>
+  </div>
+</form>
