@@ -31,7 +31,21 @@
             [attr.aria-label]="closeLabel()"
             (click)="requestClose()"
           >
-            &times;
+            <svg
+              class="modal__close-icon"
+              viewBox="0 0 16 16"
+              width="16"
+              height="16"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M2 2l12 12M14 2L2 14"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+              />
+            </svg>
           </button>
         </div>
       </div>

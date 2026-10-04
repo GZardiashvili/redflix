@@ -20,7 +20,7 @@
   flex: 1 1 auto;
   flex-direction: column;
   gap: 1.5rem; // 24px between the heading, the status and the content
-  padding: 1.5rem 3.1875rem 4rem; // 51px side gutters, like the other pages
+  padding: 7rem 3.1875rem 4rem; // 51px side gutters; top clears the absolute header
   background: #070c1c;
   color: #fff;
 }

@@ -1,5 +1,6 @@
-// Home surface: deep-navy page with the 70px gutters of the 1728px design
-// (1588px content width) and a 24px rhythm between sections. Card rows scroll
+// Home surface: the hero bleeds to the viewport top so the absolute
+// transparent header floats over the poster (per Home_Not_authorized);
+// the sections below keep the 70px gutters and 24px rhythm. Card rows scroll
 // horizontally because six 260px cards (and four 470px cards) exceed the
 // content width.
 
@@ -8,7 +9,7 @@
   flex-direction: column;
   gap: 1.5rem;
   min-height: 100%;
-  padding: 1.5rem 4.375rem 4rem;
+  padding: 0 4.375rem 4rem;
   background: #070c1c;
   color: #fff;
 }

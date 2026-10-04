@@ -7,7 +7,7 @@
   min-height: 100%;
   flex-direction: column;
   gap: 2.25rem; // 36px between the page header and the two-column layout
-  padding: 1.5rem 3.1875rem 4rem; // 51px side gutters
+  padding: 7rem 3.1875rem 4rem; // 51px side gutters; top clears the absolute header
   background: #070c1c;
   color: #fff;
 }

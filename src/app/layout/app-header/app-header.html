@@ -239,11 +239,19 @@
       </div>
     } @else {
       <div class="app-header__guest">
-        <button class="app-header__auth" type="button" (click)="loginRequested.emit()">
-          Log in
-        </button>
-        <button class="app-header__auth" type="button" (click)="registerRequested.emit()">
+        <button
+          class="app-header__auth app-header__auth--signup"
+          type="button"
+          (click)="registerRequested.emit()"
+        >
           Sign up
+        </button>
+        <button
+          class="app-header__auth app-header__auth--login"
+          type="button"
+          (click)="loginRequested.emit()"
+        >
+          Log in
         </button>
       </div>
     }
