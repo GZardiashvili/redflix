@@ -1,7 +1,6 @@
 import { Component, inject, input } from '@angular/core';
 import { Seat, SessionSeatMap } from '../../../../core/models/seat';
 import { SeatSelectionService } from '../../seat-selection.service';
-import { SeatMapLegendComponent } from './seat-map-legend/seat-map-legend';
 import { SeatSectionComponent } from './seat-section/seat-section';
 
 /**
@@ -15,12 +14,17 @@ import { SeatSectionComponent } from './seat-section/seat-section';
  * The screen bar above the seats is a static caption from the design. It carries no
  * seat data and no geometry — the API is the only source of what the hall contains.
  *
+ * This component draws the scrolling canvas only. The seat legend is deliberately
+ * not part of it: it belongs to Step 1's column footer, outside the scroll area, so
+ * a tall hall can never scroll the key half out of view or drop the map's
+ * horizontal scrollbar on top of it.
+ *
  * Selection is composed here but owned elsewhere: the map reads which seats are
  * selected from {@link SeatSelectionService} and hands an activated seat back to
  * it. Nothing below this component decides what may be selected.
  */
 @Component({
-  imports: [SeatMapLegendComponent, SeatSectionComponent],
+  imports: [SeatSectionComponent],
   selector: 'app-seat-map',
   styleUrl: './seat-map.scss',
   templateUrl: './seat-map.html',

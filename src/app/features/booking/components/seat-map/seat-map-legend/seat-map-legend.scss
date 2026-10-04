@@ -1,24 +1,23 @@
-// Key to the seat states, pinned to the bottom of the seat viewport.
+// Key to the seat states, a footer bar under the seat map's scroll area.
 //
-// A large hall scrolls the map under the dialog, and the key explains what the
-// colours on the rows mean — so it is only useful while the rows are in view.
-// Pinned, it stays readable for the whole scroll instead of being the last thing
-// to leave the panel. The negative offset matches the map's own side padding so
-// the opaque background spans the full width of the scroll area, and the bottom
-// offset matches its bottom padding, so it does not jump when the row reaches
-// the end of the scroll.
+// The key explains what the colours on the rows mean, and it is only useful while
+// the rows are in view — so it used to be `position: sticky` inside the scroll
+// container. That put it in the scroll's own coordinate space, where the rows
+// scrolling underneath it and the canvas's horizontal scrollbar both drew over its
+// labels, leaving the text half visible. Step 1 now renders it outside the scroll
+// area entirely, so it is an ordinary static footer: nothing scrolls it, nothing
+// overlaps it, and the explicit vertical padding guarantees the labels are never
+// vertically clipped by the box itself.
 :host {
-  position: sticky;
-  bottom: -1.25rem; // -20px, the map's own bottom padding
-  z-index: 1;
   display: block;
-  // The map centres its children, so the key has to claim the full width itself
-  // for its background to cover the rows scrolling behind it.
-  align-self: stretch;
-  margin-right: -1.25rem;
-  margin-left: -1.25rem;
-  padding: 0.75rem 1.25rem; // 12px 20px
-  background: #070c1c; // the dialog surface, so rows never show through the key
+  // The key never gives up its space to a taller hall — the map above it shortens
+  // instead, which is the whole point of taking it out of the scroll container.
+  flex-shrink: 0;
+  // 14px top and bottom: enough that the 16px label line and its 16px swatch sit
+  // inside the bar with clearance, rather than touching its edges and reading as
+  // cut off.
+  padding: 0.875rem 0;
+  border-top: 1px solid #2a2c3d;
 }
 
 .legend {
@@ -26,7 +25,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem; // 24px
+  gap: 0.75rem 1.5rem; // 12px rows, 24px columns
   margin: 0;
   padding: 0;
   list-style: none;
@@ -63,8 +62,9 @@
   background: #ec3013;
 }
 
-// `sold` and `held` share the flat tile; only the hatch tells them apart, so the
-// swatches repeat exactly that pair and the key cannot drift from the map.
+// `sold` and `held` share the striped treatment — a flat tile, with `held` set one
+// step lighter to mark it as temporary — so the swatches repeat exactly that pair
+// and the key cannot drift from the map.
 .legend__swatch--sold {
   background: #3a3d50;
 }
@@ -78,7 +78,7 @@
       rgb(7 12 28 / 45%) 55%,
       transparent 55%
     ),
-    #3a3d50;
+    #454a63;
 }
 
 // No seat in that position: shown as empty space rather than a colour, because

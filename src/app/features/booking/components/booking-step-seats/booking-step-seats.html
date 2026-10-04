@@ -38,8 +38,20 @@
     }
 
     <div class="booking-step__layout">
-      <div class="booking-step__scroll">
-        <app-seat-map [map]="layout" />
+      <!--
+          The map column is two stacked boxes, not one scrolling box: only the
+          canvas above scrolls. The key is a sibling of that scroll area, so it
+          keeps its full height no matter how tall the hall is, and the canvas's
+          horizontal scrollbar can never land on top of it. It is also the last
+          thing the column gives up its space to — `flex-shrink: 0` — so a long
+          hall shortens the map rather than squeezing the labels out of view.
+        -->
+      <div class="booking-step__map">
+        <div class="booking-step__scroll">
+          <app-seat-map [map]="layout" />
+        </div>
+
+        <app-seat-map-legend />
       </div>
 
       <app-seat-selection-summary />

@@ -7,19 +7,28 @@
   />
 
   <div class="coming-soon-card__body">
+    <!--
+        The release date leads the column in the accent red of the design. The API
+        sends a bare `YYYY-MM-DD`, so it is formatted here rather than printed raw;
+        `UTC` keeps the calendar day from shifting on a negative local offset.
+      -->
+    <p class="coming-soon-card__release">
+      IN CINEMAS {{ movie().releaseDate | date: 'd MMMM' : 'UTC' }}
+    </p>
+
     <h3 class="coming-soon-card__title">{{ movie().title }}</h3>
 
     <p class="coming-soon-card__meta">
-      @if (genreLabel(); as genres) {
-        <span>{{ genres }}</span>
-        <span aria-hidden="true">•</span>
+      @if (genreLabel(); as genre) {
+        <span>{{ genre }}</span>
+        <span class="coming-soon-card__separator" aria-hidden="true">·</span>
       }
       <span>{{ movie().runtimeMinutes }} min</span>
-      <span aria-hidden="true">•</span>
-      <span>Releases {{ movie().releaseDate }}</span>
     </p>
 
-    <app-rating-badge [code]="movie().ageRating.code" />
+    <!-- The shorter Coming Soon row pairs the pill with 12px copy, so it uses the
+         design's small scale rather than the Now Playing card's default one. -->
+    <app-rating-badge size="sm" [code]="movie().ageRating.code" />
 
     @if (notifyError(); as message) {
       <p class="coming-soon-card__error" role="alert">

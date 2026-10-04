@@ -34,8 +34,25 @@
   gap: 1.25rem; // 20px
 }
 
-.booking-step__scroll {
+// The map column: a scrolling canvas on top and the key beneath it, sized as one
+// 452px-tall column so the layout never jumps between states.
+//
+// The key is deliberately outside the scroll box. Trapped inside it, a tall hall
+// scrolls the labels away and the canvas's horizontal scrollbar draws straight
+// over them — which is exactly the clipped, collided rendering this replaces.
+// Here the canvas takes `min-height: 0` so it is the only part that gives up
+// space, and the key keeps its natural height no matter how long the scroll gets.
+.booking-step__map {
+  display: flex;
+  flex-direction: column;
   max-height: 28.25rem; // 452px, the design's content height
+  min-width: 0;
+}
+
+.booking-step__scroll {
+  // `min-height: 0` lets the flex item shrink below its content height, so a hall
+  // taller than the column scrolls inside it instead of pushing the key out.
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;

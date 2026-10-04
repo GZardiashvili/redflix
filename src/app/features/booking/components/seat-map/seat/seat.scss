@@ -78,14 +78,19 @@
   color: #8f93a8;
 }
 
-// Held by another visitor: the same flat tile as `sold`, over-printed with the
-// diagonal "taped over" hatch from the design. The shared base keeps the two
-// states reading as the same kind of unavailable seat, and the hatch is the sole
-// difference — which is exactly the information the visitor needs, since a hold is
-// temporary and the seat becomes sellable again when it lapses.
+// Held by another visitor: still an unavailable seat, so it keeps the same flat
+// mid-grey base as `sold` — the visitor learns the seat is not theirs either way.
+// The diagonal hatch of the design is what separates the two states, and it does
+// the work alone so the key can repeat exactly this pair and stay in step with
+// the map.
+//
+// The hatch is drawn over a lighter tint than `sold`'s base rather than a darker
+// overlay: a held seat is a *temporary* block, and a tile that reads as lighter
+// than a sold one says so at a glance even in peripheral vision or at the small
+// size the legend swatch repeats it at.
 .seat--held {
   border-color: transparent;
-  background: #3a3d50;
+  background: #454a63;
   box-shadow: none;
   color: #8f93a8;
   overflow: hidden;

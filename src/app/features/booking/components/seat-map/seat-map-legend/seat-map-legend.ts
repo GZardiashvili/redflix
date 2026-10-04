@@ -15,6 +15,10 @@ interface LegendItem {
  * contain, so the key does not change from screening to screening. `isMine` is
  * deliberately absent: it marks the visitor's own hold rather than a state the map
  * offers, so it gets no entry.
+ *
+ * Rendered by Step 1 beneath the map's scroll area rather than inside it, so the
+ * key stays whole however far the map is scrolled and the map's horizontal
+ * scrollbar never draws across it. It carries no seat data of its own.
  */
 @Component({
   selector: 'app-seat-map-legend',

@@ -1,6 +1,7 @@
+import { DatePipe } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Movie, primaryGenre } from '../../../../core/models/movie';
+import { Movie } from '../../../../core/models/movie';
 import { RecentlyViewedService } from '../../../../core/services/recently-viewed.service';
 
 /** Delay between automatic slide advances of the hero carousel. */
@@ -15,7 +16,7 @@ const AUTOPLAY_INTERVAL_MS = 6000;
  * the slide transition. Manual navigation wraps around both ends.
  */
 @Component({
-  imports: [RouterLink],
+  imports: [DatePipe, RouterLink],
   selector: 'app-home-hero',
   styleUrl: './home-hero.scss',
   templateUrl: './home-hero.html',
@@ -97,17 +98,15 @@ export class HomeHero implements OnInit {
   }
 
   /**
-   * The red label above the poster title: the film's category and its format,
-   * e.g. `Drama · IMAX`.
+   * Whether the slide has a release date to announce as a premiere.
    *
-   * Both are optional in the API contract, so a title that has neither renders no
-   * label at all rather than a lone separator. Uppercasing is the stylesheet's
-   * job, which keeps the copy here as the API's own.
+   * The API ships no "premiere week" copy — only `releaseDate` — so the line is
+   * composed from that date in the template. A title without one renders no line
+   * rather than a bare `PREMIERE ·`. The month name comes from `DatePipe`, and the
+   * uppercasing is the stylesheet's job, which keeps the copy the API's own.
    */
-  protected badgeLabel(movie: Movie): string {
-    return [primaryGenre(movie.genres), movie.formats[0]?.name ?? '']
-      .filter((part) => part !== '')
-      .join(' · ');
+  protected hasRelease(movie: Movie): boolean {
+    return movie.releaseDate !== '';
   }
 
   private restartAutoplay(): void {

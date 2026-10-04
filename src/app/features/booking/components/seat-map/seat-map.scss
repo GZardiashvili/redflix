@@ -1,15 +1,20 @@
-// The seat map: the screen caption, the API's sections, and the legend.
+// The seat map: the screen caption and the API's sections — the scrolling canvas
+// only.
 //
 // Sections stack 32px apart and each one keeps its own row widths. The whole map
 // scrolls inside the dialog when a hall is taller than the panel, so every section
-// stays reachable rather than being clipped.
-
+// stays reachable rather than being clipped. The legend is not drawn here; it
+// belongs to Step 1's column footer, outside this scroll area, so it cannot be
+// scrolled out of view or overlapped by the horizontal scrollbar below.
+//
+// The extra bottom padding is the clearance that scrollbar needs: without it the
+// bar renders over the last row of seats rather than under them.
 .seat-map {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2rem; // 32px
-  padding: 0 1.25rem 1.25rem; // 20px sides, 20px below the legend
+  padding: 0 1.25rem 2rem; // 20px sides, 32px below the last row for the scrollbar
 }
 
 // Static caption marking the front of the hall. It is presentation only: no seat

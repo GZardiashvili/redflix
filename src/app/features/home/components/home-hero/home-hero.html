@@ -13,8 +13,19 @@
         <div class="home-hero__overlay" aria-hidden="true"></div>
 
         <div class="home-hero__content">
-          @if (badgeLabel(slide); as label) {
-            <p class="home-hero__badge-label">{{ label }}</p>
+          <!--
+            Premiere line of the design. The API ships no "premiere week" copy, only
+            `releaseDate`, so the wording and the date are composed here. The month
+            name comes from `DatePipe`; the uppercase the design shows is the
+            stylesheet's own `text-transform` on `.home-hero__badge-label`, which keeps
+            the accessible text as the plain `PREMIERE · 2 October`. `UTC` is passed so
+            a `YYYY-MM-DD` release date cannot shift to the previous day on a negative
+            local offset.
+          -->
+          @if (hasRelease(slide)) {
+            <p class="home-hero__badge-label">
+              PREMIERE · {{ slide.releaseDate | date: 'd MMMM' : 'UTC' }}
+            </p>
           }
 
           <h2 class="home-hero__title">{{ slide.title }}</h2>

@@ -5,6 +5,7 @@ import { LoadingIndicator } from '../../../../shared/ui/loading/loading-indicato
 import { BookingHoldService } from '../../booking-hold.service';
 import { SeatMapService } from '../../seat-map.service';
 import { SeatMap } from '../seat-map/seat-map';
+import { SeatMapLegendComponent } from '../seat-map/seat-map-legend/seat-map-legend';
 import { SeatSelectionSummary } from '../seat-selection-summary/seat-selection-summary';
 
 /**
@@ -23,9 +24,21 @@ import { SeatSelectionSummary } from '../seat-selection-summary/seat-selection-s
  * The summary sits beside the map rather than below it and holds no selection
  * state of its own: both columns read the same selection owner, so the seats drawn
  * on the map and the seats listed with prices cannot disagree.
+ *
+ * Only the map canvas scrolls. The seat key is a sibling of the scroll area inside
+ * the same column, so it is never clipped by the scroll and never sits underneath
+ * the canvas's horizontal scrollbar — the two share the column's height instead,
+ * with the key taking a fixed slice of it and the map taking the rest.
  */
 @Component({
-  imports: [EmptyState, ErrorState, LoadingIndicator, SeatMap, SeatSelectionSummary],
+  imports: [
+    EmptyState,
+    ErrorState,
+    LoadingIndicator,
+    SeatMap,
+    SeatMapLegendComponent,
+    SeatSelectionSummary,
+  ],
   selector: 'app-booking-step-seats',
   styleUrl: './booking-step-seats.scss',
   templateUrl: './booking-step-seats.html',
