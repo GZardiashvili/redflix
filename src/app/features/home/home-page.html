@@ -23,6 +23,27 @@
     }
   }
 
+  @if (recentlyViewed.items(); as items) {
+    @if (items.length > 0) {
+      <section
+        class="home-page__section home-page__section--recent"
+        aria-labelledby="recently-viewed-heading"
+      >
+        <div class="home-page__section-head">
+          <h2 id="recently-viewed-heading" class="home-page__section-title">Recently viewed</h2>
+        </div>
+
+        <div class="home-page__cards">
+          @for (item of items; track item.id) {
+            <app-recently-viewed-card [movie]="item" />
+          }
+        </div>
+      </section>
+
+      <hr class="home-page__divider" />
+    }
+  }
+
   <section class="home-page__section" aria-labelledby="now-playing-heading">
     <div class="home-page__section-head">
       <h2 id="now-playing-heading" class="home-page__section-title">Now Playing</h2>
@@ -57,6 +78,8 @@
       }
     }
   </section>
+
+  <hr class="home-page__divider" />
 
   <section class="home-page__section" aria-labelledby="coming-soon-heading">
     <div class="home-page__section-head">
@@ -94,24 +117,6 @@
             message="Check back soon for upcoming releases."
           />
         }
-      }
-    }
-  </section>
-
-  <section class="home-page__section" aria-labelledby="recently-viewed-heading">
-    <div class="home-page__section-head">
-      <h2 id="recently-viewed-heading" class="home-page__section-title">Recently Viewed</h2>
-    </div>
-
-    @if (recentlyViewed.items(); as items) {
-      @if (items.length > 0) {
-        <div class="home-page__cards">
-          @for (item of items; track item.id) {
-            <app-recently-viewed-card [movie]="item" />
-          }
-        </div>
-      } @else {
-        <app-empty-state title="Nothing viewed yet" message="Movies you open will appear here." />
       }
     }
   </section>
