@@ -1,0 +1,211 @@
+// One order's ticket card: the design's wide panel with the screening on the
+// left and the perforated order stub on the right, on the page's deep-navy
+// surface.
+
+.ticket-card {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: hidden;
+  border-radius: 1.625rem; // 26px, the design's card radius
+  background: #1e2031;
+  color: #fff;
+}
+
+.ticket-card__main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.125rem; // 18px
+  padding: 1.5rem 1.875rem; // 24px 30px
+}
+
+.ticket-card__poster {
+  width: 6.25rem; // ~100px, the design's poster
+  height: 8.375rem; // ~134px
+  flex-shrink: 0;
+  border-radius: 0.625rem; // 10px
+  object-fit: cover;
+}
+
+.ticket-card__details {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75rem; // 12px
+}
+
+.ticket-card__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem; // 10px
+}
+
+.ticket-card__title {
+  margin: 0;
+  font-size: 1.25rem; // 20px H2 of the design
+  font-weight: 800;
+  line-height: 1.375rem; // 22px
+  text-transform: uppercase;
+}
+
+.ticket-card__age {
+  padding: 0.1875rem 0.5rem; // 3px 8px
+  border-radius: 999px;
+  background: rgb(236 48 19 / 10%);
+  color: #ec3013;
+  font-size: 0.75rem; // 12px Label/S
+  font-weight: 600;
+  line-height: 0.8125rem; // 13px
+}
+
+.ticket-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.5rem; // 40px, the design's columns
+}
+
+.ticket-card__meta-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem; // 4px
+}
+
+// The design's overline labels: DATE / VENUE / FORMAT and the SEATS kicker.
+.ticket-card__label {
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 0.8125rem; // 13px
+  text-transform: uppercase;
+}
+
+.ticket-card__value {
+  font-size: 0.875rem; // 14px Label/M
+  font-weight: 600;
+  line-height: 0.9375rem; // 15px
+}
+
+.ticket-card__seats-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem; // 8px
+}
+
+.ticket-card__seats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ticket-card__seat {
+  padding: 0.25rem 0.625rem; // 4px 10px
+  border-radius: 0.375rem; // 6px
+  background: rgb(255 255 255 / 10%);
+  font-size: 0.75rem; // 12px Label/S
+  font-weight: 600;
+  line-height: 0.8125rem; // 13px
+}
+
+// The perforated stub: order reference, what was paid and — for upcoming
+// tickets — the refund control.
+.ticket-card__stub {
+  display: flex;
+  width: 18.75rem; // 300px, the design's stub
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 1rem; // 16px
+  padding: 1.25rem 1.5rem; // 20px 24px
+  border-left: 1px dashed #2a2c3d;
+}
+
+.ticket-card__order {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem; // 2px
+  margin: 0;
+}
+
+.ticket-card__reference {
+  font-size: 0.875rem; // 14px
+  font-weight: 800;
+  line-height: 0.9375rem; // 15px
+}
+
+.ticket-card__total-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.ticket-card__total-label {
+  color: #a9a9a9;
+  font-size: 0.875rem; // 14px
+  line-height: 1.3;
+}
+
+.ticket-card__total-amount {
+  font-size: 1.5rem; // 24px H1 of the design
+  font-weight: 800;
+  line-height: 1.625rem; // 26px
+}
+
+// Grey on the card surface by design; the disabled state lowers opacity rather
+// than only dimming text, so it reads as unavailable without falling below the
+// contrast the enabled control keeps, and the note below carries the same
+// information as text for assistive technology.
+.ticket-card__refund {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1.375rem; // 10px 22px
+  border: 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 10%);
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem; // 14px Button of the design
+  font-weight: 800;
+  line-height: 0.9375rem; // 15px
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+.ticket-card__refund-note {
+  margin: 0;
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px Body/S
+  line-height: 1.3;
+  text-align: center;
+}
+
+@media (max-width: 60rem) {
+  .ticket-card {
+    flex-direction: column;
+  }
+
+  .ticket-card__stub {
+    width: auto;
+    border-top: 1px dashed #2a2c3d;
+    border-left: 0;
+  }
+}

@@ -1,0 +1,89 @@
+<article class="ticket-card">
+  <div class="ticket-card__main">
+    <img
+      class="ticket-card__poster"
+      [src]="order().session.movie.posterUrl"
+      [alt]="order().session.movie.title + ' poster'"
+      loading="lazy"
+    />
+
+    <div class="ticket-card__details">
+      <div class="ticket-card__title-row">
+        <h3 class="ticket-card__title">{{ order().session.movie.title }}</h3>
+        <span class="ticket-card__age" aria-hidden="true">{{
+          order().session.movie.ageRating.code
+        }}</span>
+      </div>
+
+      <div class="ticket-card__meta">
+        <div class="ticket-card__meta-col">
+          <span class="ticket-card__label">Date</span>
+          <span class="ticket-card__value"
+            >{{ order().session.date | date: 'EEE d MMM' : 'UTC' }} ·
+            {{ order().session.time }}</span
+          >
+        </div>
+
+        <div class="ticket-card__meta-col">
+          <span class="ticket-card__label">Venue</span>
+          <span class="ticket-card__value"
+            >{{ order().session.venue.name }} · Hall {{ order().session.hall.name }}</span
+          >
+        </div>
+
+        <div class="ticket-card__meta-col">
+          <span class="ticket-card__label">Format</span>
+          <span class="ticket-card__value"
+            >{{ order().session.format.name }} · {{ order().session.language.name }}</span
+          >
+        </div>
+      </div>
+
+      <!-- Every purchased seat, exactly as issued: seat code plus the ticket type
+           it was sold as — never collapsed into a generic count. -->
+      <div class="ticket-card__seats-row">
+        <span class="ticket-card__label">Seats</span>
+        <ul class="ticket-card__seats" aria-label="Purchased seats">
+          @for (ticket of order().tickets; track ticket.id) {
+            <li class="ticket-card__seat">{{ ticket.seatCode }} · {{ ticket.ticketType.name }}</li>
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticket-card__stub">
+    <p class="ticket-card__order">
+      <span class="ticket-card__label">Order</span>
+      <span class="ticket-card__reference">#{{ order().reference }}</span>
+    </p>
+
+    <div class="ticket-card__total-row">
+      <span class="ticket-card__total-label">Total paid</span>
+      <span class="ticket-card__total-amount">₾{{ total() }}</span>
+    </div>
+
+    @if (showRefund()) {
+      <!--
+        The Task 23 refund control: present on upcoming tickets, enabled only when
+        the server reports `isRefundable`, disabled with an explanation otherwise.
+        It performs no mutation — Task 24 owns the refund call — so it is a plain
+        inert button rather than a form submission.
+      -->
+      <button
+        class="ticket-card__refund"
+        type="button"
+        [disabled]="!order().isRefundable"
+        [attr.aria-disabled]="!order().isRefundable"
+        [attr.title]="
+          order().isRefundable ? 'Refund available soon' : 'This ticket can no longer be refunded'
+        "
+      >
+        Refund
+      </button>
+      @if (!order().isRefundable) {
+        <p class="ticket-card__refund-note">This ticket can no longer be refunded</p>
+      }
+    }
+  </div>
+</article>

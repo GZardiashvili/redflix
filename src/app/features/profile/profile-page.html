@@ -31,6 +31,13 @@
     }
 
     <app-profile-form />
+
+    <!--
+      My Tickets: the sibling section below Personal Information, fed by its own
+      `GET /tickets` request. It mounts beside — never instead of — the form, so
+      switching its Upcoming / Past tabs cannot touch form state.
+    -->
+    <app-profile-tickets />
   </div>
 } @else if (auth.initializing()) {
   <!-- A stored token is still being exchanged through `/me`: wait for the real

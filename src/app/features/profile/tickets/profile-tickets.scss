@@ -1,0 +1,78 @@
+// My Tickets: the section below Personal Information — its heading, the
+// Upcoming / Past segmented control of the design, and the ticket list.
+
+.profile-tickets {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem; // 20px
+}
+
+// The section title mirrors the page title's type, so the two sections read as
+// peers rather than one subordinated to the other.
+.profile-tickets__heading {
+  margin: 0;
+  padding-top: 2rem;
+  border-top: 1px solid #1e2031;
+  font-size: 1.5rem; // 24px H1 of the design
+  font-weight: 800;
+  line-height: 1.625rem; // 26px
+}
+
+// The segmented pill of the design: the container holds both tabs, the active
+// one carries the raised surface.
+.profile-tickets__tabs {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 0; // the pill reads as one control, not two buttons with a gap
+  padding: 0.3125rem; // 5px
+  border-radius: 0.75rem; // 12px
+  background: #1e2031;
+}
+
+.profile-tickets__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem; // 8px between the label and the count
+  padding: 0.4375rem 0.875rem; // 7px 14px
+  border: 0;
+  border-radius: 0.625rem; // 10px
+  background: transparent;
+  color: #a9a9a9;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem; // 14px Label/M
+  font-weight: 600;
+  line-height: 0.9375rem; // 15px
+
+  &--active {
+    background: #2a2c3d;
+    color: #fff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+.profile-tickets__count {
+  color: inherit;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+}
+
+.profile-tickets__loading {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 2.5rem 0; // room for the spinner to breathe in
+}
+
+.profile-tickets__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem; // 20px between cards
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

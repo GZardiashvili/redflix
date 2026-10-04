@@ -4,6 +4,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ErrorState } from '../../shared/ui/error-state/error-state';
 import { LoadingIndicator } from '../../shared/ui/loading/loading-indicator';
 import { ProfileForm } from './profile-form/profile-form';
+import { ProfileTickets } from './tickets/profile-tickets';
 
 /**
  * The Personal Information page, and the gate in front of it.
@@ -20,7 +21,7 @@ import { ProfileForm } from './profile-form/profile-form';
  * leaves a sign-in prompt rather than profile data.
  */
 @Component({
-  imports: [ErrorState, LoadingIndicator, ProfileForm],
+  imports: [ErrorState, LoadingIndicator, ProfileForm, ProfileTickets],
   selector: 'app-profile-page',
   styleUrl: './profile-page.scss',
   templateUrl: './profile-page.html',

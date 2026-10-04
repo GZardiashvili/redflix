@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
   me: 'me',
   profile: 'profile',
   orders: 'orders',
+  tickets: 'tickets',
   search: 'search',
   sessions: 'sessions',
   featuredMovies: 'movies/featured',

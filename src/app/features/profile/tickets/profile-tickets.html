@@ -1,0 +1,68 @@
+<section class="profile-tickets" aria-labelledby="profile-tickets-heading">
+  <h2 class="profile-tickets__heading" id="profile-tickets-heading">My Tickets</h2>
+
+  <!-- The two logical lists, with live counts once the response arrives. -->
+  <div class="profile-tickets__tabs" role="tablist" aria-label="Ticket lists">
+    <button
+      class="profile-tickets__tab"
+      type="button"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'upcoming'"
+      [class.profile-tickets__tab--active]="activeTab() === 'upcoming'"
+      (click)="selectTab('upcoming')"
+    >
+      Upcoming
+      @if (tickets() !== null) {
+        <span class="profile-tickets__count">{{ upcoming().length }}</span>
+      }
+    </button>
+
+    <button
+      class="profile-tickets__tab"
+      type="button"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'past'"
+      [class.profile-tickets__tab--active]="activeTab() === 'past'"
+      (click)="selectTab('past')"
+    >
+      Past
+      @if (tickets() !== null) {
+        <span class="profile-tickets__count">{{ past().length }}</span>
+      }
+    </button>
+  </div>
+
+  @if (tickets() === null && loading()) {
+    <!-- First load: no list to keep, so the whole section waits visibly. -->
+    <p class="profile-tickets__loading">
+      <app-loading-indicator label="Loading your tickets" />
+    </p>
+  } @else if (error() && tickets() === null) {
+    <!-- Failed with nothing to show: a visible error with retry, never a blank section. -->
+    <app-error-state
+      title="Could not load your tickets"
+      [message]="errorMessage()"
+      [canRetry]="true"
+      (retry)="retry()"
+    />
+  } @else if (visible().length === 0) {
+    <app-empty-state
+      [title]="activeTab() === 'upcoming' ? 'No upcoming tickets' : 'No past tickets'"
+      [message]="
+        activeTab() === 'upcoming'
+          ? 'You have no upcoming screenings. Once you book, your tickets will appear here.'
+          : 'You have no past screenings yet. Tickets for sessions that have run will appear here.'
+      "
+    />
+  } @else {
+    <!-- Every card is one server-provided order; tab switches only change which
+         half of the combined response is shown. -->
+    <ul class="profile-tickets__list" aria-label="Tickets">
+      @for (order of visible(); track order.id) {
+        <li>
+          <app-ticket-card [order]="order" [showRefund]="activeTab() === 'upcoming'" />
+        </li>
+      }
+    </ul>
+  }
+</section>
