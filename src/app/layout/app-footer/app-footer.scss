@@ -1,0 +1,37 @@
+// Application footer: the divider plus the brand / copyright row of the
+// supplied design. It lives in the app shell so every routed page ends with
+// the same footer, and `margin-top: auto` keeps it pinned to the viewport
+// bottom on short pages while letting long pages push it down naturally.
+.app-footer {
+  margin-top: auto;
+  padding: 0 3.1875rem 2rem; // 51px side gutters, matching the pages above it
+  background: #070c1c;
+  color: #fff;
+}
+
+.app-footer__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.25rem; // 20px below the divider
+  border-top: 1px solid rgb(255 255 255 / 10%);
+}
+
+.app-footer__brand {
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.app-footer__brand-accent {
+  color: #ec3013;
+}
+
+.app-footer__copyright {
+  color: #a9a9a9;
+  font-size: 0.875rem;
+  line-height: 1.3;
+  text-align: right;
+}

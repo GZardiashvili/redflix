@@ -4,6 +4,8 @@
   <router-outlet />
 </main>
 
+<app-footer />
+
 @if (loginOpen()) {
   <app-login-modal (closed)="onLoginClosed()" (switchToRegister)="openRegister()" />
 }

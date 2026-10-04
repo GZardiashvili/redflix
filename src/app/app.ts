@@ -7,6 +7,7 @@ import { RegisterModal } from './features/auth/components/register-modal/registe
 import { BookingModal } from './features/booking/components/booking-modal/booking-modal';
 import { OrderConfirmationModal } from './features/booking/components/order-confirmation-modal/order-confirmation-modal';
 import { AppHeader } from './layout/app-header/app-header';
+import { AppFooter } from './layout/app-footer/app-footer';
 
 /**
  * Application shell: header, routed content and the single application-wide
@@ -19,6 +20,7 @@ import { AppHeader } from './layout/app-header/app-header';
  */
 @Component({
   imports: [
+    AppFooter,
     AppHeader,
     BookingModal,
     LoginModal,

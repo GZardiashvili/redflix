@@ -8,9 +8,16 @@
 // fills the rest. The tabs row carries the 14px active underline state and the
 // red upcoming-count badge on My Tickets.
 
+:host {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .profile-page {
   display: flex;
-  min-height: 100%;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 1.5rem; // 24px between the heading, the status and the content
   padding: 1.5rem 3.1875rem 4rem; // 51px side gutters, like the other pages
