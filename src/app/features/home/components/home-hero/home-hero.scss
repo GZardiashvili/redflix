@@ -1,19 +1,22 @@
 .home-hero {
+  // 760px banner + 42px bottom clearance for the 54px controls row, per the
+  // design's Frame 76: poster copy sits 179px above the bar row.
   position: relative;
-  min-height: 47.5rem;
+  height: 47.5rem; // 760px
   overflow: hidden;
-  border-radius: 1.25rem;
   background: #070c1c;
   color: #fff;
 }
 
 // Absolute full-bleed slide: recreating this element per active movie replays
-// the entrance animation.
+// the entrance animation. Bottom padding keeps the poster copy above the
+// progress-bar/arrow row instead of overlapping it.
 .home-hero__slide {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: flex-end;
+  padding: 0 4.1875rem 11.1875rem; // 67px sides, 179px bottom
   animation: home-hero-slide-in 500ms ease both;
 }
 
@@ -29,130 +32,174 @@
 
 .home-hero__backdrop {
   position: absolute;
-  inset: 0;
+  top: -88.56px; // the design crops the 1062px trailer into the 760px banner
+  right: 0;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: 66.42rem; // 1062.72px
+  max-width: none;
   object-fit: cover;
 }
 
 .home-hero__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgb(7 12 28 / 92%) 0%,
-    rgb(7 12 28 / 55%) 45%,
-    transparent 75%
-  );
+  // The design's trailer scrim: left-to-right dim plus the overall darkening
+  // that keeps the white poster copy readable over bright backdrops.
+  background:
+    linear-gradient(270deg, rgb(0 0 0 / 8%) 0%, rgb(0 0 0 / 80%) 100%),
+    linear-gradient(0deg, rgb(7 12 28 / 35%) 0%, rgb(7 12 28 / 0%) 45%);
 }
 
 .home-hero__content {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  max-width: 40rem;
-  padding: 3rem;
+  align-items: flex-start;
+  gap: 0;
+  width: 36.25rem; // 580px copy column of the design
+  max-width: 100%;
+  padding: 0;
 }
 
 .home-hero__kicker {
-  color: #ec3013;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.125rem;
-  text-transform: uppercase;
+  display: none;
 }
 
 .home-hero__title {
-  font-size: 3rem;
+  max-width: 36.25rem; // 580px, wraps like the design's two-line title
+  margin: 0 0 0.9375rem; // 15px
+  font-size: 2.5rem; // 40px Display
   font-weight: 800;
-  line-height: 3.25rem;
+  line-height: 2.75rem; // 44px
+  overflow-wrap: break-word;
 }
 
-.home-hero__meta {
+.home-hero__badges {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  color: rgb(255 255 255 / 70%);
-  font-size: 0.875rem;
+  align-items: flex-start;
+  gap: 0.5rem; // 8px
+  margin: 0 0 1.25rem; // 20px above the synopsis/price
+  padding: 0;
+  list-style: none;
 }
 
-.home-hero__rating {
-  padding: 0.125rem 0.5rem;
-  border: 1px solid #2a2c3d;
+.home-hero__badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem; // 4px
+  padding: 0.375rem 0.75rem; // 6px 12px
   border-radius: 999px;
+  background: rgb(255 255 255 / 10%);
   color: #fff;
-  font-size: 0.75rem;
-  font-weight: 800;
+  font-size: 0.75rem; // 12px Label/S
+  font-weight: 600;
+  line-height: 0.8125rem; // 13px
+
+  svg {
+    width: 0.875rem; // 14px timer glyph
+    height: 0.875rem;
+    flex-shrink: 0;
+  }
+
+  &--rating {
+    background: rgb(236 48 19 / 10%);
+    color: #ec3013;
+  }
 }
 
 .home-hero__price {
-  color: rgb(255 255 255 / 70%);
-  font-size: 0.875rem;
+  display: none;
+}
+
+.home-hero__meta {
+  display: none;
+}
+
+.home-hero__rating {
+  display: none;
 }
 
 .home-hero__actions {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
+  align-items: flex-start;
+  gap: 0.625rem; // 10px
+  margin: 0;
 }
 
 .home-hero__primary,
 .home-hero__secondary {
-  padding: 0.75rem 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem; // 4px
+  padding: 0.8125rem 1.375rem; // 13px 22px
   border-radius: 999px;
-  font-size: 0.875rem;
+  font-size: 0.875rem; // 14px Button
   font-weight: 800;
+  line-height: 0.9375rem; // 15px
   text-decoration: none;
 }
 
 .home-hero__primary {
+  min-width: 8.9375rem; // 143px
+  min-height: 2.625rem; // 42px
   background: #ec3013;
   color: #fff;
 }
 
 .home-hero__secondary {
-  border: 1px solid rgb(255 255 255 / 40%);
+  min-width: 8rem; // 128px
+  min-height: 2.5625rem; // 41px
+  background: rgb(255 255 255 / 10%);
   color: #fff;
 }
 
 .home-hero__controls {
   position: absolute;
-  right: 3rem;
-  bottom: 3rem;
+  right: 4.1875rem; // 67px: centred on the 1594px design row
+  bottom: 2.625rem; // 42px
+  left: 4.1875rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem; // 20px between bars and arrows
 }
 
+// Full-width segmented progress track of the design: 3px bars with a 7px
+// rhythm, stretching to the arrows at the right edge.
 .home-hero__indicators {
   display: flex;
+  flex: 1;
   align-items: center;
-  gap: 0.25rem;
+  gap: 7px;
 }
 
+// Each segment is a button with a padded hit target, so the 3px bar stays
+// easy to hit and focus stays visible without shifting the layout.
 .home-hero__indicator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  position: relative;
+  display: block;
+  flex: 1 1 0;
+  min-width: 2.5rem;
+  height: 1.25rem;
   padding: 0;
   border: 0;
   background: none;
   cursor: pointer;
 
+  // Every bar is white by default; only the active slide grows its own
+  // orange fill, which unmounts (snapping back to white) on slide change.
   &::before {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    height: 3px;
+    border-radius: 999px;
+    background: #fff;
     content: '';
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: rgb(255 255 255 / 30%);
-  }
-
-  &--active::before {
-    background: #ec3013;
+    transform: translateY(-50%);
   }
 
   &:focus-visible {
@@ -162,24 +209,61 @@
   }
 }
 
-.home-hero__arrows {
-  display: flex;
-  gap: 0.5rem;
+// The active segment: a white track with an orange fill that grows over one
+// autoplay interval, synced to the TS-side slide advance.
+.home-hero__indicator--active::before {
+  background: #fff;
 }
 
+.home-hero__indicator-fill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-radius: 999px;
+  background: #ec3013;
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: left center;
+  animation: home-hero-progress-fill var(--home-hero-autoplay-ms, 6000ms) linear both;
+}
+
+@keyframes home-hero-progress-fill {
+  from {
+    transform: translateY(-50%) scaleX(0);
+  }
+
+  to {
+    transform: translateY(-50%) scaleX(1);
+  }
+}
+
+.home-hero__arrows {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem; // 10px
+}
+
+// Frame 77: 54px scrim circles with 34px chevrons, per the design.
 .home-hero__arrow {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 3.375rem; // 54px
+  height: 3.375rem;
   padding: 0;
-  border: 1px solid rgb(255 255 255 / 40%);
-  border-radius: 50%;
-  background: none;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(7 12 28 / 20%);
   color: #fff;
-  font-size: 1.25rem;
+  font-size: 2.125rem; // 34px chevron
+  line-height: 1;
   cursor: pointer;
+
+  &:hover {
+    background: rgb(7 12 28 / 45%);
+  }
 
   &:focus-visible {
     outline: 2px solid #ec3013;
@@ -191,5 +275,12 @@
 @media (prefers-reduced-motion: reduce) {
   .home-hero__slide {
     animation: none;
+  }
+
+  // Autoplay is off here, so the timed fill would never complete — show the
+  // active segment solid orange instead of animating it.
+  .home-hero__indicator-fill {
+    animation: none;
+    transform: translateY(-50%) scaleX(1);
   }
 }

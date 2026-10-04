@@ -27,6 +27,15 @@ export class HomeHero implements OnInit {
   /** Raw slide index; normalised against the current movie count on read. */
   private readonly activeIndex = signal(0);
 
+  /**
+   * Bumps on every navigation so the active progress fill remounts and its CSS
+   * fill animation restarts — including re-selecting the already-active slide.
+   */
+  protected readonly cycle = signal(0);
+
+  /** Autoplay delay, exposed so the progress fill can sync its duration. */
+  protected readonly autoplayMs = AUTOPLAY_INTERVAL_MS;
+
   /** The slide currently shown, `undefined` only while the list is empty. */
   protected readonly currentIndex = computed(() => {
     const count = this.movies().length;
@@ -67,6 +76,7 @@ export class HomeHero implements OnInit {
     }
 
     this.activeIndex.set(((index % count) + count) % count);
+    this.cycle.update((cycle) => cycle + 1);
     this.restartAutoplay();
   }
 
@@ -84,10 +94,6 @@ export class HomeHero implements OnInit {
     if (movie !== undefined) {
       this.recentlyViewed.record(movie);
     }
-  }
-
-  protected genreNames(movie: Movie): string {
-    return movie.genres.map((genre) => genre.name).join(' • ');
   }
 
   private restartAutoplay(): void {

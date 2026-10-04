@@ -9,9 +9,17 @@
   flex-direction: column;
   gap: 1.5rem;
   min-height: 100%;
-  padding: 0 4.375rem 4rem;
+  padding: 0 0 4rem;
   background: #070c1c;
   color: #fff;
+}
+
+// The hero breaks out of the page flow to span the full viewport width
+// (edge-to-edge 1728px banner of the design), while the sections below keep
+// the 70px gutters.
+.home-page app-home-hero {
+  display: block;
+  margin: 0;
 }
 
 .home-page__hero-loading,
@@ -25,6 +33,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  padding: 0 4.375rem; // 70px gutters: sections stay inset, the hero spans full width
 }
 
 .home-page__section-head {

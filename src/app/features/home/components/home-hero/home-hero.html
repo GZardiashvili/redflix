@@ -13,18 +13,31 @@
         <div class="home-hero__overlay" aria-hidden="true"></div>
 
         <div class="home-hero__content">
-          <p class="home-hero__kicker">Featured</p>
           <h2 class="home-hero__title">{{ slide.title }}</h2>
 
-          <p class="home-hero__meta">
-            <span class="home-hero__rating">{{ slide.ageRating.code }}</span>
-            <span aria-hidden="true">•</span>
-            <span>{{ slide.runtimeMinutes }} min</span>
-            @if (genreNames(slide); as genres) {
-              <span aria-hidden="true">•</span>
-              <span>{{ genres }}</span>
+          <ul class="home-hero__badges" aria-label="Movie details">
+            <li class="home-hero__badge home-hero__badge--rating">
+              <span>{{ slide.ageRating.code }}</span>
+            </li>
+            <li class="home-hero__badge">
+              <svg viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+                <circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" />
+                <path
+                  d="M7 4v3l2 1.2"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span>{{ slide.runtimeMinutes }} Min</span>
+            </li>
+            @for (format of slide.formats; track format.id) {
+              <li class="home-hero__badge">
+                <span>{{ format.name }}</span>
+              </li>
             }
-          </p>
+          </ul>
 
           <p class="home-hero__price">From {{ slide.fromPrice }} ₾</p>
 
@@ -33,13 +46,13 @@
               class="home-hero__primary"
               [routerLink]="['/movies', slide.slug]"
               (click)="recordView()"
-              >Buy Ticket</a
+              >Buy tickets</a
             >
             <a
               class="home-hero__secondary"
               [routerLink]="['/movies', slide.slug]"
               (click)="recordView()"
-              >More Info</a
+              >All sessions</a
             >
           </div>
         </div>
@@ -48,7 +61,12 @@
 
     @if (movies().length > 1) {
       <div class="home-hero__controls">
-        <div class="home-hero__indicators" role="group" aria-label="Featured movie slides">
+        <div
+          class="home-hero__indicators"
+          role="group"
+          aria-label="Featured movie slides"
+          [style.--home-hero-autoplay-ms]="autoplayMs + 'ms'"
+        >
           @for (item of movies(); track item.id; let i = $index) {
             <button
               type="button"
@@ -57,7 +75,16 @@
               [attr.aria-current]="i === currentIndex() ? 'true' : null"
               [attr.aria-label]="'Show featured movie ' + (i + 1) + ' of ' + movies().length"
               (click)="select(i)"
-            ></button>
+            >
+              <!-- Keyed by active slide + cycle so each visit starts its own
+                   left-to-right fill, and the previous bar snaps back to
+                   white once the slide changes. -->
+              @for (fill of [currentIndex() + '-' + cycle()]; track fill) {
+                @if (i === currentIndex()) {
+                  <span class="home-hero__indicator-fill" aria-hidden="true"></span>
+                }
+              }
+            </button>
           }
         </div>
 
