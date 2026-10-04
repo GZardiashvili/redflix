@@ -55,8 +55,12 @@
   font-size: 1.125rem; // 18px
   line-height: 1.25rem; // 20px
 
+  // The available-seat hover below only sets a border colour, so a selected seat
+  // kept its orange fill already; it states the lighter orange explicitly so the
+  // hover reads as feedback on the *chosen* seat rather than as nothing happening.
   &:hover {
     border-color: #070c1c;
+    background: #ff4d30;
   }
 }
 
@@ -64,29 +68,33 @@
   font-variant-numeric: tabular-nums;
 }
 
-// Sold: dimmed right down, with the number following the seat so it stays
-// readable while clearly reading as unavailable.
+// Sold (paid/booked): a solid, borderless tile in a flat mid-grey with the number
+// dimmed right down. Permanent and inert, so it is drawn as a plain slab with no
+// affordance at all — nothing about it suggests an action.
 .seat--sold {
   border-color: transparent;
-  background: transparent;
+  background: #3a3d50;
   box-shadow: none;
-  color: #505261;
+  color: #8f93a8;
 }
 
-// Held by another visitor: the diagonal "taped over" hatch from the design. It
-// stays legible and, unlike `sold`, signals something temporary.
+// Held by another visitor: the same flat tile as `sold`, over-printed with the
+// diagonal "taped over" hatch from the design. The shared base keeps the two
+// states reading as the same kind of unavailable seat, and the hatch is the sole
+// difference — which is exactly the information the visitor needs, since a hold is
+// temporary and the seat becomes sellable again when it lapses.
 .seat--held {
   border-color: transparent;
-  background: #1e2031;
+  background: #3a3d50;
   box-shadow: none;
-  color: #a9a9a9;
+  color: #8f93a8;
   overflow: hidden;
 
   &::before {
     position: absolute;
     width: 5.25rem; // 84px, wide enough to cross the tile at the design's angle
     height: 1.25rem; // 20px
-    background: rgb(169 169 169 / 12%);
+    background: rgb(7 12 28 / 45%);
     content: '';
     transform: rotate(-37.44deg);
   }

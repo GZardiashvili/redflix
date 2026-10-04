@@ -136,17 +136,36 @@
   gap: 0.25rem; // 4px
   padding: 0.8125rem 1.375rem; // 13px 22px
   border-radius: 999px;
+  font-family: 'Archivo', system-ui, sans-serif;
   font-size: 0.875rem; // 14px Button
   font-weight: 800;
   line-height: 0.9375rem; // 15px
   text-decoration: none;
 }
 
+// The primary CTA: the design's 42px red pill with the ticket glyph ahead of the
+// label. `height` rather than `min-height` keeps the pill on-spec, and the extra
+// min-width leaves room for the icon so the label never wraps beside it.
 .home-hero__primary {
-  min-width: 8.9375rem; // 143px
-  min-height: 2.625rem; // 42px
+  min-width: 9.4375rem; // 151px
+  height: 2.625rem; // 42px
   background: #ec3013;
   color: #fff;
+
+  &:hover {
+    background: #ff4d30;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+.home-hero__cta-icon {
+  width: 1rem; // 16px
+  height: 1rem;
+  flex: 0 0 auto;
 }
 
 .home-hero__secondary {

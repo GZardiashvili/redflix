@@ -40,16 +40,37 @@
   font-size: 0.75rem;
 }
 
+// The card's CTA: the same red pill as the hero's, so the two entry points into
+// a movie read as one control at different scales.
 .movie-card__action {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.25rem; // 4px
+  height: 2.625rem; // 42px
   margin-top: auto;
-  padding: 0.625rem 1rem;
+  padding: 0.8125rem 1.375rem; // 13px 22px
   border-radius: 999px;
   background: #ec3013;
   color: #fff;
-  font-size: 0.875rem;
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 0.875rem; // 14px
   font-weight: 800;
+  line-height: 0.9375rem; // 15px
   text-decoration: none;
+
+  &:hover {
+    background: #ff4d30;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+.movie-card__action-icon {
+  width: 1rem; // 16px
+  height: 1rem;
+  flex: 0 0 auto;
 }

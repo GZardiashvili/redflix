@@ -42,8 +42,10 @@
   background: #ec3013;
 }
 
+// `sold` and `held` share the flat tile; only the hatch tells them apart, so the
+// swatches repeat exactly that pair and the key cannot drift from the map.
 .legend__swatch--sold {
-  background: #1e2031;
+  background: #3a3d50;
 }
 
 .legend__swatch--held {
@@ -51,11 +53,11 @@
     linear-gradient(
       to bottom right,
       transparent 45%,
-      rgb(169 169 169 / 30%) 45%,
-      rgb(169 169 169 / 30%) 55%,
+      rgb(7 12 28 / 45%) 45%,
+      rgb(7 12 28 / 45%) 55%,
       transparent 55%
     ),
-    #1e2031;
+    #3a3d50;
 }
 
 // No seat in that position: shown as empty space rather than a colour, because

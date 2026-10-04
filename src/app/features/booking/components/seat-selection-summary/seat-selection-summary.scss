@@ -165,6 +165,14 @@
 
 .summary__type--active {
   background: #ec3013;
+
+  // Declared here rather than left to `.summary__type:hover`: both selectors have
+  // the same specificity, so the unselected hover tint would otherwise win and a
+  // chosen pill would snap back to grey the moment the pointer crossed it — the
+  // one moment the visitor is most likely to be checking their selection.
+  &:hover {
+    background: #ff4d30;
+  }
 }
 
 .summary__reason {
