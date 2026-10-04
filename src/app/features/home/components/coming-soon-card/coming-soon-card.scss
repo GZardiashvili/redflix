@@ -69,20 +69,48 @@
   }
 }
 
+// The Notify Me action of the Figma card: an outlined pill on the panel surface,
+// not a filled call to action — the section it sits in already leads with the
+// release date in red.
 .coming-soon-card__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem; // 8px between the bell and the label
   align-self: flex-start;
   margin-top: auto;
-  padding: 0.5rem 1rem;
-  border: 0;
+  padding: 0.625rem 1.25rem; // 10px 20px
+  border: 1px solid #fff;
   border-radius: 999px;
-  background: #ec3013;
+  background: transparent;
   color: #fff;
-  font-size: 0.875rem;
+  font-family: inherit;
+  font-size: 0.875rem; // 14px
   font-weight: 800;
+  line-height: 0.9375rem; // 15px
   cursor: pointer;
 
+  &:hover:not(:disabled) {
+    background: rgb(255 255 255 / 10%);
+  }
+
   &:disabled {
-    opacity: 0.6;
+    border-color: rgb(255 255 255 / 40%);
+    color: #a9a9a9;
     cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+// The 16px bell of the design; the check replaces it in the subscribed state.
+.coming-soon-card__action-icon {
+  display: flex;
+  flex-shrink: 0;
+
+  &--done {
+    color: #4ade80;
   }
 }

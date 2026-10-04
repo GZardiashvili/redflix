@@ -64,15 +64,29 @@ export class OrderConfirmationModal {
   }
 
   /**
+   * "Back to home": dismisses the confirmation and sends the visitor to the
+   * landing page, where the freshly booked film is part of what is shown.
+   *
+   * Dismissal happens first so the dialog never lingers over the new route;
+   * every other close affordance (the shell's `×`, Escape, the overlay) still
+   * leaves the visitor where they were, as before.
+   */
+  protected backToHome(): void {
+    this.dismiss();
+    void this.router.navigate(['/']);
+  }
+
+  /**
    * "My Tickets": closes the confirmation first, then routes to the profile
-   * page where the tickets live.
+   * page's My Tickets section.
    *
    * Dismissing before navigating keeps the dialog from lingering over the new
-   * route; the profile feature owns what is shown there, so this button only
-   * decides where the visitor lands.
+   * route. The section is named by the query parameter the Profile page reads,
+   * so the visitor lands on the ticket list itself and that section re-reads
+   * `GET /tickets`, showing the order just bought without a manual refresh.
    */
   protected showTickets(): void {
     this.dismiss();
-    void this.router.navigate(['/profile']);
+    void this.router.navigate(['/profile'], { queryParams: { tab: 'tickets' } });
   }
 }

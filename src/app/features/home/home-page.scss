@@ -65,17 +65,22 @@
   font-weight: 800;
 }
 
-// "See all": Label/M in the type scale.
+// "See all": the Figma label — Archivo SemiBold 14/15 in the accent red. The
+// only link in a section head, so it never needs a hover colour of its own to
+// read as interactive: it stays red and gains a focus ring.
 .home-page__see-all {
   color: #ec3013;
-  font-size: 0.875rem;
+  font-family: 'Archivo', sans-serif;
+  font-style: normal;
+  font-size: 0.875rem; // 14px
   font-weight: 600;
   line-height: 0.9375rem; // 15px
   text-decoration: none;
 
-  &:hover,
   &:focus-visible {
-    color: #fff;
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+    border-radius: 2px;
   }
 }
 

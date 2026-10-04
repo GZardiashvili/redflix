@@ -1,7 +1,7 @@
 import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router, RouterLink } from '@angular/router';
-import { Subject, debounceTime } from 'rxjs';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { Subject, debounceTime, filter } from 'rxjs';
 import { toApiError } from '../../../core/api/api-error';
 import { Movie } from '../../../core/models/movie';
 import { MoviesService } from '../../../core/services/movies.service';
@@ -117,6 +117,33 @@ export class AppHeaderSearch {
       next: (query) => this.runSearch(query),
       error: () => this.status.set('error'),
     });
+
+    // The query and its dropdown belong to the page the visitor was on: any
+    // completed navigation (a result, the brand link, any other route change)
+    // resets both, so nothing stale is carried into the next page.
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => this.reset());
+  }
+
+  /**
+   * Clears the query and hides the dropdown without touching focus.
+   *
+   * Separate from {@link clearQuery}, which is the user's own "×" and returns
+   * focus to the input — focus must not jump here, because a navigation has
+   * already moved the visitor's attention elsewhere.
+   */
+  private reset(): void {
+    this.query.set('');
+    this.results.set([]);
+    this.activeIndex.set(-1);
+    this.errorMessage.set('');
+    this.sequence += 1;
+    this.status.set('prompt');
+    this.open.set(false);
   }
 
   protected onQueryChange(value: string): void {
@@ -170,19 +197,13 @@ export class AppHeaderSearch {
   /** Navigates to the movie and records its Recently Viewed snapshot. */
   protected openMovie(movie: Movie): void {
     this.recentlyViewed.record(movie);
-    this.closePanel();
+    this.reset();
     void this.router.navigate(['/movies', movie.slug]);
   }
 
   /** Clears the query back to the prompt panel without leaving a stale request. */
   protected clearQuery(): void {
-    this.query.set('');
-    this.results.set([]);
-    this.activeIndex.set(-1);
-    this.errorMessage.set('');
-    this.sequence += 1;
-    this.status.set('prompt');
-
+    this.reset();
     this.inputRef()?.nativeElement.focus();
   }
 

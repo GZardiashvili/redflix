@@ -100,7 +100,12 @@
       </app-form-field>
     </div>
 
-    <button class="register-modal__submit" type="submit" [disabled]="loading()">
+    <button
+      class="register-modal__submit"
+      type="submit"
+      [disabled]="!canSubmit"
+      [attr.aria-busy]="loading()"
+    >
       @if (loading()) {
         <app-loading-indicator size="sm" label="Creating your account" />
       } @else {

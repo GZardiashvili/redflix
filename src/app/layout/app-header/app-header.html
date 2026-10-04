@@ -136,6 +136,7 @@
                   class="app-header__menu-item"
                   role="menuitem"
                   routerLink="/profile"
+                  [queryParams]="{ tab: 'personal-info' }"
                   (click)="closeMenu()"
                 >
                   <svg
@@ -167,6 +168,7 @@
                   class="app-header__menu-item"
                   role="menuitem"
                   routerLink="/profile"
+                  [queryParams]="{ tab: 'tickets' }"
                   (click)="closeMenu()"
                 >
                   <svg

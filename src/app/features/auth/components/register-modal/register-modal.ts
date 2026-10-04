@@ -72,6 +72,10 @@ export class RegisterModal implements OnDestroy {
   /** Preview URL for the accepted avatar, or `null`. */
   protected readonly avatarPreview = signal<string | null>(null);
 
+  protected get canSubmit(): boolean {
+    return !this.loading() && !this.form.pristine && this.form.valid && this.avatarError() === null;
+  }
+
   /** Client-side or server-side avatar message, or `null`. */
   protected readonly avatarError = signal<string | null>(null);
 

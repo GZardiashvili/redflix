@@ -1,4 +1,15 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  linkedSignal,
+  signal,
+  untracked,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
+import { map } from 'rxjs';
 import { AuthReplayService } from '../../core/services/auth-replay.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ErrorState } from '../../shared/ui/error-state/error-state';
@@ -9,6 +20,20 @@ import { TicketsService } from './tickets/tickets.service';
 
 /** The two top-level sections of the Profile page, per the supplied design. */
 export type ProfileSection = 'info' | 'tickets';
+
+/** URL value of the `tab` query parameter for each section. */
+const SECTION_TAB_PARAM: Record<ProfileSection, string> = {
+  info: 'personal-info',
+  tickets: 'tickets',
+};
+
+/** `?tab=` values (including the legacy `upcoming` alias) mapped to a section. */
+const SECTION_BY_TAB_PARAM: Record<string, ProfileSection> = {
+  'personal-info': 'info',
+  info: 'info',
+  tickets: 'tickets',
+  upcoming: 'tickets',
+};
 
 /**
  * The Personal Information page, and the gate in front of it.
@@ -24,6 +49,18 @@ export type ProfileSection = 'info' | 'tickets';
  * 401 uses — so there is no second login mechanism on this page; dismissing it
  * leaves a sign-in prompt rather than profile data.
  */
+/**
+ * The section a `?tab=` value names, defaulting to Personal Information for an
+ * absent or unrecognised value so a hand-edited URL still lands somewhere valid.
+ */
+function sectionFromTab(tab: string | null): ProfileSection {
+  if (tab === null) {
+    return 'info';
+  }
+
+  return SECTION_BY_TAB_PARAM[tab] ?? 'info';
+}
+
 @Component({
   imports: [ErrorState, LoadingIndicator, ProfileForm, ProfileTickets],
   providers: [TicketsService],
@@ -35,6 +72,21 @@ export class ProfilePage {
   protected readonly auth = inject(AuthService);
   private readonly replay = inject(AuthReplayService);
   private readonly ticketsService = inject(TicketsService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+
+  /**
+   * The section the URL asks for (`?tab=personal-info` / `?tab=tickets`).
+   *
+   * Read from the router, not stored: the navbar dropdown, the order
+   * confirmation's "My Tickets" button and a pasted URL all arrive the same way,
+   * so there is one source of truth and changing tabs never needs a reload.
+   * An unknown or absent value falls back to Personal Information.
+   */
+  private readonly requestedSection = toSignal(
+    this.route.queryParamMap.pipe(map((params) => params.get('tab'))),
+    { initialValue: null },
+  );
 
   /**
    * Which top-level section is visible.
@@ -43,8 +95,14 @@ export class ProfilePage {
    * second, per the ticket screenshots. Both children stay mounted and are only
    * hidden, so switching sections never destroys the profile form state and the
    * ticket list keeps its loaded response.
+   *
+   * A `linkedSignal` over the query parameter: the URL sets the section, and a
+   * local tab click overrides it until the router reports something new.
    */
-  protected readonly activeSection = signal<ProfileSection>('info');
+  protected readonly activeSection = linkedSignal<ProfileSection, ProfileSection>({
+    source: () => sectionFromTab(this.requestedSection()),
+    computation: (section) => section,
+  });
 
   /** Which Upcoming/Past list the tickets section shows. Owned by the page. */
   protected readonly ticketsTab = signal<TicketsTab>('upcoming');
@@ -89,6 +147,22 @@ export class ProfilePage {
 
       this.requestLogin();
     });
+
+    // A freshly purchased ticket must be there the moment My Tickets opens, so
+    // opening the section re-reads `GET /tickets`. The collection read is
+    // untracked: only the section may trigger a refresh, otherwise each response
+    // would schedule the next one.
+    effect(() => {
+      if (this.activeSection() !== 'tickets') {
+        return;
+      }
+
+      if (untracked(() => this.ticketsService.tickets()) === null) {
+        return;
+      }
+
+      void this.ticketsService.reload();
+    });
   }
 
   /** Retries the session restore the page failed to read; nothing is re-fetched here. */
@@ -96,9 +170,22 @@ export class ProfilePage {
     void this.auth.restoreSession();
   }
 
-  /** Shows one top-level section; the other stays mounted but hidden. */
+  /**
+   * Shows one top-level section; the other stays mounted but hidden.
+   *
+   * The query parameter is the source of truth, so the click writes it rather
+   * than only moving local state — the URL then always describes what is on
+   * screen, and a refresh or a shared link lands on the same section.
+   */
   protected selectSection(section: ProfileSection): void {
     this.activeSection.set(section);
+
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: SECTION_TAB_PARAM[section] },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   /**

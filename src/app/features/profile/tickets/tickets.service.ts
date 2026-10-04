@@ -166,6 +166,17 @@ export class TicketsService {
     this.refundFailureState.set(null);
   }
 
+  /**
+   * Re-reads the tickets on demand, bypassing the in-flight guard.
+   *
+   * Used when the visitor has just bought a ticket and opens My Tickets: the
+   * response already in memory cannot contain the new order, and a request that
+   * happens to be running was issued before the purchase.
+   */
+  async reload(): Promise<void> {
+    await this.reloadAfterRefund();
+  }
+
   /** Refreshes the collection after a refund without the duplicate guard. */
   private async reloadAfterRefund(): Promise<void> {
     this.loadingState.set(true);

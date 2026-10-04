@@ -68,7 +68,17 @@
     color-scheme: dark;
   }
 
+  // Preferred Venue: the native arrow is suppressed and replaced with the same
+  // chevron the other controls use, so the right inset matches the text inputs
+  // instead of sitting flush against the field's right edge.
   &.profile-form__select {
+    appearance: none;
+    padding-right: 2.75rem; // 44px: 16px inset + 16px chevron + breathing room
+    background-color: #1e2031;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m3.5 6 4.5 4.5L12.5 6' stroke='%23a9a9a9' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1rem 1rem;
     color-scheme: dark;
     cursor: pointer;
   }

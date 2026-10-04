@@ -12,7 +12,10 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  min-height: 0;
+  // The dark surface must reach the bottom of the viewport on a short page and
+  // stay the page background on a long one — never a fixed height that stops
+  // painting half way down and exposes the raw canvas below.
+  min-height: 100vh;
 }
 
 .profile-page {
