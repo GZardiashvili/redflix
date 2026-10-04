@@ -1,6 +1,6 @@
 import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Movie } from '../../../../core/models/movie';
+import { Movie, primaryGenre } from '../../../../core/models/movie';
 import { RecentlyViewedService } from '../../../../core/services/recently-viewed.service';
 
 /** Delay between automatic slide advances of the hero carousel. */
@@ -94,6 +94,20 @@ export class HomeHero implements OnInit {
     if (movie !== undefined) {
       this.recentlyViewed.record(movie);
     }
+  }
+
+  /**
+   * The red label above the poster title: the film's category and its format,
+   * e.g. `Drama · IMAX`.
+   *
+   * Both are optional in the API contract, so a title that has neither renders no
+   * label at all rather than a lone separator. Uppercasing is the stylesheet's
+   * job, which keeps the copy here as the API's own.
+   */
+  protected badgeLabel(movie: Movie): string {
+    return [primaryGenre(movie.genres), movie.formats[0]?.name ?? '']
+      .filter((part) => part !== '')
+      .join(' · ');
   }
 
   private restartAutoplay(): void {

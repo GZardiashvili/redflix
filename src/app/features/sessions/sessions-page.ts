@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Subject, debounceTime, distinctUntilChanged, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { toApiError } from '../../core/api/api-error';
 import { SortOption } from '../../core/models/filter-options';
 import {
@@ -31,9 +31,6 @@ import {
   SessionsUrlState,
 } from './utils/sessions-url.utils';
 
-/** Quiet period after the last keystroke before the search becomes a request. */
-const SEARCH_DEBOUNCE_MS = 400;
-
 /** Sort list used only before `/filter-options` has resolved. */
 const EMPTY_SORT_OPTIONS: SortOption[] = [];
 
@@ -46,6 +43,10 @@ const EMPTY_SORT_OPTIONS: SortOption[] = [];
  * components and refetches, and writes every user action back to the URL. Because
  * that round-trip is idempotent, Back/Forward restores a previous view without the
  * children re-emitting.
+ *
+ * The toolbar's search field is gone — the header typeahead owns film search — so
+ * `search` is now written only by the URL. A `/sessions?q=…` link still narrows
+ * the list, which is what the typeahead's "browse" links rely on.
  */
 @Component({
   imports: [
@@ -68,9 +69,6 @@ export class SessionsPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
-  /** Raw search text from the toolbar; debounced before it reaches the URL. */
-  private readonly searchInput = new Subject<string>();
-
   /** URL state at construction, so the very first render already matches the address bar. */
   private readonly initialState = parseSessionsUrl(this.route.snapshot.queryParams);
 
@@ -83,8 +81,8 @@ export class SessionsPage {
   /** Sort id; mirrored from the URL, defaulting to the API's own default. */
   protected readonly sort = signal(this.initialState.sort);
 
-  /** Film-title search; mirrored from the URL. */
-  protected readonly search = signal(this.initialState.search);
+  /** Film-title search; mirrored from the URL, which is now its only writer. */
+  private readonly search = signal(this.initialState.search);
 
   /** Requested page; mirrored from the URL. */
   protected readonly page = signal(this.initialState.page);
@@ -131,18 +129,11 @@ export class SessionsPage {
 
   constructor() {
     // `queryParams` replays its current value on subscribe, so this performs the
-    // initial load and then reacts to every later change — a filter, date, sort,
-    // search or page change, as well as a Back/Forward navigation.
+    // initial load and then reacts to every later change — a filter, date, sort or
+    // page change, as well as a Back/Forward navigation.
     this.route.queryParams
       .pipe(takeUntilDestroyed())
       .subscribe((params) => this.applyUrlState(params));
-
-    // Keystrokes are debounced and de-duplicated, so only a settled query becomes
-    // a request. This feeds off the toolbar's output rather than the URL, so the
-    // URL echo that follows a search cannot start another one.
-    this.searchInput
-      .pipe(debounceTime(SEARCH_DEBOUNCE_MS), distinctUntilChanged(), takeUntilDestroyed())
-      .subscribe((search) => this.onSearchChange(search));
   }
 
   /** Fetches the showtimes for the current date and filter selection. */
@@ -177,16 +168,6 @@ export class SessionsPage {
   protected onFiltersChange(filters: SessionsFiltersValue): void {
     this.filters.set(filters);
     this.navigate({ ...this.currentState(), ...filters, page: FIRST_PAGE });
-  }
-
-  /** A keystroke in the toolbar's search field; debounced before it is applied. */
-  protected onSearchInput(value: string): void {
-    this.searchInput.next(value);
-  }
-
-  /** A settled search term; applied like any other filter, so the page resets. */
-  protected onSearchChange(search: string): void {
-    this.navigate({ ...this.currentState(), search, page: FIRST_PAGE });
   }
 
   /** A sort was chosen in the toolbar; applied like any other filter. */

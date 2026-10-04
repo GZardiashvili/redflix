@@ -1,40 +1,20 @@
 <div class="top-bar">
   <p class="top-bar__summary">{{ summary() }}</p>
 
-  <div class="top-bar__controls">
-    <label class="top-bar__search">
-      <svg class="top-bar__search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path
-          d="M11 4a7 7 0 1 1 0 14 7 7 0 0 1 0-14Zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm4.9 10.3 4.2 4.2-1.4 1.4-4.2-4.2 1.4-1.4Z"
-        />
-      </svg>
-      <span class="visually-hidden">Search sessions by film title</span>
-      <input
-        class="top-bar__search-input"
-        type="search"
-        name="sessions-search"
-        autocomplete="off"
-        placeholder="Search by film title"
-        [value]="search()"
-        (input)="onSearchInput($any($event.target).value)"
-      />
-    </label>
-
-    <label class="top-bar__sort">
-      <span class="top-bar__sort-label">Sort:</span>
-      <select
-        class="top-bar__sort-select"
-        name="sessions-sort"
-        [value]="sort()"
-        (change)="onSortChange($any($event.target).value)"
-      >
-        @for (option of sortOptions(); track option.id) {
-          <option class="top-bar__sort-option" [value]="option.id">{{ option.label }}</option>
-        }
-      </select>
-      <svg class="top-bar__sort-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M6 9.5 12 15.5 18 9.5" />
-      </svg>
-    </label>
-  </div>
+  <label class="top-bar__sort">
+    <span class="top-bar__sort-label">Sort:</span>
+    <select
+      class="top-bar__sort-select"
+      name="sessions-sort"
+      [value]="sort()"
+      (change)="onSortChange($any($event.target).value)"
+    >
+      @for (option of sortOptions(); track option.id) {
+        <option class="top-bar__sort-option" [value]="option.id">{{ option.label }}</option>
+      }
+    </select>
+    <svg class="top-bar__sort-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M6 9.5 12 15.5 18 9.5" />
+    </svg>
+  </label>
 </div>

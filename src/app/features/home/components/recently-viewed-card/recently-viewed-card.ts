@@ -22,8 +22,8 @@ export class RecentlyViewedCard {
   /** Snapshotted movie summary. */
   readonly movie = input.required<RecentlyViewedMovie>();
 
-  /** Snapshotted genre names for the meta row; `''` when none were captured. */
-  protected readonly genreLabel = computed(() => this.movie().genreNames.join(', '));
+  /** The snapshotted genre for the meta row; `''` when none was captured. */
+  protected readonly genreLabel = computed(() => this.movie().genreNames[0] ?? '');
 
   private readonly recentlyViewed = inject(RecentlyViewedService);
 

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, output, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, inject, output, signal, viewChild } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -80,6 +80,14 @@ export class RegisterModal implements OnDestroy {
   protected readonly avatarError = signal<string | null>(null);
 
   /**
+   * The file input covering the avatar row, reached to clear its value.
+   *
+   * It is the control the whole row clicks through to, so removing an avatar has
+   * to reset it as well as the state.
+   */
+  protected readonly avatarInput = viewChild.required<ElementRef<HTMLInputElement>>('avatarInput');
+
+  /**
    * Username message, or `null`.
    *
    * `null` in both directions that matter: before the field has been engaged, and
@@ -153,11 +161,29 @@ export class RegisterModal implements OnDestroy {
     input.value = '';
   }
 
-  protected removeAvatar(): void {
+  /**
+   * Drops the chosen avatar and revokes its preview URL.
+   *
+   * The click is stopped and defaulted so it can never reach the file input
+   * underneath: the whole avatar row is covered by an invisible `<input
+   * type="file">` that turns any click on it into "browse for a file", which is
+   * what used to happen instead of removing the picture.
+   *
+   * The input's own value is cleared too, so choosing the same file again still
+   * counts as a change and reopens the preview instead of being swallowed as an
+   * unchanged selection.
+   */
+  protected removeAvatar(event: MouseEvent): void {
+    event.stopPropagation();
+    event.preventDefault();
+
     this.revokePreview();
     this.avatar.set(null);
     this.avatarPreview.set(null);
     this.avatarError.set(null);
+
+    const input = this.avatarInput().nativeElement;
+    input.value = '';
   }
 
   protected async submit(): Promise<void> {

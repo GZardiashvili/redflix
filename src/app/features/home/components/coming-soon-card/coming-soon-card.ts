@@ -1,5 +1,5 @@
 import { Component, computed, input, output } from '@angular/core';
-import { Movie, formatGenres } from '../../../../core/models/movie';
+import { Movie, primaryGenre } from '../../../../core/models/movie';
 import { LoadingIndicator } from '../../../../shared/ui/loading/loading-indicator';
 import { RatingBadge } from '../../../../shared/ui/rating-badge/rating-badge';
 
@@ -21,8 +21,8 @@ export class ComingSoonCard {
   /** Movie summary rendered by this card. */
   readonly movie = input.required<Movie>();
 
-  /** Genre names for the meta row; `''` when the movie has none. */
-  protected readonly genreLabel = computed(() => formatGenres(this.movie().genres));
+  /** Genre for the meta row; `''` when the movie has none. */
+  protected readonly genreLabel = computed(() => primaryGenre(this.movie().genres));
 
   /** Whether a notify request (or its login gate) is currently running. */
   readonly notifyPending = input(false);

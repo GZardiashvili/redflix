@@ -62,8 +62,17 @@
   padding: 0;
 }
 
-.home-hero__kicker {
-  display: none;
+// Category label above the poster title, in the accent red of the design.
+.home-hero__badge-label {
+  margin: 0 0 0.5rem; // 8px
+  color: #ec3013;
+  font-family: 'Archivo', sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 0.75rem; // 12px
+  line-height: 0.8125rem; // 13px
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .home-hero__title {

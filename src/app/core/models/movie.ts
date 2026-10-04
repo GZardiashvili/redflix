@@ -35,13 +35,14 @@ export interface Genre {
 }
 
 /**
- * The genre names of a movie as a single label, `''` when it has none.
+ * The single category a card shows for a movie, `''` when it has none.
  *
- * Cards and details pages show the names the API sends, joined rather than picked
- * between, so a title with two genres never hides one of them.
+ * The card rows have room for one label beside the runtime, and the design's
+ * cards carry a single category, so the API's own first genre is taken and the
+ * rest are left to the details page, which lists them all.
  */
-export function formatGenres(genres: readonly Genre[]): string {
-  return genres.map((genre) => genre.name).join(', ');
+export function primaryGenre(genres: readonly Genre[]): string {
+  return genres[0]?.name ?? '';
 }
 
 /**

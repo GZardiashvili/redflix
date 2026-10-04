@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
 import { AuthService } from '../../../../core/services/auth.service';
 import { RegisterModal } from './register-modal';
 
@@ -132,5 +133,88 @@ describe('RegisterModal validation', () => {
     fixture.detectChanges();
 
     expect(submit()?.disabled).toBe(true);
+  });
+});
+describe('RegisterModal avatar', () => {
+  let fixture: ComponentFixture<RegisterModal>;
+
+  const root = () => fixture.nativeElement as HTMLElement;
+  const avatarInput = () => root().querySelector<HTMLInputElement>('#register-avatar');
+  const removeButton = () =>
+    root().querySelector<HTMLButtonElement>('.register-modal__avatar-remove');
+  const preview = () => root().querySelector<HTMLImageElement>('.register-modal__avatar-preview');
+
+  /** Object URLs are a browser API jsdom does not implement. */
+  let createObjectURL: ReturnType<typeof vi.fn>;
+  let revokeObjectURL: ReturnType<typeof vi.fn>;
+
+  /** Picks a file the way the browser does: a `files` list, then a change event. */
+  function choose(file: File): void {
+    const input = avatarInput()!;
+    Object.defineProperty(input, 'files', { configurable: true, value: [file] });
+    input.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+  }
+
+  beforeEach(async () => {
+    createObjectURL = vi.fn(() => 'blob:avatar');
+    revokeObjectURL = vi.fn();
+    vi.stubGlobal('URL', Object.assign(URL, { createObjectURL, revokeObjectURL }));
+
+    await TestBed.configureTestingModule({
+      imports: [RegisterModal],
+      providers: [{ provide: AuthService, useValue: { register: () => Promise.resolve() } }],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(RegisterModal);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('previews an accepted image', () => {
+    choose(new File(['png'], 'avatar.png', { type: 'image/png' }));
+
+    expect(preview()).not.toBeNull();
+    expect(removeButton()?.textContent?.trim()).toBe('Remove');
+  });
+
+  it('removes the avatar instead of opening the file picker', () => {
+    choose(new File(['png'], 'avatar.png', { type: 'image/png' }));
+
+    const button = removeButton()!;
+    // Registered after Angular's own handler, so it sees the settled event: the
+    // prevented default is what stops the click from activating anything else,
+    // the invisible file input covering the avatar row included.
+    const seen: MouseEvent[] = [];
+    button.addEventListener('click', (event) => seen.push(event));
+
+    button.click();
+    fixture.detectChanges();
+
+    expect(seen[0].defaultPrevented).toBe(true);
+    expect(preview()).toBeNull();
+    expect(removeButton()).toBeNull();
+  });
+
+  it('releases the preview and resets the input so the same file can be chosen again', () => {
+    choose(new File(['png'], 'avatar.png', { type: 'image/png' }));
+    expect(createObjectURL).toHaveBeenCalledOnce();
+
+    // jsdom keeps no file selection of its own, so this stands in for the value
+    // the browser leaves on the input after a pick.
+    Object.defineProperty(avatarInput()!, 'value', {
+      configurable: true,
+      writable: true,
+      value: 'C:\\fakepath\\avatar.png',
+    });
+
+    removeButton()!.click();
+    fixture.detectChanges();
+
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:avatar');
+    expect(avatarInput()!.value).toBe('');
   });
 });

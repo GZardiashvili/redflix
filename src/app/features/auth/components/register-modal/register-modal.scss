@@ -122,7 +122,12 @@
   font-size: 0.8125rem;
 }
 
+// Lifted above the file input that covers the whole avatar row: otherwise the
+// click lands on that input, which opens the file browser instead of running
+// this button. `z-index` needs a positioned element to apply to.
 .register-modal__avatar-remove {
+  position: relative;
+  z-index: 1;
   padding: 0;
   border: 0;
   background: none;
@@ -132,9 +137,13 @@
   cursor: pointer;
 }
 
+// The invisible control that makes the avatar row click-to-browse. It spans the
+// row on purpose — the label's `for` alone would only cover its own text — so
+// everything interactive above it has to sit on a higher layer.
 .register-modal__avatar-input {
   position: absolute;
   inset: 0;
+  z-index: 0;
   opacity: 0;
   cursor: pointer;
 }

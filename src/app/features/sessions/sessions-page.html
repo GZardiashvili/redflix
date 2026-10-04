@@ -15,10 +15,8 @@
     <section class="sessions-content" aria-label="Showtimes">
       <app-sessions-top-bar
         [totalSessions]="totalSessionCount()"
-        [search]="search()"
         [sort]="sort()"
         [sortOptions]="sortOptions()"
-        (searchChanged)="onSearchInput($event)"
         (sortChanged)="onSortChange($event)"
       />
 

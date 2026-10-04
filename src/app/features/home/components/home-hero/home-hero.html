@@ -13,6 +13,10 @@
         <div class="home-hero__overlay" aria-hidden="true"></div>
 
         <div class="home-hero__content">
+          @if (badgeLabel(slide); as label) {
+            <p class="home-hero__badge-label">{{ label }}</p>
+          }
+
           <h2 class="home-hero__title">{{ slide.title }}</h2>
 
           <ul class="home-hero__badges" aria-label="Movie details">

@@ -31,9 +31,12 @@
   }
 }
 
+// Magnifier of the design, left of the field: 14px glyph in the bar's own 16px
+// side padding, and always present so the control reads as a search box before
+// anything is typed.
 .header-search__icon {
-  width: 1.125rem;
-  height: 1.125rem;
+  width: 0.875rem; // 14px
+  height: 0.875rem;
   flex-shrink: 0;
 }
 

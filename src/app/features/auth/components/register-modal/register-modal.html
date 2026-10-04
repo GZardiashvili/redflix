@@ -34,7 +34,11 @@
         @if (avatar(); as file) {
           <p class="register-modal__avatar-file">
             {{ file.name }}
-            <button class="register-modal__avatar-remove" type="button" (click)="removeAvatar()">
+            <button
+              class="register-modal__avatar-remove"
+              type="button"
+              (click)="removeAvatar($event)"
+            >
               Remove
             </button>
           </p>
@@ -42,6 +46,7 @@
       </div>
 
       <input
+        #avatarInput
         id="register-avatar"
         class="register-modal__avatar-input"
         type="file"

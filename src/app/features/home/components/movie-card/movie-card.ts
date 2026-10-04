@@ -1,6 +1,6 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Movie, formatGenres } from '../../../../core/models/movie';
+import { Movie, primaryGenre } from '../../../../core/models/movie';
 import { RecentlyViewedService } from '../../../../core/services/recently-viewed.service';
 import { RatingBadge } from '../../../../shared/ui/rating-badge/rating-badge';
 
@@ -21,8 +21,8 @@ export class MovieCard {
   /** Movie summary rendered by this card. */
   readonly movie = input.required<Movie>();
 
-  /** Genre names for the meta row; `''` when the movie has none. */
-  protected readonly genreLabel = computed(() => formatGenres(this.movie().genres));
+  /** Genre for the meta row; `''` when the movie has none. */
+  protected readonly genreLabel = computed(() => primaryGenre(this.movie().genres));
 
   private readonly recentlyViewed = inject(RecentlyViewedService);
 
