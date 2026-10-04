@@ -1,20 +1,108 @@
+// The host holds the row's layout: it is the flex item the `.home-page__cards` row
+// measures, so it keeps the collapsed 260px width. The card inside it grows past
+// that width on hover instead of the host growing with it — which is what keeps the
+// expansion out of the flow, so no neighbour in the row ever moves.
+:host {
+  display: block;
+  width: 16.25rem; // 260px
+}
+
 .movie-card {
+  position: relative;
+  z-index: 0;
   display: flex;
   flex-direction: column;
   gap: 0.625rem;
-  width: 16.25rem;
-  min-height: 28.25rem;
+  width: 16.25rem; // 260px
+  min-height: 28.25rem; // 452px
   padding: 0.75rem;
   border-radius: 1.25rem;
   background: #1e2031;
   color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+  // `width` rather than a scale transform: the design's expansion is a wider tile
+  // with a landscape crop, not a uniformly magnified one, and a transform would
+  // stretch the type along with the box. Neither property is a layout property of
+  // the host, so neither reflows the row.
+  transition:
+    width 0.3s ease,
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
+
+  &:hover,
+  &:focus-visible {
+    // Lifted above the neighbouring tiles it now overlaps.
+    z-index: 1;
+    width: 26.25rem; // 420px — the design's expanded Card_large
+    background: #242639;
+    box-shadow: 0 1.25rem 2.5rem rgb(0 0 0 / 45%);
+
+    .movie-card__poster {
+      // The expanded tile shows a landscape crop rather than the collapsed portrait
+      // one, so the poster gives up exactly the 58.8px the synopsis band takes. That
+      // balance is what holds the card's height steady across the transition: the
+      // band opens exactly as much as the poster closes.
+      height: 15.075rem; // 241.2px = 18.75rem - the 3.675rem band
+    }
+
+    .movie-card__synopsis {
+      max-height: 3.675rem;
+      opacity: 1;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ec3013;
+    outline-offset: 2px;
+  }
 }
 
+// Derived from the card rather than fixed, so the image tracks the card's animated
+// width without a second transition to keep in step with it.
+//
+// `min-height: 0` lets the poster shrink instead of letting the card grow when a
+// title wraps to a second line, so every card in the row stays the height the
+// design draws whatever its copy.
 .movie-card__poster {
-  width: 14.75rem;
-  height: 18.75rem;
+  width: calc(100% - 1.5rem);
+  height: 18.75rem; // 300px
+  min-height: 0;
   border-radius: 0.875rem;
   object-fit: cover;
+  transition: height 0.3s ease;
+}
+
+// The synopsis band, revealed by the expanded state.
+//
+// Collapsed it takes no space rather than sitting there transparent: the design's
+// resting card has no synopsis band, so a reserved one would make every card on the
+// page taller than the design draws it.
+//
+// Adding this element to the column adds one 10px row gap, so the negative margins
+// (one above, one below) give back exactly that 10px and a collapsed card occupies
+// precisely what it did before the band existed. They stay negative in the expanded
+// state as well, which leaves the band contributing only its own height — and the
+// poster gives up that same 3.675rem. Two equal and opposite changes are what hold
+// the card's height steady through the transition, so nothing in the row moves.
+//
+// `max-height` is what animates, and it animates to the exact three-line height so
+// the reveal is a clean wipe rather than a guess at the content's height.
+// `-webkit-line-clamp` then caps the copy at three lines with an ellipsis.
+.movie-card__synopsis {
+  display: -webkit-box;
+  margin-block: -0.3125rem; // -5px each side, cancelling the one added row gap
+  max-height: 0;
+  overflow: hidden;
+  color: #a9a9a9;
+  font-size: 0.875rem; // 14px
+  line-height: 1.4; // 19.6px a line, so three lines are exactly the 3.675rem below
+  opacity: 0;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .movie-card__title {
@@ -53,6 +141,10 @@
 // The card's CTA: the same red pill as the hero's, so the two entry points into
 // a movie read as one control at different scales. The hero carries the ticket
 // icon; on the card the label alone keeps the pill's width proportional.
+//
+// A styled `<span>`, not a link: the card itself is the single link to the movie
+// (see the template), and an anchor inside an anchor is invalid HTML. Its hover
+// treatment is kept so the pill still responds, but the pointer belongs to the card.
 .movie-card__action {
   display: flex;
   align-items: center;
@@ -69,12 +161,16 @@
   text-decoration: none;
   white-space: nowrap;
 
-  &:hover {
+  .movie-card:hover & {
     background: #ff4d30;
   }
+}
 
-  &:focus-visible {
-    outline: 2px solid #fff;
-    outline-offset: 2px;
+// Reduced motion: the expanded card is still revealed, it simply arrives at once.
+@media (prefers-reduced-motion: reduce) {
+  .movie-card,
+  .movie-card__poster,
+  .movie-card__synopsis {
+    transition: none;
   }
 }

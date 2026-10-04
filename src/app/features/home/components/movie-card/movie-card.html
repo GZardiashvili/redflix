@@ -1,4 +1,4 @@
-<article class="movie-card">
+<a class="movie-card" [routerLink]="['/movies', movie().slug]" (click)="recordView()">
   <img
     class="movie-card__poster"
     [src]="movie().posterUrl"
@@ -18,11 +18,24 @@
 
   <app-rating-badge [code]="movie().ageRating.code" />
 
+  <!--
+      Revealed by the expanded state, and held at zero height while collapsed so the
+      resting card stays the height the design draws it (see the stylesheet for how
+      the band and the poster trade height).
+
+      The catalogue contract does not guarantee `synopsis` and the API sends an empty
+      string for a title without copy, so the paragraph renders empty rather than
+      inventing a placeholder.
+    -->
+  <p class="movie-card__synopsis">{{ movie().synopsis ?? '' }}</p>
+
   <div class="movie-card__footer">
     <p class="movie-card__price">From {{ movie().fromPrice }} ₾</p>
 
-    <a class="movie-card__action" [routerLink]="['/movies', movie().slug]" (click)="recordView()">
-      Buy ticket
-    </a>
+    <!--
+        A styled label rather than a second link: the card itself is the single link
+        to the movie, and nesting one anchor inside another is invalid HTML.
+      -->
+    <span class="movie-card__action">Buy ticket</span>
   </div>
-</article>
+</a>

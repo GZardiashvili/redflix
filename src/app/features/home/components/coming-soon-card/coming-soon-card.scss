@@ -4,6 +4,12 @@
 //
 // The card is `min-height` rather than a fixed height because the notify error
 // message is allowed to grow the column rather than clip its own retry control.
+//
+// The hover treatment is the design's subtle one: a hairline light border and a
+// soft lift. Both are box properties rather than layout ones, so the row never
+// reflows, and `box-sizing: border-box` (global) keeps the reserved 1px from
+// changing the card's size. `overflow: visible` is the default and is what lets
+// the shadow paint outside the row's own bounds.
 .coming-soon-card {
   display: flex;
   flex-direction: row;
@@ -11,9 +17,28 @@
   width: 29.375rem; // 470px
   min-height: 10rem; // 160px
   padding: 0.75rem; // 12px
+  border: 1px solid transparent;
   border-radius: 1.25rem; // 20px
   background: #1e2031;
   color: #fff;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+
+  &:hover {
+    border-color: rgb(255 255 255 / 16%);
+    background: #242639;
+    box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 35%);
+  }
+}
+
+// Reduced motion: the hover treatment still applies, it just arrives at once.
+@media (prefers-reduced-motion: reduce) {
+  .coming-soon-card {
+    transition: none;
+  }
 }
 
 // The design crops the backdrop to a wide 16:9-ish tile rather than a poster
