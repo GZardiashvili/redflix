@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { Modal } from '../../../../shared/ui/modal/modal';
 import { BookingContext } from '../../booking-context';
+import { BookingEntryService } from '../../booking-entry.service';
 import { BookingHoldService } from '../../booking-hold.service';
 import { BookingStateService } from '../../booking-state.service';
 import { BookingHeader } from '../booking-header/booking-header';
@@ -43,6 +44,7 @@ import { HoldTimer } from '../hold-timer/hold-timer';
 })
 export class BookingModal {
   private readonly booking = inject(BookingStateService);
+  private readonly entry = inject(BookingEntryService);
   private readonly hold = inject(BookingHoldService);
 
   /** Whether the dialog is showing. Owned by the booking state. */
@@ -72,9 +74,15 @@ export class BookingModal {
    * The release is fired and forgotten, and the dialog closes straight away: a
    * visitor who has abandoned a booking should not be kept waiting on a
    * background request to free seats that the countdown would free anyway.
+   *
+   * Closing also clears the entry service's parked screening. The dialog is
+   * mounted for the whole session, so this is the single point every exit passes
+   * through; leaving a screening parked there would let a later, unrelated auth
+   * change reopen the booking dialog for a screening the visitor abandoned.
    */
   protected close(): void {
     this.hold.release();
+    this.entry.reset();
     this.booking.close();
   }
 }

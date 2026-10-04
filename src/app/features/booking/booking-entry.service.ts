@@ -108,6 +108,24 @@ export class BookingEntryService {
     this.advance();
   }
 
+  /**
+   * Drops any parked screening and its one-shot gate flags.
+   *
+   * Called when the booking dialog closes, however it closed. Without it a
+   * screening parked at the login or profile gate would outlive the visit: the
+   * next time auth state changed for any reason — a login from the header, a
+   * token refresh — the effect above would fire and open the booking dialog for
+   * a screening the visitor had already walked away from.
+   *
+   * Harmless when nothing is parked, which is the common case: the screening has
+   * already moved into {@link BookingStateService} and is cleared by that state.
+   */
+  reset(): void {
+    this.pendingState.set(null);
+    this.profileRequestedFor = null;
+    this.loginRequestedFor = null;
+  }
+
   /** Applies the auth and profile gates to the parked screening, if any. */
   private advance(): void {
     const pending = this.pendingState();
@@ -142,7 +160,9 @@ export class BookingEntryService {
    *
    * `waitForLogin()` completes on a successful login, which makes the effect
    * above run again and continue the booking; a dismissal rejects, which must
-   * not throw here and leaves the screening parked.
+   * not throw here. A dismissal is also a decision to abandon: the screening is
+   * dropped, so it cannot resurface on some later, unrelated auth change. The
+   * visitor who still wants it simply clicks the screening again.
    */
   private requestLogin(pending: BookingContext): void {
     if (this.loginRequestedFor === pending.sessionId) {
@@ -152,7 +172,7 @@ export class BookingEntryService {
     this.loginRequestedFor = pending.sessionId;
     this.replay.waitForLogin().subscribe({
       next: () => undefined,
-      error: () => undefined,
+      error: () => this.reset(),
     });
   }
 

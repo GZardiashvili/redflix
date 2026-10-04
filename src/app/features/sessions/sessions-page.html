@@ -52,9 +52,20 @@
           (retry)="loadSessions()"
         />
       } @else if (groups().length > 0) {
+        @if (bookingBlockedByProfile()) {
+          <p class="sessions-content__notice" role="status">
+            Complete your profile before buying tickets. Your chosen screening is kept.
+          </p>
+        }
+
         <div class="sessions-content__groups">
           @for (group of groups(); track group.movie.id; let last = $last) {
-            <app-session-movie-card [group]="group" (select)="onSelectSession($event)" />
+            <app-session-movie-card
+              [group]="group"
+              [ageRestricted]="isAgeRestricted(group.movie)"
+              [restrictionMessage]="restrictionCopy(group.movie)"
+              (select)="onSelectSession($event)"
+            />
 
             @if (!last) {
               <hr class="sessions-content__divider" />

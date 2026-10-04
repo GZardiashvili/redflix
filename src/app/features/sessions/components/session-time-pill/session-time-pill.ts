@@ -9,9 +9,10 @@ const LOW_SEATS = 5;
  * `Venue · Hall`, price and the remaining-seats badge.
  *
  * Sold-out sessions stay visible but disabled (opacity 0.4), so the time
- * remains legible as required by the API rules. The pill is presentational:
- * it emits `select` and the page owns whatever happens next (the booking flow
- * arrives in a later task).
+ * remains legible as required by the API rules. The same is true for a session
+ * the current account is too young for: `ageRestricted` is passed in rather than
+ * derived here, so the page owns the eligibility check and this component stays
+ * presentational.
  */
 @Component({
   selector: 'app-session-time-pill',
@@ -22,7 +23,19 @@ export class SessionTimePill {
   /** Showtime rendered by this pill. */
   readonly session = input.required<MovieSession>();
 
-  /** The pill was clicked; never fires for sold-out pills (they disable). */
+  /**
+   * Whether this pill is inert. A sold-out pill is always inert; an
+   * age-restricted one is inert because the page says so.
+   */
+  readonly disabled = input(false);
+
+  /** Whether `disabled` comes from the film's age rating rather than availability. */
+  readonly ageRestricted = input(false);
+
+  /** Why an age-restricted pill cannot be booked; shown as its tooltip. */
+  readonly restrictionReason = input('');
+
+  /** The pill was clicked; never fires for a disabled pill. */
   readonly select = output<MovieSession>();
 
   /** `Galleria Tbilisi · Hall D` */
@@ -42,7 +55,9 @@ export class SessionTimePill {
   protected readonly ariaLabel = computed(() => {
     const session = this.session();
     const availability = session.isSoldOut ? 'sold out' : `${session.seatsLeft} seats left`;
+    const age =
+      this.ageRestricted() && this.restrictionReason() ? `. ${this.restrictionReason()}` : '';
 
-    return `${session.time}, ${session.format.name}, ${session.language.name}, ${this.place()}, ₾${session.price}, ${availability}`;
+    return `${session.time}, ${session.format.name}, ${session.language.name}, ${this.place()}, ₾${session.price}, ${availability}${age}`;
   });
 }

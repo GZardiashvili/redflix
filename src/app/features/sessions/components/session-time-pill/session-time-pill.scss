@@ -27,6 +27,12 @@
     opacity: 0.4;
     cursor: not-allowed;
   }
+
+  // Age-restricted pills read as blocked rather than unavailable.
+  &--restricted {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
 }
 
 .session-pill__top {

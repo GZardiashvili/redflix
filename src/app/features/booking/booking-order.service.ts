@@ -4,6 +4,7 @@ import { ApiError, toApiError } from '../../core/api/api-error';
 import { Order, OrderRequest } from '../../core/models/order';
 import { OrdersService } from '../../core/services/orders.service';
 import { BookingHoldService } from './booking-hold.service';
+import { BookingEntryService } from './booking-entry.service';
 import { BookingStateService } from './booking-state.service';
 import { SeatSelectionService } from './seat-selection.service';
 
@@ -49,6 +50,7 @@ export interface OrderFailure {
 export class BookingOrderService {
   private readonly orders = inject(OrdersService);
   private readonly hold = inject(BookingHoldService);
+  private readonly entry = inject(BookingEntryService);
   private readonly booking = inject(BookingStateService);
   private readonly selection = inject(SeatSelectionService);
 
@@ -88,7 +90,9 @@ export class BookingOrderService {
    * can react without re-inspecting the HTTP response.
    *
    * On success the hold is consumed and the booking closed here rather than by
-   * the form, so no caller can end up with a paid order still on screen.
+   * the form, so no caller can end up with a paid order still on screen. The
+   * entry service is reset alongside it, so no screening stays parked once the
+   * order is through.
    */
   async submit(request: OrderRequest): Promise<Order> {
     if (!this.canSubmit()) {
@@ -105,6 +109,7 @@ export class BookingOrderService {
       this.hold.complete();
       this.selection.clear();
       this.booking.close();
+      this.entry.reset();
 
       return response.data;
     } catch (error) {

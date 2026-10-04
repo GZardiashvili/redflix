@@ -20,7 +20,13 @@
 
   <div class="session-card__pills">
     @for (session of group().sessions; track session.id) {
-      <app-session-time-pill [session]="session" (select)="select.emit($event)" />
+      <app-session-time-pill
+        [session]="session"
+        [disabled]="ageRestricted()"
+        [ageRestricted]="ageRestricted()"
+        [restrictionReason]="restrictionMessage()"
+        (select)="select.emit({ movie: group().movie, session: $event })"
+      />
     }
   </div>
 </article>
