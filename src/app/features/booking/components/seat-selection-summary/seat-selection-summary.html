@@ -1,9 +1,17 @@
 <section class="summary" aria-labelledby="booking-summary-heading">
-  <h3 class="summary__heading" id="booking-summary-heading">Your seats · Max {{ maxSeats() }}</h3>
+  <h3 class="summary__heading" id="booking-summary-heading">
+    @if (readOnly()) {
+      Your held seats
+    } @else {
+      Your seats · Max {{ maxSeats() }}
+    }
+  </h3>
 
-  <p class="summary__hint">
-    Pick up to {{ maxSeats() }} seats from the map. Each seat can carry its own ticket type.
-  </p>
+  @if (!readOnly()) {
+    <p class="summary__hint">
+      Pick up to {{ maxSeats() }} seats from the map. Each seat can carry its own ticket type.
+    </p>
+  }
 
   <!--
     The live region is always present so a notice is announced when it appears,
@@ -24,40 +32,56 @@
             <div class="summary__line-price">
               <span class="summary__amount">₾{{ line.price }}</span>
 
-              <button
-                type="button"
-                class="summary__remove"
-                [attr.aria-label]="'Remove seat ' + line.code"
-                (click)="removeSeat(line.seatId)"
-              >
-                &times;
-              </button>
+              <!--
+                Hidden once the seats are held: the server has reserved exactly
+                what is listed, so there is nothing here the visitor may still
+                change. Step 2's way back is the explicit Back control instead.
+              -->
+              @if (!readOnly()) {
+                <button
+                  type="button"
+                  class="summary__remove"
+                  [attr.aria-label]="'Remove seat ' + line.code"
+                  (click)="removeSeat(line.seatId)"
+                >
+                  &times;
+                </button>
+              }
             </div>
           </div>
 
           <hr class="summary__rule" />
 
-          <!--
-            One ticket-type group per seat: changing one seat's type cannot touch
-            another's, and each group is labelled by its own seat code.
-          -->
-          <div
-            class="summary__types"
-            role="group"
-            [attr.aria-label]="'Ticket type for seat ' + line.code"
-          >
-            @for (type of ticketTypes(); track type.id) {
-              <button
-                type="button"
-                class="summary__type"
-                [class.summary__type--active]="line.ticketType?.id === type.id"
-                [attr.aria-pressed]="line.ticketType?.id === type.id"
-                (click)="chooseTicketType(line.seatId, type.id)"
-              >
-                {{ type.name }} {{ type.percentage }}
-              </button>
-            }
-          </div>
+          @if (!readOnly()) {
+            <!--
+              One ticket-type group per seat: changing one seat's type cannot
+              touch another's, and each group is labelled by its own seat code.
+            -->
+            <div
+              class="summary__types"
+              role="group"
+              [attr.aria-label]="'Ticket type for seat ' + line.code"
+            >
+              @for (type of ticketTypes(); track type.id) {
+                <button
+                  type="button"
+                  class="summary__type"
+                  [class.summary__type--active]="line.ticketType?.id === type.id"
+                  [attr.aria-pressed]="line.ticketType?.id === type.id"
+                  (click)="chooseTicketType(line.seatId, type.id)"
+                >
+                  {{ type.name }} {{ type.percentage }}
+                </button>
+              }
+            </div>
+          } @else if (line.ticketType; as type) {
+            <!--
+              Read-only: the assigned type as plain text. It is stated rather
+              than omitted, because a held seat's ticket type is part of what is
+              being bought and hiding it would make the list ambiguous.
+            -->
+            <p class="summary__assigned">{{ type.name }}</p>
+          }
 
           @if (line.invalidReason; as reason) {
             <p class="summary__reason">{{ reason }}</p>
@@ -73,16 +97,23 @@
     <div class="summary__subtotal">
       <span class="summary__subtotal-label">Subtotal</span>
       <span class="summary__subtotal-rule"></span>
-      <span class="summary__amount summary__amount--total">₾{{ subtotal() }}</span>
+      <span class="summary__amount summary__amount--total">₾{{ total() }}</span>
     </div>
 
-    <button
-      type="button"
-      class="summary__next"
-      [disabled]="!canContinue()"
-      (click)="continueToCheckout()"
-    >
-      Next: Checkout
-    </button>
+    <!--
+      Only Step 1 has a way onward: on Step 2 the seats are held, so the forward
+      action belongs to the checkout form that this task does not build yet.
+    -->
+    @if (!readOnly()) {
+      <button
+        type="button"
+        class="summary__next"
+        [disabled]="!canContinue()"
+        [attr.aria-busy]="submitting()"
+        (click)="continueToCheckout()"
+      >
+        {{ submitting() ? 'Holding seats…' : 'Next: Checkout' }}
+      </button>
+    }
   </div>
 </section>

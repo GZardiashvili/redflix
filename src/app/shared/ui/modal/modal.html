@@ -16,14 +16,24 @@
       <div class="modal__header">
         <h2 class="modal__title" [id]="titleId">{{ title() }}</h2>
 
-        <button
-          type="button"
-          class="modal__close"
-          [attr.aria-label]="closeLabel()"
-          (click)="requestClose()"
-        >
-          &times;
-        </button>
+        <!--
+          Trailing group of the header: optional projected content — the booking
+          dialog's hold timer — followed by the close control. Grouped so the title
+          stays hard against the left edge and the rest sits together on the right,
+          whichever optional pieces are projected in.
+        -->
+        <div class="modal__header-aside">
+          <ng-content select="[modalHeaderAside]" />
+
+          <button
+            type="button"
+            class="modal__close"
+            [attr.aria-label]="closeLabel()"
+            (click)="requestClose()"
+          >
+            &times;
+          </button>
+        </div>
       </div>
 
       <div class="modal__body">

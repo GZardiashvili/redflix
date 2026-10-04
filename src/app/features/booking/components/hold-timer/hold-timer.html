@@ -1,0 +1,16 @@
+<!--
+  Rendered only while a hold exists. `role="timer"` gives assistive technology
+  the countdown without a live region, so the remaining time is available on
+  demand instead of being read aloud every second.
+-->
+@if (remaining(); as time) {
+  <p
+    class="hold-timer"
+    [class.hold-timer--urgent]="urgent()"
+    role="timer"
+    [attr.aria-label]="'Seats held for ' + spokenRemaining()"
+  >
+    <span class="hold-timer__label">Seats held</span>
+    <span class="hold-timer__time">{{ time }}</span>
+  </p>
+}

@@ -20,6 +20,23 @@
       />
     </div>
   } @else {
+    <!--
+        A `409` or an expired hold reports itself above the map rather than
+        replacing it: the map is still the right thing to show, because the lost
+        seats are about to be redrawn on it as taken. `role="alert"` so the loss
+        is announced the moment it happens, rather than leaving the visitor to
+        work out what changed.
+      -->
+    @if (failure(); as problem) {
+      <p
+        class="booking-step__banner"
+        [class.booking-step__banner--conflict]="problem.kind === 'conflict'"
+        role="alert"
+      >
+        {{ conflictMessage() ?? problem.message }}
+      </p>
+    }
+
     <div class="booking-step__layout">
       <div class="booking-step__scroll">
         <app-seat-map [map]="layout" />

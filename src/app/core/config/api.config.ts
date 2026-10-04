@@ -55,6 +55,27 @@ export function sessionSeatsUrl(sessionId: number): string {
 }
 
 /**
+ * Builds the absolute URL of a session's hold endpoint:
+ * `POST /sessions/{session}/holds`.
+ *
+ * `{session}` is the **numeric session id** from the booking context, the same
+ * identifier the seat map uses.
+ */
+export function sessionHoldsUrl(sessionId: number): string {
+  return `${API_BASE_URL}/sessions/${encodeURIComponent(String(sessionId))}/holds`;
+}
+
+/**
+ * Builds the absolute URL of a single hold: `GET /holds/{hold}` and
+ * `DELETE /holds/{hold}`.
+ *
+ * `{hold}` is the hold's own uuid, never a session id.
+ */
+export function holdUrl(holdId: string): string {
+  return `${API_BASE_URL}/holds/${encodeURIComponent(holdId)}`;
+}
+
+/**
  * Builds the absolute URL of the notification subscription endpoint:
  * `POST /movies/{movie}/notify`, where `{movie}` is the movie **slug**
  * (the API 404s an id-based path).

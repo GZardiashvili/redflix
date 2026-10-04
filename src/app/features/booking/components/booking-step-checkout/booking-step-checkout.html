@@ -1,3 +1,24 @@
-<section class="booking-step booking-step--checkout" aria-label="Checkout">
-  <p class="booking-step__placeholder">Checkout for this screening will appear here.</p>
-</section>
+<!--
+  Step 2 only makes sense with a hold behind it. The guard is not expected to be
+  seen — an expiry takes the flow back to Step 1 by itself — but it keeps the
+  layout from rendering an empty summary in the moment between the hold going and
+  the step following it back.
+-->
+@if (hasHold()) {
+  <section class="checkout" aria-labelledby="checkout-heading">
+    <h3 class="checkout__heading" id="checkout-heading">Checkout</h3>
+
+    <div class="checkout__layout">
+      <!--
+        The left column the design reserves for the checkout form. Its height is
+        what keeps the step the same size as Step 1; the form itself belongs to a
+        later task, so for now the column holds only the way back.
+      -->
+      <div class="checkout__form">
+        <button type="button" class="checkout__back" (click)="backToSeats()">Back to seats</button>
+      </div>
+
+      <app-seat-selection-summary class="checkout__summary" [readOnly]="true" />
+    </div>
+  </section>
+}

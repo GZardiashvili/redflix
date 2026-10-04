@@ -217,8 +217,18 @@
   line-height: 1.625rem; // 26px
 }
 
-// Disabled while Step 1 is incomplete. It does not request anything yet: the
-// hold, the countdown and the move into checkout belong to the next task.
+// Read-only mode (Step 2): the held seat's ticket type as plain text, standing
+// where the type buttons would be so the card keeps its shape.
+.summary__assigned {
+  margin: 0;
+  color: #fff;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 1rem; // 16px
+}
+
+// Disabled while Step 1 is incomplete, and while a hold request is in flight so
+// the same click cannot create two holds.
 .summary__next {
   width: 100%;
   padding: 0.8125rem 1.375rem; // 13px 22px

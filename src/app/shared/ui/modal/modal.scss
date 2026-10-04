@@ -34,6 +34,17 @@
   gap: 1rem;
 }
 
+// Trailing group of the header: whatever a parent projects into the
+// `modalHeaderAside` slot, then the close control. Grouped so the title stays on
+// the left and everything else collects on the right regardless of what — or
+// whether — anything is projected.
+.modal__header-aside {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.75rem; // 12px
+}
+
 .modal__title {
   font-size: 1.25rem;
 }

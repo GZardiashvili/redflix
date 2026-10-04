@@ -24,7 +24,9 @@ import { BookingStateService } from './booking-state.service';
  *   the visitor has already moved away from is discarded instead of landing on
  *   screen, and the in-flight request is cancelled with it.
  *
- * Nothing here mutates anything: no holds, no orders, no selection.
+ * Reading only: this service never mutates the map it holds, and it owns no
+ * selection, no hold and no order. `refresh()` exists so the hold flow can ask
+ * for the map again after the server has changed it.
  */
 @Service()
 export class SeatMapService {
@@ -70,8 +72,16 @@ export class SeatMapService {
       .subscribe();
   }
 
-  /** Re-requests the current session's map after a failure. */
-  retry(): void {
+  /**
+   * Re-requests the current session's map, dropping the response already held.
+   *
+   * Two callers, one action: the step's own Retry after a failed load, and the
+   * hold flow after the server has changed the map underneath us — a `409`
+   * reconciliation or an expired hold. Both mean the seats on screen may be out
+   * of date, and both are answered by asking the API again for the same session
+   * rather than by patching the map locally.
+   */
+  refresh(): void {
     this.attemptState.update((attempt) => attempt + 1);
   }
 

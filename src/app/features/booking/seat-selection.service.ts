@@ -203,6 +203,29 @@ export class SeatSelectionService {
     this.selectionState.update((selection) => selection.filter((entry) => entry.seatId !== seatId));
     this.noticeState.set(null);
   }
+
+  /**
+   * Drops every selected seat carrying one of the given seat codes.
+   *
+   * Used when the hold request is answered with `409`: the API names the seats
+   * it could not give us, and only those may leave the selection. Seats the
+   * visitor did win are still theirs, so removing by code — rather than
+   * clearing the selection — is what keeps the uncontested part of the order
+   * intact and lets the visitor try again with just those seats.
+   *
+   * Unknown codes are ignored, so a code the local map never had cannot remove
+   * anything. Codes are matched exactly: seat codes are the API's own stable
+   * identity (`A7`), not a position on screen.
+   */
+  removeByCodes(codes: readonly string[]): void {
+    const lost = new Set(codes);
+
+    if (lost.size === 0) {
+      return;
+    }
+
+    this.selectionState.update((selection) => selection.filter((entry) => !lost.has(entry.code)));
+  }
   /**
    * Assigns a ticket type to one seat, leaving every other seat untouched.
    *

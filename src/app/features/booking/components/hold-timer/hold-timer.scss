@@ -1,0 +1,41 @@
+// The hold countdown in the booking dialog's header: a quiet slate block with a
+// muted caption over the remaining time.
+//
+// The urgent state is the design's red, applied to the digits and the caption
+// together. The digits also carry tabular figures so the block does not change
+// width as the numbers tick, which would make the header twitch once a second.
+
+.hold-timer {
+  display: flex;
+  min-width: 6.375rem; // 102px, the design's timer block
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem; // 2px
+  padding: 0.5rem 0.875rem; // 8px 14px
+  border-radius: 0.75rem; // 12px
+  background: #1e2031;
+}
+
+.hold-timer__label {
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 0.8125rem; // 13px
+}
+
+.hold-timer__time {
+  color: #fff;
+  font-size: 0.875rem; // 14px
+  font-weight: 800;
+  line-height: 0.9375rem; // 15px
+  font-variant-numeric: tabular-nums;
+}
+
+// Under a minute left. The lighter tint of the brand red keeps the digits
+// legible on the dark slate while still reading as an alert next to the neutral
+// state — the full brand red fails contrast at this size against #1E2031.
+.hold-timer--urgent .hold-timer__label,
+.hold-timer--urgent .hold-timer__time {
+  color: #ff6a52;
+}

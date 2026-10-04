@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../../../shared/ui/error-state/error-state';
 import { LoadingIndicator } from '../../../../shared/ui/loading/loading-indicator';
+import { BookingHoldService } from '../../booking-hold.service';
 import { SeatMapService } from '../../seat-map.service';
 import { SeatMap } from '../seat-map/seat-map';
 import { SeatSelectionSummary } from '../seat-selection-summary/seat-selection-summary';
@@ -31,6 +32,7 @@ import { SeatSelectionSummary } from '../seat-selection-summary/seat-selection-s
 })
 export class BookingStepSeats {
   private readonly seatMap = inject(SeatMapService);
+  private readonly hold = inject(BookingHoldService);
 
   /** The loaded layout, or `null` while loading or after a failure. */
   protected readonly map = this.seatMap.map;
@@ -39,8 +41,43 @@ export class BookingStepSeats {
   protected readonly error = this.seatMap.error;
   protected readonly isEmpty = this.seatMap.isEmpty;
 
-  /** Re-requests the current session's seat map. */
+  /**
+   * Re-requests the current session's seat map after a failure.
+   *
+   * The same action the hold flow takes after a conflict or an expiry; only the
+   * reason for asking differs.
+   */
   protected retry(): void {
-    this.seatMap.retry();
+    this.seatMap.refresh();
   }
+
+  /**
+   * Why the last attempt to continue failed, or `null` when there is nothing to
+   * report. Read from the hold service, which owns the reconciliation.
+   */
+  protected readonly failure = this.hold.failure;
+
+  /**
+   * The seats a `409` took away, as the single sentence the design shows:
+   * `Some of those seats were just taken: A1, A2`.
+   *
+   * Composed here rather than in the service so the service keeps one message —
+   * the API's own — and the seat-list formatting stays a rendering concern. The
+   * codes are the API's stable seat identities, never a position on screen, so
+   * the list is exactly what the visitor saw labelled on the map.
+   *
+   * The API's sentence is trimmed of its closing full stop before the codes are
+   * appended: it writes the message as a finished sentence, and joining a list to
+   * one produces `just taken.: A1`, which reads as a typo rather than a sentence
+   * with a list on it. The wording itself is never touched.
+   */
+  protected readonly conflictMessage = computed(() => {
+    const failure = this.failure();
+
+    if (failure === null || failure.contested.length === 0) {
+      return null;
+    }
+
+    return `${failure.message.replace(/\.\s*$/, '')}: ${failure.contested.join(', ')}`;
+  });
 }

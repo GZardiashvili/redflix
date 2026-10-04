@@ -1,17 +1,64 @@
-// Content area of the booking dialog's second step. It shares Step 1's shell so
-// moving between steps does not resize the dialog; the checkout form, order
-// summary and payment request drop into it later.
+// Step 2 of the booking dialog.
+//
+// The design's two columns: the checkout form on the left, the price summary on
+// the right. The form is empty in this task, so the column's height is what keeps
+// the dialog the same size as Step 1 — the step must not resize as the flow moves
+// between steps, or the countdown above it appears to jump.
 
-.booking-step {
+.checkout {
   display: flex;
   width: 100%;
+  flex-direction: column;
+  gap: 1.5rem; // 24px
+}
+
+.checkout__heading {
+  color: #fff;
+  font-size: 1.25rem; // 20px
+  font-weight: 800;
+  line-height: 1.375rem; // 22px
+}
+
+.checkout__layout {
+  display: flex;
+  align-items: stretch;
+  gap: 1.25rem; // 20px
+}
+
+.checkout__form {
+  display: flex;
   min-height: 28.25rem; // 452px, the design's content height
-  align-items: center;
-  justify-content: center;
-  padding: 2rem; // 32px
-  border: 1px solid #1e2031;
-  border-radius: 1.25rem; // 20px
-  color: #a9a9a9;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0 1.625rem 1.625rem; // 26px, the design's inner gutter
+}
+
+.checkout__summary {
+  flex: 0 0 auto;
+}
+
+// The way back to Step 1. Deliberately quiet: it reverses the step rather than
+// advancing it, and the seats stay held, so it must not read as the primary
+// action the red buttons are for.
+.checkout__back {
+  padding: 0.8125rem 1.375rem; // 13px 22px
+  border: 1px solid #2a2c3d;
+  border-radius: 999px;
+  background: none;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
   font-size: 0.875rem; // 14px
-  text-align: center;
+  font-weight: 800;
+  line-height: 0.9375rem; // 15px
+
+  &:hover {
+    background: #1e2031;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
 }
