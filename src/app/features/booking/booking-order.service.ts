@@ -115,6 +115,21 @@ export class BookingOrderService {
   }
 
   /**
+   * Dismisses the confirmation view, dropping the order it was showing.
+   *
+   * Every way out of the confirmation — the Close button, the shell's own close
+   * control, Escape, a click on the overlay, and "My Tickets" before it
+   * navigates — arrives here, so exactly one place decides when the view is
+   * gone. Dropping the reference only stops the dialog from showing again: the
+   * order itself is a server record and nothing about it is changed or requested
+   * here. By the time this runs there is no hold, no selection and no countdown
+   * left to clear — {@link submit} took care of all three on the way in.
+   */
+  dismiss(): void {
+    this.orderState.set(null);
+  }
+
+  /**
    * Routes a failed order to the layer that can resolve it.
    *
    * A `422` **without** `errors` and a `409` both mean the hold no longer

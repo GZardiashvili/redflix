@@ -211,9 +211,11 @@ export class BookingStepCheckout {
     this.serverErrors.set({});
 
     try {
-      const order = await this.orderService.submit(this.buildRequest(hold.holdId));
-
-      console.info(`Order successful: ${order.reference}`, order);
+      // On a `201` the order service has already stored the order, consumed the
+      // hold and closed the booking, so the confirmation view — which renders
+      // from that stored order — opens in the dialog's place. The form itself
+      // has nothing left to do with the response.
+      await this.orderService.submit(this.buildRequest(hold.holdId));
     } catch {
       // The order service has already routed the failure: field errors are put
       // on their controls, and a lost hold has taken the flow back to Step 1.

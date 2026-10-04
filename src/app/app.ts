@@ -5,6 +5,7 @@ import { AuthService } from './core/services/auth.service';
 import { LoginModal } from './features/auth/components/login-modal/login-modal';
 import { RegisterModal } from './features/auth/components/register-modal/register-modal';
 import { BookingModal } from './features/booking/components/booking-modal/booking-modal';
+import { OrderConfirmationModal } from './features/booking/components/order-confirmation-modal/order-confirmation-modal';
 import { AppHeader } from './layout/app-header/app-header';
 
 /**
@@ -17,7 +18,14 @@ import { AppHeader } from './layout/app-header/app-header';
  * the login/register API calls.
  */
 @Component({
-  imports: [AppHeader, BookingModal, LoginModal, RegisterModal, RouterOutlet],
+  imports: [
+    AppHeader,
+    BookingModal,
+    LoginModal,
+    OrderConfirmationModal,
+    RegisterModal,
+    RouterOutlet,
+  ],
   selector: 'app-root',
   styleUrl: './app.scss',
   templateUrl: './app.html',

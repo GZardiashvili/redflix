@@ -1,6 +1,7 @@
 import { ApiResponse } from '../api/api-response';
 import { HoldTicketType } from './hold';
-import { MovieSession } from './session';
+import { Movie } from './movie';
+import { MovieSession, SessionHall, SessionVenue } from './session';
 
 /**
  * Domain models for `POST /orders`: the completed purchase.
@@ -32,6 +33,41 @@ export interface OrderTicket {
 /** Lifecycle of an order as the API reports it. */
 export type OrderStatus = 'paid' | 'refunded';
 
+/**
+ * The movie an order's session is for, as the order carries it inline.
+ *
+ * The catalogue {@link Movie} without the genre and format lists: `POST /orders`
+ * attaches the whole screening — movie included — to the order, and those two
+ * lists are the only fields it does not send. Modelling the difference rather
+ * than reusing `Movie` keeps a reader from reaching for `order.session.movie.genres`
+ * and finding nothing there.
+ */
+export type OrderMovie = Omit<Movie, 'genres' | 'formats'>;
+
+/**
+ * The hall an order's session plays in.
+ *
+ * The same `SessionHall` the other session payloads use, plus the venue again,
+ * nested one level down — the API sends it both here and as `session.venue`.
+ * Both are modelled as returned; the confirmation reads `session.venue`, which
+ * is the same record.
+ */
+export interface OrderHall extends SessionHall {
+  readonly venue: SessionVenue;
+}
+
+/**
+ * The screening an order is for: the session record of `GET /sessions` with the
+ * movie attached inline rather than grouped beside it, which is what lets the
+ * confirmation render poster, title and screening from the order alone — no
+ * second request, and no reading of local booking state that has since been
+ * cleared.
+ */
+export interface OrderSession extends MovieSession {
+  readonly hall: OrderHall;
+  readonly movie: OrderMovie;
+}
+
 /** A completed order. */
 export interface Order {
   readonly id: number;
@@ -57,8 +93,8 @@ export interface Order {
    */
   readonly cardLastFour: string;
   readonly contact: OrderContact;
-  /** The screening the tickets are for. */
-  readonly session: MovieSession;
+  /** The screening the tickets are for, with the movie attached inline. */
+  readonly session: OrderSession;
   readonly tickets: readonly OrderTicket[];
 }
 

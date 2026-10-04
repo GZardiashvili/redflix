@@ -1,0 +1,275 @@
+// The order confirmation dialog: the centred success panel that replaces the
+// booking dialog once `POST /orders` has answered `201`.
+//
+// The overlay, centring, dimming and surface come from the shared shell's
+// `booking` variant — the same panel the booking flow itself uses — so this file
+// owns only what the confirmation adds: hiding the shell's header row (the
+// design's confirmation is one headerless, centred panel) and laying out the
+// order it renders.
+
+:host {
+  display: contents;
+}
+
+// The shell's header is the movie title and an `×`, which the design does not
+// have here: this panel opens with its own success mark and heading, and the
+// Close button below carries the dismissal. The heading itself stays in the
+// DOM, so `aria-labelledby` still gives the dialog its accessible name — only
+// its visual row is removed, and Escape, the overlay and Close all still work.
+//
+// Scoped under `.modal__dialog` so the rule outranks the shell's own
+// `.modal__header { display: flex }`, which would otherwise win the specificity
+// tie and leave the row on screen.
+:host ::ng-deep .modal__dialog .modal__header {
+  display: none;
+}
+
+:host ::ng-deep .modal__body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0;
+}
+
+// The design's 673px content column, centred inside the wide booking panel.
+.confirmation {
+  display: flex;
+  width: 100%;
+  max-width: 42.0625rem; // 673px
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem; // 24px
+}
+
+// The green success mark. Decorative — the heading beside it already says what
+// happened — so it is hidden from assistive technology in the template.
+.confirmation__icon {
+  display: flex;
+  width: 3.5rem; // 56px
+  height: 3.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #4ade80;
+  color: #fff;
+}
+
+.confirmation__intro {
+  display: flex;
+  max-width: 22.8125rem; // 365px, the design's text measure
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem; // 10px
+  text-align: center;
+}
+
+.confirmation__heading {
+  margin: 0;
+  color: #fff;
+  font-size: 1.5rem; // 24px
+  font-weight: 800;
+  line-height: 1.625rem; // 26px
+}
+
+.confirmation__lede {
+  margin: 0;
+  color: #a9a9a9;
+  font-size: 0.875rem; // 14px
+  line-height: 1.3;
+}
+
+// The reference badge: the server's own code, whole and selectable so it can be
+// read out or copied to a ticket desk without retyping.
+.confirmation__reference {
+  margin: 0;
+}
+
+.confirmation__reference-text {
+  display: inline-block;
+  padding: 0.375rem 1rem; // 6px 16px
+  border-radius: 999px;
+  background: #2a2c3d;
+  color: #fff;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 0.8125rem; // 13px
+  text-transform: uppercase;
+}
+
+// The order itself: film and screening, then the tickets, then what was paid —
+// all of it the server's record, laid out as one receipt-like card.
+.confirmation__summary {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  flex-direction: column;
+  gap: 0.75rem; // 12px
+  padding: 1.25rem; // 20px
+  border-radius: 0.75rem; // 12px
+  background: #1e2031;
+}
+
+.confirmation__movie {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem; // 10px
+}
+
+.confirmation__poster {
+  width: 3rem; // 48px
+  height: 4rem; // 64px
+  flex: 0 0 auto;
+  border-radius: 0.5rem; // 8px
+  object-fit: cover;
+}
+
+.confirmation__film {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.5rem; // 8px
+}
+
+.confirmation__title {
+  margin: 0;
+  color: #fff;
+  font-size: 0.875rem; // 14px
+  font-weight: 800;
+  line-height: 0.9375rem; // 15px
+}
+
+.confirmation__screening {
+  margin: 0;
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  line-height: 1.3;
+}
+
+.confirmation__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem; // 6px
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.confirmation__tag {
+  padding: 0.25rem 0.625rem; // 4px 10px
+  border-radius: 999px;
+  background: #2a2c3d;
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 0.8125rem;
+}
+
+.confirmation__divider {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid #2a2c3d;
+}
+
+// One row per issued ticket: the seat on the left, the type the server assigned
+// it on the right. Nothing is aggregated, so two seats of different types read
+// as two facts rather than one sum.
+.confirmation__tickets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; // 8px
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.confirmation__ticket {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.75rem; // 12px
+  line-height: 1rem; // 16px
+}
+
+.confirmation__seat {
+  color: #fff;
+  font-weight: 600;
+}
+
+.confirmation__type {
+  color: #a9a9a9;
+  font-weight: 400;
+}
+
+.confirmation__total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.confirmation__total-label {
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  line-height: 1rem;
+  text-transform: uppercase;
+}
+
+.confirmation__total-amount {
+  color: #fff;
+  font-size: 1.125rem; // 18px
+  font-weight: 800;
+  line-height: 1.25rem; // 20px
+}
+
+.confirmation__payment {
+  margin: 0;
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  line-height: 1rem;
+  text-align: right;
+}
+
+.confirmation__actions {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  gap: 0.75rem; // 12px
+}
+
+// The two ways onward, shaped like the booking flow's own pills so the panel
+// still reads as the same application.
+.confirmation__primary,
+.confirmation__secondary {
+  min-height: 2.5625rem; // 41px
+  padding: 0.8125rem 1.375rem; // 13px 22px
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem; // 14px
+  font-weight: 800;
+  line-height: 0.9375rem; // 15px
+}
+
+.confirmation__primary {
+  background: #ec3013;
+  color: #fff;
+}
+
+.confirmation__secondary {
+  background: rgb(255 255 255 / 10%);
+  color: #fff;
+
+  &:hover {
+    background: rgb(255 255 255 / 16%);
+  }
+}
+
+.confirmation__primary:focus-visible,
+.confirmation__secondary:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}

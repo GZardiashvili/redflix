@@ -1,0 +1,105 @@
+<!--
+  The dialog shell owns the overlay, focus and the generic ways of closing it;
+  the body renders only while an order exists, and only from that order. The
+  shell's own header is hidden by this component's styles — the design's
+  confirmation is a single centred panel — but its title stays in the DOM as the
+  dialog's accessible name, and Close, Escape and the overlay all still dismiss.
+-->
+<app-modal
+  variant="booking"
+  [open]="open()"
+  title="Booking confirmed"
+  closeLabel="Close confirmation"
+  (closed)="dismiss()"
+>
+  @if (order(); as order) {
+    <div class="confirmation">
+      <div class="confirmation__icon" aria-hidden="true">
+        <svg
+          class="confirmation__check"
+          viewBox="0 0 24 24"
+          width="32"
+          height="32"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+
+      <div class="confirmation__intro">
+        <h2 class="confirmation__heading">Booking confirmed!</h2>
+
+        <p class="confirmation__lede">
+          Your tickets are ready. We&apos;ve sent the confirmation to your email.
+        </p>
+
+        <!--
+          The reference the visitor quotes: the server's own code, shown whole
+          and selectable rather than reconstructed or truncated.
+        -->
+        <p class="confirmation__reference">
+          <span class="confirmation__reference-text">Order #{{ order.reference }}</span>
+        </p>
+      </div>
+
+      <div class="confirmation__summary">
+        <div class="confirmation__movie">
+          <img
+            class="confirmation__poster"
+            [src]="order.session.movie.posterUrl"
+            [alt]="order.session.movie.title + ' poster'"
+          />
+
+          <div class="confirmation__film">
+            <h3 class="confirmation__title">{{ order.session.movie.title }}</h3>
+
+            <p class="confirmation__screening">
+              {{ order.session.venue.name }} · Hall {{ order.session.hall.name }} ·
+              {{ order.session.date | date: 'EEE d MMM' : 'UTC' }} · {{ order.session.time }}
+            </p>
+
+            <ul class="confirmation__tags" aria-label="Screening format">
+              <li class="confirmation__tag">{{ order.session.format.name }}</li>
+              <li class="confirmation__tag">{{ order.session.language.name }}</li>
+            </ul>
+          </div>
+        </div>
+
+        <hr class="confirmation__divider" />
+
+        <ul class="confirmation__tickets" aria-label="Purchased seats">
+          @for (ticket of order.tickets; track ticket.id) {
+            <li class="confirmation__ticket">
+              <span class="confirmation__seat">Seat {{ ticket.seatCode }}</span>
+              <span class="confirmation__type">{{ ticket.ticketType.name }}</span>
+            </li>
+          }
+        </ul>
+
+        <hr class="confirmation__divider" />
+
+        <div class="confirmation__total">
+          <span class="confirmation__total-label">Total paid</span>
+          <span class="confirmation__total-amount">₾{{ total() }}</span>
+        </div>
+
+        <p class="confirmation__payment">
+          <span class="visually-hidden">Paid with card </span>
+          <span aria-hidden="true">•••• </span>{{ order.cardLastFour }}
+        </p>
+      </div>
+
+      <div class="confirmation__actions">
+        <button type="button" class="confirmation__primary" (click)="showTickets()">
+          My Tickets
+        </button>
+
+        <button type="button" class="confirmation__secondary" (click)="dismiss()">Close</button>
+      </div>
+    </div>
+  }
+</app-modal>
