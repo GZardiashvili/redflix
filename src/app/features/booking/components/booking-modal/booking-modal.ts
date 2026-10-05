@@ -20,9 +20,10 @@ import { HoldTimer } from '../hold-timer/hold-timer';
  * state of its own, so the Movie Details page and the shell cannot disagree
  * about which screening is being booked.
  *
- * The hold countdown is projected into the shared shell's header aside. It is
- * presentational — it reads the hold's own state — so the dialog does not
- * compute a remaining time, and the shell does not know what a hold is.
+ * The hold countdown is projected into the shared shell's header aside, on the
+ * seat-selection step only. It is presentational — it reads the hold's own state
+ * — so the dialog does not compute a remaining time, and the shell does not know
+ * what a hold is.
  *
  * Closing is where the dialog does one thing of its own: it releases an active
  * hold first, so the seats the visitor was reserving are freed immediately
@@ -63,6 +64,21 @@ export class BookingModal {
 
   /** Movie title, used as the dialog's accessible name. */
   protected readonly title = computed(() => this.context()?.movieTitle ?? 'Booking');
+
+  /**
+   * Whether the hold countdown belongs in the header right now.
+   *
+   * Step 1 owns the countdown: the hold is created there and lives on for as long
+   * as the seats are reserved, so a visitor who goes back from checkout to the
+   * seat map still sees the time left on the seats they are re-picking. Step 2
+   * is deliberately without it — the hold is already guaranteed there, and the
+   * form is the thing the visitor needs the space for.
+   *
+   * The component stays rendered only while this holds, but it renders nothing
+   * of its own until a hold exists: the two conditions are separate, so the
+   * countdown appearing is never a layout change.
+   */
+  protected readonly showHoldTimer = this.booking.isStep1;
 
   /**
    * Closes the booking, releasing any active hold first.

@@ -4,10 +4,12 @@ import { BookingHoldService } from '../../booking-hold.service';
 /**
  * The countdown of the active hold, shown in the booking dialog's header.
  *
- * Renders nothing at all while no hold exists: there is no countdown to show on
- * Step 1, and an empty placeholder would be read as a hold that has already run
- * out. Once a hold exists it renders for as long as the hold does, which is the
- * whole of Step 2.
+ * Renders nothing at all while no hold exists: the seats are not reserved yet,
+ * and an empty placeholder would be read as a hold that has already run out.
+ * Once a hold exists it renders for as long as the hold does — which on the
+ * seat-selection step is however long the visitor stays there, including after
+ * coming back from checkout. The booking dialog decides which step shows it; this
+ * component only decides whether there is anything to count down.
  *
  * Presentational in the strict sense — it holds no timer, no interval and no
  * copy of the remaining time. Both the digits and the urgency state come from
