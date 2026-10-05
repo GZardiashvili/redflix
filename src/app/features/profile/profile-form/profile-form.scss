@@ -68,6 +68,20 @@
     color-scheme: dark;
   }
 
+  // Valid state: default border is kept (no green), and a checkmark is shown
+  // at the right edge. Gated on `.ng-touched` so untouched fields stay quiet.
+  // Read-only email, date and select controls are excluded: the check would
+  // collide with the native picker/chevron or decorate a non-editable value.
+  // The email control is disabled, so it additionally requires `.ng-dirty` —
+  // a disabled control can otherwise carry `.ng-valid` without engagement.
+  &.ng-touched.ng-dirty.ng-valid:not(&--readonly):not(&--date):not(.profile-form__select) {
+    padding-right: 2.5rem; // 40px: room for the 16px check + 16px inset
+    background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.56419 10.9726L2.90056 8.30902C2.83091 8.23851 2.74795 8.18254 2.65651 8.14434C2.56506 8.10613 2.46694 8.08646 2.36783 8.08646C2.26873 8.08646 2.17061 8.10613 2.07916 8.14434C1.98771 8.18254 1.90476 8.23851 1.83511 8.30902C1.7646 8.37867 1.70863 8.46162 1.67042 8.55307C1.63222 8.64452 1.61255 8.74264 1.61255 8.84174C1.61255 8.94085 1.63222 9.03897 1.67042 9.13042C1.70863 9.22186 1.7646 9.30482 1.83511 9.37447L5.02385 12.5632C5.32066 12.86 5.80011 12.86 6.09692 12.5632L14.1639 4.50383C14.2344 4.43418 14.2904 4.35122 14.3286 4.25978C14.3668 4.16833 14.3865 4.07021 14.3865 3.9711C14.3865 3.872 14.3668 3.77388 14.3286 3.68243C14.2904 3.59098 14.2344 3.50803 14.1639 3.43838C14.0943 3.36788 14.0113 3.3119 13.9199 3.2737C13.8284 3.23549 13.7303 3.21582 13.6312 3.21582C13.5321 3.21582 13.434 3.23549 13.3425 3.2737C13.2511 3.3119 13.1681 3.36788 13.0985 3.43838L5.56419 10.9726Z' fill='%234ADE80'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1rem 1rem;
+  }
+
   // Preferred Venue: the native arrow is suppressed and replaced with the same
   // chevron the other controls use, so the right inset matches the text inputs
   // instead of sitting flush against the field's right edge.

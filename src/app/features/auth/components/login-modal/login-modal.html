@@ -28,7 +28,11 @@
       />
     </app-form-field>
 
-    <button class="login-modal__submit" type="submit" [disabled]="loading()">
+    <button
+      class="login-modal__submit"
+      type="submit"
+      [disabled]="loading() || form.invalid"
+    >
       @if (loading()) {
         <app-loading-indicator size="sm" label="Logging in" />
       } @else {

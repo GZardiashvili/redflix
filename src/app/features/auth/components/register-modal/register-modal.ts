@@ -54,7 +54,10 @@ export class RegisterModal implements OnDestroy {
   protected readonly form = this.forms.group(
     {
       username: ['', [Validators.required, Validators.minLength(3)]],
-      email: ['', [Validators.required, Validators.email]],
+      email: [
+        '',
+        [Validators.required, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)],
+      ],
       password: ['', [Validators.required, Validators.minLength(3)]],
       password_confirmation: ['', [Validators.required]],
     },
@@ -105,7 +108,7 @@ export class RegisterModal implements OnDestroy {
   protected emailError(): string | null {
     return fieldError(this.form.controls.email, {
       required: 'Email is required.',
-      email: 'Enter a valid email address.',
+      pattern: 'Please enter a valid email format.',
     });
   }
 
@@ -292,7 +295,7 @@ function isEngaged(control: AbstractControl): boolean {
  */
 function fieldError(
   control: AbstractControl,
-  messages: Partial<Record<'required' | 'minlength' | 'email', string>>,
+  messages: Partial<Record<'required' | 'minlength' | 'email' | 'pattern', string>>,
 ): string | null {
   if (!isEngaged(control) || control.valid) {
     return null;

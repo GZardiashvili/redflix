@@ -189,7 +189,12 @@ export class ProfileForm {
   protected readonly form = this.forms.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
     // Disabled, never submitted: the API establishes email at registration.
-    email: [{ value: '', disabled: true }],
+    // The pattern still states the format rule so the control carries the same
+    // strict email requirement as the auth forms, even while read-only.
+    email: [
+      { value: '', disabled: true },
+      [Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)],
+    ],
     mobileNumber: ['', [Validators.required, georgianMobileValidator]],
     dateOfBirth: ['', [Validators.required, dateOfBirthValidator]],
     preferredVenueId: [null as number | null],

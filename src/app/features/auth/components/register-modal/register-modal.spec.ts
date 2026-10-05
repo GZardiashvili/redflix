@@ -93,7 +93,7 @@ describe('RegisterModal validation', () => {
     blur('register-email');
     fixture.detectChanges();
 
-    expect(message('register-email')).toBe('Enter a valid email address.');
+    expect(message('register-email')).toBe('Please enter a valid email format.');
 
     type('register-email', 'register-email', 'jane@kinoxii.test');
     fixture.detectChanges();

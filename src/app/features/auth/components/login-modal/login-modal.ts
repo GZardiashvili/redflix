@@ -34,7 +34,7 @@ export class LoginModal {
   readonly switchToRegister = output<void>();
 
   protected readonly form = this.forms.group({
-    email: ['', [Validators.required, Validators.email]],
+    email: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
     password: ['', [Validators.required, Validators.minLength(3)]],
   });
 
@@ -54,7 +54,7 @@ export class LoginModal {
       return 'Email is required.';
     }
 
-    return 'Enter a valid email address.';
+    return 'Please enter a valid email format.';
   }
 
   protected passwordError(): string | null {
