@@ -5,9 +5,7 @@
   closeLabel="Close booking"
   (closed)="close()"
 >
-  @if (showHoldTimer()) {
-    <app-hold-timer modalHeaderAside />
-  }
+  <app-hold-timer modalHeaderAside />
 
   @if (context(); as screening) {
     <app-booking-header [context]="screening" />

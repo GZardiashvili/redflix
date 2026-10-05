@@ -201,6 +201,13 @@ export class BookingHoldService {
    * ticket type **id** to the **slug** the endpoint requires. The two
    * vocabularies differ deliberately — the configuration numbers its ticket
    * types, the booking API names them — so the translation happens here, once.
+   *
+   * A resubmission that changes nothing reuses the hold rather than replacing
+   * it: when the current selection is seat-for-seat and slug-for-slug what the
+   * live hold already reserves, no request is sent and the flow simply advances
+   * to Step 2, leaving the countdown untouched. A fresh `POST` would come back
+   * with a fresh `expiresAt` and restart the eight minutes for no reason; only
+   * a selection that actually differs earns a replacement hold.
    */
   submit(): void {
     const context = this.booking.context();
@@ -232,6 +239,16 @@ export class BookingHoldService {
     }
 
     if (seats.length === 0) {
+      return;
+    }
+
+    // Step 2 → Step 1 → Step 2 with the same seats is not a new reservation: the
+    // hold still covers exactly what the visitor picked, so advancing reuses it
+    // and the countdown keeps ticking instead of restarting.
+    if (this.selectionMatchesHold(seats)) {
+      this.failureState.set(null);
+      this.booking.showStep2();
+
       return;
     }
 
@@ -293,6 +310,38 @@ export class BookingHoldService {
     this.holdState.set(null);
     this.failureState.set(null);
     this.submittingState.set(false);
+  }
+
+  /**
+   * Whether the about-to-be-sent hold payload reserves exactly what the live
+   * hold already reserves: the same session, the same seats, the same ticket
+   * types.
+   *
+   * Order is ignored — the summary follows pick order while the API stores its
+   * own — but identity and ticket type are not: a reseat or a reticket is a new
+   * reservation and must replace the hold. An already-expired countdown reads
+   * `00:00` only until the expiry effect tears the hold down, and a teardown in
+   * progress must not green-light a reuse, so a hold with no time left never
+   * matches.
+   */
+  private selectionMatchesHold(seats: readonly HoldRequestSeat[]): boolean {
+    const hold = this.holdState();
+
+    if (hold === null || !hold.isLive || this.secondsRemaining() === 0) {
+      return false;
+    }
+
+    if (hold.sessionId !== this.booking.context()?.sessionId) {
+      return false;
+    }
+
+    if (hold.seats.length !== seats.length) {
+      return false;
+    }
+
+    const held = new Map(hold.seats.map((seat) => [seat.seatId, seat.ticketType.slug] as const));
+
+    return seats.every((seat) => held.get(seat.seatId) === seat.ticketType);
   }
 
   /**

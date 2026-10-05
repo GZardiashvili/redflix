@@ -112,10 +112,11 @@ export class SeatSelectionSummary {
    * Requests a hold for the current selection and moves to checkout.
    *
    * This is where Step 1 ends and Step 2 begins, and the transition belongs to
-   * {@link BookingHoldService}: it sends the request, reconciles a conflict,
-   * starts the countdown, and only advances once the server has confirmed the
-   * seats. Nothing about that is duplicated here — this component only reports
-   * whether it may be pressed.
+   * {@link BookingHoldService}: it reuses the live hold when the selection is
+   * unchanged, otherwise sends the request, reconciles a conflict, starts the
+   * countdown, and only advances once the server has confirmed the seats.
+   * Nothing about that is duplicated here — this component only reports whether
+   * it may be pressed.
    */
   protected continueToCheckout(): void {
     this.hold.submit();
