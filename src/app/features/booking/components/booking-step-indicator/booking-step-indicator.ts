@@ -1,6 +1,5 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { BookingHoldService } from '../../booking-hold.service';
-import { SeatSelectionService } from '../../seat-selection.service';
 import { BookingStatus } from '../../booking-state.service';
 
 /** One entry of the indicator, in the order the design lists them. */
@@ -27,9 +26,9 @@ const STEPS: readonly BookingStep[] = [
  * The tabs navigate. Returning to SEATS from CHECKOUT keeps the hold — the
  * visitor is changing their mind about the seats, not abandoning the booking,
  * and the hold service replaces the hold when a new selection is submitted.
- * Moving forward to CHECKOUT is guarded: it only works when Step 1 is valid
- * and a hold is active, so the tabs cannot reach a step that has nothing to
- * check out.
+ * Moving forward to CHECKOUT runs the same hold request as "Next: Checkout":
+ * it validates the selection, reuses the live hold when nothing changed, and
+ * only advances once the server confirms.
  */
 @Component({
   selector: 'app-booking-step-indicator',
@@ -38,7 +37,6 @@ const STEPS: readonly BookingStep[] = [
 })
 export class BookingStepIndicator {
   private readonly hold = inject(BookingHoldService);
-  private readonly selection = inject(SeatSelectionService);
 
   /** Current status of the booking flow; decides which step is active. */
   readonly active = input.required<BookingStatus>();
@@ -46,7 +44,7 @@ export class BookingStepIndicator {
   /** The visitor asked to go back to seat selection; the hold is kept. */
   readonly backToSeats = output<void>();
 
-  /** The visitor asked to go forward to checkout; the hold already exists. */
+  /** The visitor asked to go forward to checkout via the hold request. */
   readonly forwardToCheckout = output<void>();
 
   /** The steps, each flagged with whether it is the active one. */
@@ -59,8 +57,9 @@ export class BookingStepIndicator {
    *
    * The active step is never clickable — it is where the visitor already is.
    * SEATS is always reachable from CHECKOUT because the hold survives the trip
-   * back. CHECKOUT is reachable from SEATS only when Step 1 is valid and a
-   * hold is active, so the tabs cannot open an empty checkout.
+   * back. CHECKOUT from SEATS needs a submittable selection, so the tab cannot
+   * fire on an empty or invalid Step 1. No hold is required yet: the checkout
+   * request creates or reuses the hold itself, exactly like "Next: Checkout".
    */
   protected canActivate(status: BookingStep['status']): boolean {
     if (status === this.active()) {
@@ -71,7 +70,7 @@ export class BookingStepIndicator {
       return this.active() === 'step2';
     }
 
-    return this.selection.canContinue() && this.hold.hasHold();
+    return this.hold.canSubmit();
   }
 
   /** Emits the navigation the tab asked for, when the tab may be activated. */

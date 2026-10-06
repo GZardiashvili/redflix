@@ -13,7 +13,7 @@
     <app-booking-step-indicator
       [active]="status()"
       (backToSeats)="showStep1()"
-      (forwardToCheckout)="showStep2()"
+      (forwardToCheckout)="requestCheckout()"
     />
 
     @switch (status()) {

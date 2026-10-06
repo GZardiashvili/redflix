@@ -79,14 +79,16 @@ export class BookingModal {
   }
 
   /**
-   * Moves forward to checkout.
+   * Moves forward to checkout through the hold logic — the exact path the
+   * "Next: Checkout" button takes.
    *
-   * Reached only through the guarded step tab, so a hold is already active by
-   * the time this runs — the same transition the hold request makes after it
-   * confirms the seats.
+   * `hold.submit()` validates the selection, reuses the live hold when nothing
+   * changed, otherwise POSTs the update and only advances once the server
+   * confirms. A direct `showStep2()` here would bypass all of that and leave a
+   * stale hold behind a changed selection.
    */
-  protected showStep2(): void {
-    this.booking.showStep2();
+  protected requestCheckout(): void {
+    this.hold.submit();
   }
 
   /**
