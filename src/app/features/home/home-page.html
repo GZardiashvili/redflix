@@ -116,6 +116,7 @@
           <div
             id="coming-soon-list"
             class="home-page__cards home-page__cards--coming-soon"
+            [class.home-page__cards--expanded]="comingSoonExpanded()"
             appScrollFade
           >
             @for (movie of movies; track movie.id) {

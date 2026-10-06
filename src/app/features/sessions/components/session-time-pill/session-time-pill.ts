@@ -1,8 +1,8 @@
 import { Component, computed, input, output } from '@angular/core';
 import { MovieSession } from '../../../../core/models/session';
 
-/** Seats at or below this count render the low-availability red. */
-const LOW_SEATS = 5;
+/** Seats below this count render the low-availability red; >= this stays green. */
+const LOW_SEATS_THRESHOLD = 10;
 
 /**
  * One showtime as a 252×104 card: time, format chip, language,
@@ -43,9 +43,9 @@ export class SessionTimePill {
     () => `${this.session().venue.name} · Hall ${this.session().hall.name}`,
   );
 
-  /** Whether the seats badge should warn about low availability. */
+  /** Whether the seats badge should warn about low availability (< 10 seats). */
   protected readonly isLow = computed(
-    () => !this.session().isSoldOut && this.session().seatsLeft <= LOW_SEATS,
+    () => !this.session().isSoldOut && this.session().seatsLeft < LOW_SEATS_THRESHOLD,
   );
 
   /**

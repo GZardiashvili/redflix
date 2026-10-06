@@ -128,7 +128,40 @@
   text-align: center;
 }
 
-// Circular badge behind the prompt (popcorn) and empty (magnifier) icons.
+// Roomy prompt overlay, per Overlay / Search – Prompt: tall centred card with
+// generous air around the 48px popcorn, bold white title, muted subtitle and a
+// large pill CTA. Scoped to --prompt so loading / empty / error keep the
+// compact treatment. The input magnifier is untouched.
+.header-search__state--prompt {
+  gap: 0;
+  min-height: 24rem;
+  padding: 3rem 2rem 3.5rem;
+
+  .header-search__state-icon--popcorn {
+    margin-bottom: 2.5rem;
+  }
+
+  .header-search__state-title {
+    margin: 0 0 0.75rem;
+    font-size: 1.5rem;
+    line-height: 1.25;
+  }
+
+  .header-search__state-message {
+    margin: 0;
+    font-size: 1.125rem;
+    line-height: 1.5;
+  }
+
+  .header-search__cta {
+    width: auto;
+    min-width: 20rem;
+    height: 3.5rem;
+    margin-top: 2rem;
+    padding: 0 3rem;
+    font-size: 1.125rem;
+  }
+}
 .header-search__state-icon {
   display: flex;
   align-items: center;
@@ -143,6 +176,18 @@
   svg {
     width: 1.75rem; // 28px
     height: 1.75rem;
+  }
+
+  &--popcorn {
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: transparent;
+
+    svg {
+      width: 3rem; // 48px, the SVG's own size — do not rescale its backdrop
+      height: 3rem;
+    }
   }
 }
 

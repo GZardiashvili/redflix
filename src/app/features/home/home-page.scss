@@ -135,4 +135,40 @@
   &--coming-soon {
     gap: 1.25rem;
   }
+
+  // Expanded Coming Soon: single-row carousel becomes a smooth multi-row grid.
+  // Cards fade/slide in via opacity + transform so the layout change does not
+  // jump. Collapsing removes the class and restores the horizontal scroll row.
+  &--expanded {
+    flex-wrap: wrap;
+    gap: 1.25rem; // 20px
+    overflow-x: visible;
+    mask-image: none;
+    box-shadow: none;
+
+    > * {
+      flex-shrink: 1;
+      opacity: 0;
+      transform: translateY(0.5rem);
+      transition:
+        opacity 0.25s ease,
+        transform 0.25s ease;
+      animation: coming-soon-enter 0.25s ease forwards;
+    }
+  }
+}
+
+@keyframes coming-soon-enter {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-page__cards--expanded > * {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
 }
