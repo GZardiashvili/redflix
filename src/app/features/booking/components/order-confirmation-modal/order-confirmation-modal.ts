@@ -54,6 +54,38 @@ export class OrderConfirmationModal {
   });
 
   /**
+   * The receipt's seat row: the issued seat codes joined in ticket order
+   * ("B3, B4, B5"), straight from the server's tickets.
+   */
+  protected readonly seatCodes = computed(() => {
+    const order = this.order();
+
+    return order === null ? '' : order.tickets.map((ticket) => ticket.seatCode).join(', ');
+  });
+
+  /**
+   * The receipt's ticket row: counts grouped by type ("2 x Adult, 1 x Child").
+   *
+   * Grouped in first-seen order so the summary reads the way the seats were
+   * picked, with each type named exactly as the server assigned it.
+   */
+  protected readonly ticketSummary = computed(() => {
+    const order = this.order();
+
+    if (order === null) {
+      return '';
+    }
+
+    const counts = new Map<string, number>();
+
+    for (const ticket of order.tickets) {
+      counts.set(ticket.ticketType.name, (counts.get(ticket.ticketType.name) ?? 0) + 1);
+    }
+
+    return [...counts].map(([name, count]) => `${count} x ${name}`).join(', ');
+  });
+
+  /**
    * Closes the confirmation and leaves the visitor on the page underneath.
    *
    * The same call backs the Close button, the shell's close control, Escape and
@@ -77,7 +109,7 @@ export class OrderConfirmationModal {
   }
 
   /**
-   * "My Tickets": closes the confirmation first, then routes to the profile
+   * "View my tickets": closes the confirmation first, then routes to the profile
    * page's My Tickets section.
    *
    * Dismissing before navigating keeps the dialog from lingering over the new
@@ -85,7 +117,7 @@ export class OrderConfirmationModal {
    * so the visitor lands on the ticket list itself and that section re-reads
    * `GET /tickets`, showing the order just bought without a manual refresh.
    */
-  protected showTickets(): void {
+  protected viewTickets(): void {
     this.dismiss();
     void this.router.navigate(['/profile'], { queryParams: { tab: 'tickets' } });
   }

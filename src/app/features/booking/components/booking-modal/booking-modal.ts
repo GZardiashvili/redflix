@@ -67,6 +67,29 @@ export class BookingModal {
   protected readonly title = computed(() => this.context()?.movieTitle ?? 'Booking');
 
   /**
+   * Returns to seat selection without releasing the hold.
+   *
+   * The hold is deliberately kept: the visitor is changing their mind about the
+   * seats, not abandoning the booking, and the hold service replaces the hold
+   * when a new selection is submitted — releasing here would only take away
+   * seats the server is still holding for them.
+   */
+  protected showStep1(): void {
+    this.booking.showStep1();
+  }
+
+  /**
+   * Moves forward to checkout.
+   *
+   * Reached only through the guarded step tab, so a hold is already active by
+   * the time this runs — the same transition the hold request makes after it
+   * confirms the seats.
+   */
+  protected showStep2(): void {
+    this.booking.showStep2();
+  }
+
+  /**
    * Closes the booking, releasing any active hold first.
    *
    * One place handles every way out — the close button, Escape and a click on

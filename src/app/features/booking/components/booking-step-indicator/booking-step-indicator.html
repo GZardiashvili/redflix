@@ -1,11 +1,15 @@
 <ol class="steps" aria-label="Booking progress">
   @for (step of steps(); track step.status) {
-    <li
-      class="steps__step"
-      [class.steps__step--active]="step.isActive"
-      [attr.aria-current]="step.isActive ? 'step' : null"
-    >
-      <span class="steps__label">{{ step.label }}</span>
+    <li class="steps__step" [class.steps__step--active]="step.isActive">
+      <button
+        type="button"
+        class="steps__tab"
+        [disabled]="!canActivate(step.status)"
+        [attr.aria-current]="step.isActive ? 'step' : null"
+        (click)="activate(step.status)"
+      >
+        <span class="steps__label">{{ step.label }}</span>
+      </button>
     </li>
   }
 </ol>

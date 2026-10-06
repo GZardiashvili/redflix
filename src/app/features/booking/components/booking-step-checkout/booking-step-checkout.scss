@@ -103,6 +103,18 @@
     outline: none;
   }
 
+  // Valid state: default border is kept (no green), and a checkmark is shown
+  // at the right edge. Gated on `.ng-touched`/`.ng-dirty` so untouched fields
+  // stay quiet.
+  &.ng-touched.ng-valid,
+  &.ng-dirty.ng-valid {
+    padding-right: 2.5rem; // 40px: room for the 13px check + 16px inset
+    background-image: url("data:image/svg+xml,%3Csvg width='13' height='10' viewBox='0 0 13 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3.95164 7.75683L1.28801 5.0932C1.21836 5.02269 1.1354 4.96672 1.04396 4.92851C0.95251 4.89031 0.85439 4.87064 0.755284 4.87064C0.656178 4.87064 0.558057 4.89031 0.46661 4.92851C0.375164 4.96672 0.29221 5.02269 0.222557 5.0932C0.152055 5.16285 0.0960796 5.2458 0.0578758 5.33725C0.0196721 5.4287 0 5.52682 0 5.62592C0 5.72503 0.0196721 5.82315 0.0578758 5.9146C0.0960796 6.00604 0.152055 6.089 0.222557 6.15865L3.4113 9.3474C3.70811 9.6442 4.18756 9.6442 4.48437 9.3474L12.5514 1.28801C12.6219 1.21836 12.6778 1.1354 12.716 1.04396C12.7542 0.95251 12.7739 0.85439 12.7739 0.755283C12.7739 0.656177 12.7542 0.558057 12.716 0.46661C12.6778 0.375164 12.6219 0.29221 12.5514 0.222557C12.4817 0.152055 12.3988 0.0960794 12.3073 0.0578757C12.2159 0.0196719 12.1177 0 12.0186 0C11.9195 0 11.8214 0.0196719 11.73 0.0578757C11.6385 0.0960794 11.5556 0.152055 11.4859 0.222557L3.95164 7.75683Z' fill='%234ADE80'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 0.8125rem 0.625rem; // 13px × 10px
+  }
+
   // The form is disabled while the order request is in flight; dimming it says
   // so, rather than leaving live-looking fields that ignore typing.
   &:disabled {
@@ -128,50 +140,28 @@
   line-height: 1.3;
 }
 
-// The way back and the way forward, side by side at the foot of the form.
-.checkout__actions {
+// The summary column of Step 2: the read-only summary with the commit action
+// pinned beneath it, which is where the design puts "Pay: Complete order".
+.checkout__summary-column {
   display: flex;
-  align-items: center;
+  flex: 0 0 auto;
+  flex-direction: column;
   gap: 0.75rem; // 12px
-  margin-top: auto;
-  padding-top: 1rem; // 16px
+  align-self: stretch;
 }
 
 .checkout__summary {
   flex: 0 0 auto;
 }
 
-// The way back to Step 1. Deliberately quiet: it reverses the step rather than
-// advancing it, and the seats stay held, so it must not read as the primary
-// action the red buttons are for.
-.checkout__back {
-  padding: 0.8125rem 1.375rem; // 13px 22px
-  border: 1px solid #2a2c3d;
-  border-radius: 999px;
-  background: none;
-  color: #fff;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.875rem; // 14px
-  font-weight: 800;
-  line-height: 0.9375rem; // 15px
-
-  &:hover {
-    background: #1e2031;
-  }
-
-  &:focus-visible {
-    outline: 2px solid #fff;
-    outline-offset: 2px;
-  }
-}
-
 // The commit action. The only red control in this step, so it reads as the one
-// thing being decided here.
+// thing being decided here. Disabled while the form is invalid and while the
+// order is in flight — the latter is what makes a second click impossible
+// while the first is still on its way to the server.
 .checkout__pay {
   display: flex;
   min-height: 2.5625rem; // 41px
-  flex: 1 1 auto;
+  width: 100%;
   align-items: center;
   justify-content: center;
   padding: 0.8125rem 1.375rem; // 13px 22px
@@ -185,8 +175,8 @@
   font-weight: 800;
   line-height: 0.9375rem; // 15px
 
-  // Disabled while the order is in flight. Greyed rather than merely inert, so
-  // it is visibly not the next action available.
+  // Disabled while the form is invalid or the order is in flight. Greyed
+  // rather than merely inert, so it is visibly not the next action available.
   &:disabled {
     background: #505261;
     color: #a9a9a9;

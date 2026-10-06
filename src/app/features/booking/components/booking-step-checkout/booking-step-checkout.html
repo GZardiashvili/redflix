@@ -9,7 +9,13 @@
     <h3 class="checkout__heading" id="checkout-heading">Checkout</h3>
 
     <div class="checkout__layout">
-      <form class="checkout__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <form
+        id="checkout-form"
+        class="checkout__form"
+        [formGroup]="form"
+        (ngSubmit)="submit()"
+        novalidate
+      >
         <!--
           The general sentence for a field-level 422. It sits above the form
           because it is about the submission as a whole; each field's own reason
@@ -137,32 +143,30 @@
           </div>
         </div>
 
-        <div class="checkout__actions">
-          <button type="button" class="checkout__back" (click)="backToSeats()">
-            Back to seats
-          </button>
-
-          <!--
-            Disabled while the request is in flight, not merely while the form is
-            empty: that is what makes a second click impossible while the first is
-            still on its way to the server.
-          -->
-          <button
-            class="checkout__pay"
-            type="submit"
-            [disabled]="!canSubmit()"
-            [attr.aria-busy]="submitting()"
-          >
-            @if (submitting()) {
-              <app-loading-indicator size="sm" label="Completing order" />
-            } @else {
-              Pay: Complete order
-            }
-          </button>
-        </div>
       </form>
 
-      <app-seat-selection-summary class="checkout__summary" [readOnly]="true" />
+      <div class="checkout__summary-column">
+        <app-seat-selection-summary class="checkout__summary" [readOnly]="true" />
+
+        <!--
+          The commit action lives at the foot of the summary column, under the
+          totals — that is where the design puts it. It submits the sibling
+          form through `form="checkout-form"` rather than sitting inside it.
+        -->
+        <button
+          class="checkout__pay"
+          type="submit"
+          form="checkout-form"
+          [disabled]="!canSubmit() || form.invalid"
+          [attr.aria-busy]="submitting()"
+        >
+          @if (submitting()) {
+            <app-loading-indicator size="sm" label="Completing order" />
+          } @else {
+            Pay: Complete order
+          }
+        </button>
+      </div>
     </div>
   </section>
 }

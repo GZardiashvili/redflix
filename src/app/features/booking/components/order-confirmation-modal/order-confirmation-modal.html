@@ -57,28 +57,35 @@
           <div class="confirmation__film">
             <h3 class="confirmation__title">{{ order.session.movie.title }}</h3>
 
+            <!--
+              The Figma receipt line: venue, hall, short weekday + day + month,
+              and start time — one compact "Galleria Tbilisi · Hall B · Tue 15
+              Sep · 16:30" fact rather than the catalogue's long-form copy.
+            -->
             <p class="confirmation__screening">
               {{ order.session.venue.name }} · Hall {{ order.session.hall.name }} ·
               {{ order.session.date | date: 'EEE d MMM' : 'UTC' }} · {{ order.session.time }}
             </p>
-
-            <ul class="confirmation__tags" aria-label="Screening format">
-              <li class="confirmation__tag">{{ order.session.format.name }}</li>
-              <li class="confirmation__tag">{{ order.session.language.name }}</li>
-            </ul>
           </div>
         </div>
 
         <hr class="confirmation__divider" />
 
-        <ul class="confirmation__tickets" aria-label="Purchased seats">
-          @for (ticket of order.tickets; track ticket.id) {
-            <li class="confirmation__ticket">
-              <span class="confirmation__seat">Seat {{ ticket.seatCode }}</span>
-              <span class="confirmation__type">{{ ticket.ticketType.name }}</span>
-            </li>
-          }
-        </ul>
+        <!--
+          The Figma receipt rows: aggregated seat codes and grouped ticket
+          counts ("B3, B4, B5" / "2 x Adult, 1 x Child") rather than one row
+          per issued ticket.
+        -->
+        <dl class="confirmation__receipt">
+          <div class="confirmation__receipt-row">
+            <dt class="confirmation__receipt-term">Seats</dt>
+            <dd class="confirmation__receipt-value">{{ seatCodes() }}</dd>
+          </div>
+          <div class="confirmation__receipt-row">
+            <dt class="confirmation__receipt-term">Tickets</dt>
+            <dd class="confirmation__receipt-value">{{ ticketSummary() }}</dd>
+          </div>
+        </dl>
 
         <hr class="confirmation__divider" />
 
@@ -86,16 +93,11 @@
           <span class="confirmation__total-label">Total paid</span>
           <span class="confirmation__total-amount">₾{{ total() }}</span>
         </div>
-
-        <p class="confirmation__payment">
-          <span class="visually-hidden">Paid with card </span>
-          <span aria-hidden="true">•••• </span>{{ order.cardLastFour }}
-        </p>
       </div>
 
       <div class="confirmation__actions">
-        <button type="button" class="confirmation__primary" (click)="showTickets()">
-          My Tickets
+        <button type="button" class="confirmation__primary" (click)="viewTickets()">
+          View my tickets
         </button>
 
         <button type="button" class="confirmation__secondary" (click)="backToHome()">

@@ -13,7 +13,6 @@ import { FormField } from '../../../../shared/ui/form-field/form-field';
 import { LoadingIndicator } from '../../../../shared/ui/loading/loading-indicator';
 import { BookingHoldService } from '../../booking-hold.service';
 import { BookingOrderService } from '../../booking-order.service';
-import { BookingStateService } from '../../booking-state.service';
 import { SeatSelectionSummary } from '../seat-selection-summary/seat-selection-summary';
 
 /**
@@ -47,7 +46,7 @@ const MESSAGES: Record<CheckoutField, (control: AbstractControl) => string> = {
   fullName: (control) =>
     control.hasError('required') ? 'Enter your full name.' : 'Enter at least 3 characters.',
   email: (control) =>
-    control.hasError('required') ? 'Enter your email address.' : 'Enter a valid email address.',
+    control.hasError('required') ? 'Enter your email address.' : 'Please enter a valid email format.',
   mobileNumber: (control) =>
     control.hasError('required') ? 'Enter your mobile number.' : 'Enter a 9-digit mobile number.',
   cardNumber: (control) =>
@@ -87,7 +86,6 @@ export class BookingStepCheckout {
   private readonly auth = inject(AuthService);
   private readonly hold = inject(BookingHoldService);
   private readonly orderService = inject(BookingOrderService);
-  private readonly booking = inject(BookingStateService);
 
   /**
    * Whether a hold is being checked out at all.
@@ -114,7 +112,10 @@ export class BookingStepCheckout {
    */
   protected readonly form = this.forms.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(3)]],
-    email: ['', [Validators.required, Validators.email]],
+    email: [
+      '',
+      [Validators.required, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)],
+    ],
     mobileNumber: ['', [Validators.required, exactlyDigits(9)]],
     cardNumber: ['', [Validators.required, exactlyDigits(16)]],
     expiry: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])\/\d{2}$/)]],
@@ -163,18 +164,6 @@ export class BookingStepCheckout {
     }
 
     return this.localErrorFor(field);
-  }
-
-  /**
-   * Returns to seat selection without releasing the hold.
-   *
-   * The hold is deliberately kept: the visitor is changing their mind about the
-   * seats, not abandoning the booking, and the API replaces the hold when they
-   * submit a new selection — releasing here would only take away seats the server
-   * is still holding for them.
-   */
-  protected backToSeats(): void {
-    this.booking.showStep1();
   }
 
   /**

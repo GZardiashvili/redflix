@@ -10,7 +10,11 @@
   @if (context(); as screening) {
     <app-booking-header [context]="screening" />
 
-    <app-booking-step-indicator [active]="status()" />
+    <app-booking-step-indicator
+      [active]="status()"
+      (backToSeats)="showStep1()"
+      (forwardToCheckout)="showStep2()"
+    />
 
     @switch (status()) {
       @case ('step2') {
