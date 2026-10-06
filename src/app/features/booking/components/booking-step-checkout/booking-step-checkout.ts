@@ -7,12 +7,14 @@ import {
   Validators,
 } from '@angular/forms';
 import { Component, computed, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { OrderRequest } from '../../../../core/models/order';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FormField } from '../../../../shared/ui/form-field/form-field';
 import { LoadingIndicator } from '../../../../shared/ui/loading/loading-indicator';
 import { BookingHoldService } from '../../booking-hold.service';
 import { BookingOrderService } from '../../booking-order.service';
+import { BookingStateService } from '../../booking-state.service';
 import { SeatSelectionSummary } from '../seat-selection-summary/seat-selection-summary';
 
 /**
@@ -76,7 +78,7 @@ const MESSAGES: Record<CheckoutField, (control: AbstractControl) => string> = {
  * be paid for. This component owns the form and the presentation of the outcome.
  */
 @Component({
-  imports: [FormField, LoadingIndicator, ReactiveFormsModule, SeatSelectionSummary],
+  imports: [DatePipe, FormField, LoadingIndicator, ReactiveFormsModule],
   selector: 'app-booking-step-checkout',
   styleUrl: './booking-step-checkout.scss',
   templateUrl: './booking-step-checkout.html',
@@ -86,6 +88,49 @@ export class BookingStepCheckout {
   private readonly auth = inject(AuthService);
   private readonly hold = inject(BookingHoldService);
   private readonly orderService = inject(BookingOrderService);
+  private readonly booking = inject(BookingStateService);
+
+  /** The live hold being checked out: seats and subtotal for the summary card. */
+  protected readonly held = this.hold.hold;
+
+  /** The screening being booked, for the summary card's title line. */
+  protected readonly screening = this.booking.context;
+
+  /**
+   * The summary card's seat row: the held seat codes in hold order
+   * ("B3, B4, B5").
+   */
+  protected readonly seatCodes = computed(() => {
+    const hold = this.held();
+
+    return hold === null ? '' : hold.seats.map((seat) => seat.code).join(', ');
+  });
+
+  /**
+   * The summary card's ticket row: held seats grouped by ticket type
+   * ("2 x Adult, 1 x Child"), in first-seen order.
+   */
+  protected readonly ticketSummary = computed(() => {
+    const hold = this.held();
+
+    if (hold === null) {
+      return '';
+    }
+
+    const counts = new Map<string, number>();
+
+    for (const seat of hold.seats) {
+      counts.set(seat.ticketType.name, (counts.get(seat.ticketType.name) ?? 0) + 1);
+    }
+
+    return [...counts].map(([name, count]) => `${count} x ${name}`).join(', ');
+  });
+
+  /**
+   * The summary card's subtotal: the server's own figure, in whole lari like
+   * the design ("₾ 32").
+   */
+  protected readonly subtotal = computed(() => this.held()?.subtotal ?? 0);
 
   /**
    * Whether a hold is being checked out at all.
@@ -146,6 +191,25 @@ export class BookingStepCheckout {
 
   constructor() {
     this.prefill();
+  }
+
+  /**
+   * Formats the expiry as the visitor types: digits only, with a `/` inserted
+   * after the second digit ("0627" → "06/27"), capped at five characters.
+   *
+   * Backspacing over the slash works because the value is rebuilt from digits
+   * alone: deleting the `/` of "06/2" leaves the digits "062", which formats
+   * back to "06/2", and one more deletion leaves "06". Pasting a full value is
+   * normalised the same way, and a lone leading digit gets no slash yet.
+   */
+  protected maskExpiry(): void {
+    const control = this.form.controls.expiry;
+    const digits = String(control.value ?? '').replace(/\D/g, '').slice(0, 4);
+    const masked = digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+
+    if (masked !== control.value) {
+      control.setValue(masked);
+    }
   }
 
   /**
@@ -243,6 +307,11 @@ export class BookingStepCheckout {
    * again: `/me` has run at startup or at login. Every profile field is `null`
    * until the profile is complete, in which case the form starts empty and the
    * visitor types their own details.
+   *
+   * Each prefilled control is marked touched so a valid prefilled value shows
+   * its checkmark immediately on load, without waiting for a blur. The mark
+   * happens after the patch, and an invalid prefill still shows no check —
+   * `errorFor` only answers for engaged controls whose value fails the rules.
    */
   private prefill(): void {
     const user = this.auth.user();
@@ -252,6 +321,12 @@ export class BookingStepCheckout {
       email: user?.email ?? '',
       mobileNumber: user?.mobileNumber ?? '',
     });
+
+    for (const field of ['fullName', 'email', 'mobileNumber'] as const) {
+      if ((this.form.controls[field].value ?? '').length > 0) {
+        this.form.controls[field].markAsTouched();
+      }
+    }
   }
 
   /**

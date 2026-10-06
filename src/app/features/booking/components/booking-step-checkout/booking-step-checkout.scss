@@ -140,18 +140,116 @@
   line-height: 1.3;
 }
 
-// The summary column of Step 2: the read-only summary with the commit action
-// pinned beneath it, which is where the design puts "Pay: Complete order".
+// The summary column of Step 2: the aggregated receipt card with the subtotal
+// and the commit action beneath it, which is where the design puts
+// "Pay: Complete order".
 .checkout__summary-column {
   display: flex;
+  width: 20.0625rem; // 321px, the same column Step 1's summary uses
   flex: 0 0 auto;
   flex-direction: column;
   gap: 0.75rem; // 12px
   align-self: stretch;
 }
 
-.checkout__summary {
-  flex: 0 0 auto;
+.checkout__summary-heading {
+  margin: 0;
+  color: #fff;
+  font-size: 0.875rem; // 14px
+  font-weight: 800;
+  line-height: 0.9375rem; // 15px
+}
+
+// The aggregated receipt card: title, screening, then the grouped seat and
+// ticket rows — the server's hold rendered as facts, with nothing to edit.
+.checkout__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; // 8px
+  padding: 1.25rem; // 20px
+  border-radius: 0.75rem; // 12px
+  background: #1e2031;
+}
+
+.checkout__card-title {
+  margin: 0;
+  color: #fff;
+  font-size: 0.875rem; // 14px
+  font-weight: 800;
+  line-height: 0.9375rem; // 15px
+  text-transform: uppercase;
+}
+
+.checkout__card-screening {
+  margin: 0;
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  line-height: 1.3;
+}
+
+.checkout__card-divider {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid #2a2c3d;
+}
+
+.checkout__card-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; // 8px
+  margin: 0;
+  padding: 0;
+}
+
+.checkout__card-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.checkout__card-term {
+  color: #a9a9a9;
+  font-size: 0.75rem; // 12px
+  line-height: 1rem; // 16px
+}
+
+.checkout__card-value {
+  margin: 0;
+  color: #fff;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 1rem; // 16px
+  text-align: right;
+}
+
+// The subtotal below the card: label on the left, the server's own figure
+// large on the right.
+.checkout__subtotal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: auto;
+  padding: 0 0.3125rem; // 5px
+}
+
+.checkout__subtotal-label {
+  color: #fff;
+  font-size: 0.75rem; // 12px
+  font-weight: 600;
+  line-height: 0.8125rem; // 13px
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.checkout__subtotal-amount {
+  color: #fff;
+  font-size: 1.5rem; // 24px
+  font-weight: 800;
+  line-height: 1.625rem; // 26px
+  font-variant-numeric: tabular-nums;
 }
 
 // The commit action. The only red control in this step, so it reads as the one

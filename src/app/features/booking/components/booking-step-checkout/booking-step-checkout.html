@@ -115,6 +115,7 @@
                 autocomplete="cc-exp"
                 inputmode="numeric"
                 maxlength="5"
+                (input)="maskExpiry()"
               />
             </app-form-field>
 
@@ -146,11 +147,47 @@
       </form>
 
       <div class="checkout__summary-column">
-        <app-seat-selection-summary class="checkout__summary" [readOnly]="true" />
+        <!--
+          The Step 2 summary: an aggregated receipt card, not the Step 1
+          line-by-line editor. All figures come from the live hold, and the
+          screening line from the booking context the hold was created for.
+        -->
+        <h3 class="checkout__summary-heading">Summary</h3>
+
+        @if (held()) {
+          <div class="checkout__card">
+            @if (screening(); as show) {
+              <p class="checkout__card-title">{{ show.movieTitle }}</p>
+
+              <p class="checkout__card-screening">
+                Hall {{ show.hallName }} ·
+                {{ show.date | date: 'EEE d MMM' : 'UTC' }} · {{ show.time }}
+              </p>
+            }
+
+            <hr class="checkout__card-divider" />
+
+            <dl class="checkout__card-rows">
+              <div class="checkout__card-row">
+                <dt class="checkout__card-term">Seats</dt>
+                <dd class="checkout__card-value">{{ seatCodes() }}</dd>
+              </div>
+              <div class="checkout__card-row">
+                <dt class="checkout__card-term">Tickets</dt>
+                <dd class="checkout__card-value">{{ ticketSummary() }}</dd>
+              </div>
+            </dl>
+          </div>
+        }
+
+        <div class="checkout__subtotal">
+          <span class="checkout__subtotal-label">Subtotal</span>
+          <span class="checkout__subtotal-amount">₾ {{ subtotal() }}</span>
+        </div>
 
         <!--
           The commit action lives at the foot of the summary column, under the
-          totals — that is where the design puts it. It submits the sibling
+          subtotal — that is where the design puts it. It submits the sibling
           form through `form="checkout-form"` rather than sitting inside it.
         -->
         <button
