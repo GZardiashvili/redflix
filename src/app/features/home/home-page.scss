@@ -136,18 +136,23 @@
     gap: 1.25rem;
   }
 
-  // Expanded Coming Soon: single-row carousel becomes a smooth multi-row grid.
-  // Cards fade/slide in via opacity + transform so the layout change does not
-  // jump. Collapsing removes the class and restores the horizontal scroll row.
+  // Expanded Coming Soon: the single-row carousel becomes a responsive
+  // multi-column grid that fills the full container width (no dead space on
+  // wide screens). Cards fade/slide in via opacity + transform so the layout
+  // change does not jump. Collapsing removes the class and restores the
+  // horizontal scroll flex row with its fixed card width.
   &--expanded {
-    flex-wrap: wrap;
-    gap: 1.25rem; // 20px
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(29.375rem, 1fr)); // 470px columns
+    gap: 1.5rem; // 24px
+    width: 100%;
     overflow-x: visible;
     mask-image: none;
     box-shadow: none;
 
     > * {
-      flex-shrink: 1;
+      min-width: 0;
+      width: 100%;
       opacity: 0;
       transform: translateY(0.5rem);
       transition:
@@ -156,6 +161,16 @@
       animation: coming-soon-enter 0.25s ease forwards;
     }
   }
+}
+
+// The expanded grid owns the column width, so the card hosts stretch to fill
+// their track. The rule reaches the `app-coming-soon-card` host elements (not
+// their encapsulated internals) — enough for the track to size evenly, while
+// the collapsed carousel keeps its fixed 470px card width untouched.
+.home-page__cards--expanded app-coming-soon-card {
+  display: block;
+  width: 100%;
+  max-width: none;
 }
 
 @keyframes coming-soon-enter {

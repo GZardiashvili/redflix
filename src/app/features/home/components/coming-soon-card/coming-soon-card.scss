@@ -34,6 +34,14 @@
   }
 }
 
+// In the page's expanded grid the track owns the width: the card stretches to
+// fill its column so wide containers (1920px) have no dead space on the
+// right. The collapsed carousel keeps the fixed 470px width.
+:host-context(.home-page__cards--expanded) .coming-soon-card {
+  width: 100%;
+  max-width: none;
+}
+
 // Reduced motion: the hover treatment still applies, it just arrives at once.
 @media (prefers-reduced-motion: reduce) {
   .coming-soon-card {
