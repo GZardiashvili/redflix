@@ -28,8 +28,11 @@ export class TicketCard {
   readonly order = input.required<Order>();
 
   /**
-   * Whether the refund affordance belongs on this card: upcoming tickets only.
-   * Past tickets render the same information with no refund action.
+   * Whether the upcoming-ticket refund affordance belongs on this card.
+   *
+   * True for upcoming tickets (refund button plus its cutoff note); false for
+   * past tickets, which render the attended / refunded treatment instead — a
+   * disabled Refund control, or a "Refunded" label when `refundedAt` is set.
    */
   readonly showRefund = input(false);
 
@@ -45,6 +48,41 @@ export class TicketCard {
    * which confirms before sending any request.
    */
   readonly refundRequested = output<void>();
+
+  /**
+   * Whether this order was refunded, derived from the server's `refundedAt`.
+   *
+   * A non-null timestamp means the order already went through
+   * `POST /orders/{order}/refund` — past cards render a "Refunded" label instead
+   * of any refund action. A null value means the session simply ran its course.
+   */
+  protected readonly isRefunded = computed(() => this.order().refundedAt !== null);
+
+  /**
+   * The refund cutoff for this order's session: `session.startsAt` minus 2 hours.
+   *
+   * Refunds are allowed up to 2 hours before the session starts, so the stub
+   * reads "Refundable until …" from this instant. Parsed from the server's ISO
+   * `startsAt` and shifted by exactly 2 hours; `null` when the timestamp cannot
+   * be parsed, in which case the template hides the note rather than printing a
+   * fabricated time. Rendering stays in UTC (like the session date elsewhere on
+   * the card) via the `DatePipe` timezone argument in the template.
+   */
+  protected readonly refundCutoff = computed<Date | null>(() => {
+    const startsAt = this.order().session.startsAt;
+
+    if (!startsAt) {
+      return null;
+    }
+
+    const parsed = Date.parse(startsAt);
+
+    if (Number.isNaN(parsed)) {
+      return null;
+    }
+
+    return new Date(parsed - 2 * 60 * 60 * 1000);
+  });
 
   /**
    * The total the server charged, in lari with cents.

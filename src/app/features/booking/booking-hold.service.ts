@@ -35,6 +35,17 @@ export interface HoldFailure {
 const EXPIRED_MESSAGE = 'Your hold time expired. Please re-select your seats.';
 
 /**
+ * `localStorage` key holding the id of the hold the visitor was in the middle of.
+ *
+ * Only the id is stored: the server remains the sole authority on whether that
+ * hold still stands, so a reload re-reads it with `GET /holds/{hold}` instead of
+ * trusting a snapshot of the hold itself. The key exists exactly as long as a
+ * hold is resumable — it is written when the server confirms one, and removed
+ * when the hold is released, expires, or is paid for.
+ */
+const ACTIVE_HOLD_KEY = 'kinoxii_active_hold';
+
+/**
  * The booking hold: the seats the server has reserved, how long they are
  * reserved for, and every way that reservation can end.
  *
@@ -70,6 +81,14 @@ const EXPIRED_MESSAGE = 'Your hold time expired. Please re-select your seats.';
  * which checkout reuses when `POST /orders` ends the hold instead of the clock
  * doing so. That is the point of keeping them here: one hold, one way to lose
  * it, whichever request discovers the loss.
+ *
+ * **A hold outlives the page that made it.** Every `holdId` the server confirms
+ * is written to `localStorage` under {@link ACTIVE_HOLD_KEY}, and opening a
+ * booking reads it back with `GET /holds/{hold}`: a live answer resumes the hold,
+ * its countdown and the seats it reserves, while a dead or refused id is dropped
+ * from storage. The key is removed by every path that ends a hold — release,
+ * expiry and a completed order — so what the browser stores and what the server
+ * holds cannot drift apart.
  */
 @Service()
 export class BookingHoldService {
@@ -81,6 +100,25 @@ export class BookingHoldService {
   private readonly holdState = signal<Hold | null>(null);
   private readonly submittingState = signal(false);
   private readonly failureState = signal<HoldFailure | null>(null);
+
+  /**
+   * Whether a stored hold is being read back right now.
+   *
+   * Guards the restore effect against itself: the request is started from an
+   * effect, and this signal keeps that effect from starting it twice while the
+   * first one is still in flight.
+   */
+  private readonly restoringState = signal(false);
+
+  /**
+   * The booking session a restore has already been attempted for, or `null`.
+   *
+   * Written before the request goes out, so one open of the dialog costs at most
+   * one `GET` — a failure cannot loop by retrying inside the same visit. Closing
+   * the dialog resets it, which is what lets the next open try again when a
+   * transport failure left the id in storage.
+   */
+  private restoredForSession: number | null = null;
 
   /**
    * The current wall-clock reading, refreshed once a second while a hold is
@@ -188,6 +226,40 @@ export class BookingHoldService {
         this.discard();
       }
     });
+
+    // A hold that survived a reload is read back the moment a booking opens.
+    //
+    // The stored id is only a pointer: the server decides whether the hold still
+    // stands, so the outcome of `GET /holds/{hold}` — live, expired, refused — is
+    // what resumes the flow or drops the key, never the stored value itself.
+    // Restoring on open rather than at construction keeps a bare reload from
+    // issuing an authenticated request before the visitor has asked for anything,
+    // and by then the login gate has already run.
+    effect(() => {
+      const context = this.booking.context();
+
+      if (context === null) {
+        this.restoredForSession = null;
+        return;
+      }
+
+      if (this.holdState() !== null || this.restoringState()) {
+        return;
+      }
+
+      if (this.restoredForSession === context.sessionId) {
+        return;
+      }
+
+      const stored = readStoredHoldId();
+
+      if (stored === null) {
+        this.restoredForSession = context.sessionId;
+        return;
+      }
+
+      this.restore(stored, context.sessionId);
+    });
   }
 
   /**
@@ -260,6 +332,7 @@ export class BookingHoldService {
       .pipe(
         switchMap((response) => {
           this.holdState.set(response.data);
+          storeHoldId(response.data.holdId);
           this.booking.showStep2();
 
           return EMPTY;
@@ -294,10 +367,7 @@ export class BookingHoldService {
       return;
     }
 
-    this.holds
-      .releaseHold(hold.holdId)
-      .pipe(catchError(() => EMPTY))
-      .subscribe({ complete: () => undefined, error: () => undefined });
+    this.sendRelease(hold.holdId);
   }
 
   /** Drops any outstanding failure notice, e.g. when the visitor picks again. */
@@ -305,11 +375,100 @@ export class BookingHoldService {
     this.failureState.set(null);
   }
 
-  /** Forgets the hold without contacting the API; see {@link release}. */
+  /**
+   * Forgets the hold without contacting the API; see {@link release}.
+   *
+   * Forgetting includes the stored id: every way the hold can end locally is a
+   * way it can no longer be resumed, so `localStorage` is cleared here rather
+   * than separately in each caller.
+   */
   private discard(): void {
     this.holdState.set(null);
     this.failureState.set(null);
     this.submittingState.set(false);
+    clearStoredHold();
+  }
+
+  /**
+   * Reads a stored hold back and, if the server still honours it, resumes it.
+   *
+   * The one place a reload stops losing a hold. Every outcome is the server's to
+   * declare:
+   *
+   * * `isLive: true` for this same screening — the hold, its countdown and the
+   *   seats it reserves are put back and the flow opens on Step 2, where the
+   *   visitor left it;
+   * * `isLive: false` — the server has already released the seats, so the id is
+   *   dropped from storage and nothing is resumed;
+   * * any HTTP answer the API refuses the id with (`401`, `403`, `404`, …) —
+   *   same conclusion, since the id names nothing we may resume;
+   * * a transport failure (`status 0`) — nothing is known, so the id is kept and
+   *   the next open of the dialog tries again.
+   *
+   * A live hold for some *other* screening, and a response that arrives after the
+   * visitor closed the dialog, are both holds nobody is resuming: they are
+   * released rather than left counting down where no one can pay for them.
+   */
+  private restore(holdId: string, sessionId: number): void {
+    this.restoredForSession = sessionId;
+    this.restoringState.set(true);
+
+    this.holds
+      .getHold(holdId)
+      .pipe(
+        switchMap((response) => {
+          this.restoringState.set(false);
+
+          const hold = response.data;
+          const currentSessionId = this.booking.context()?.sessionId ?? null;
+
+          if (!hold.isLive) {
+            clearStoredHold();
+            return EMPTY;
+          }
+
+          if (currentSessionId === null || currentSessionId !== hold.sessionId) {
+            clearStoredHold();
+            this.sendRelease(hold.holdId);
+            return EMPTY;
+          }
+
+          this.holdState.set(hold);
+          this.selection.restoreHeld(
+            hold.seats.map((seat) => ({
+              seatId: seat.seatId,
+              code: seat.code,
+              ticketTypeSlug: seat.ticketType.slug,
+            })),
+          );
+          this.booking.showStep2();
+
+          return EMPTY;
+        }),
+        catchError((error: unknown) => {
+          this.restoringState.set(false);
+
+          if (toApiError(error).status !== 0) {
+            clearStoredHold();
+          }
+
+          return EMPTY;
+        }),
+      )
+      .subscribe();
+  }
+
+  /**
+   * Fires a `DELETE` for a hold nobody holds locally any more.
+   *
+   * Failures are swallowed: a hold the server has already released answers
+   * `404`, which is exactly the state this call is happy to discover.
+   */
+  private sendRelease(holdId: string): void {
+    this.holds
+      .releaseHold(holdId)
+      .pipe(catchError(() => EMPTY))
+      .subscribe({ complete: () => undefined, error: () => undefined });
   }
 
   /**
@@ -421,9 +580,13 @@ export class BookingHoldService {
    * `message` is passed rather than assumed so the visitor is told what the
    * server actually said; the countdown supplies {@link EXPIRED_MESSAGE} because
    * by then the server has stopped answering.
+   *
+   * The stored id goes with the hold: the server has already freed these seats,
+   * so there is nothing left to resume on the next reload.
    */
   expire(message: string = EXPIRED_MESSAGE): void {
     this.holdState.set(null);
+    clearStoredHold();
     this.selection.clear();
     this.seatMap.refresh();
     this.failureState.set({ kind: 'error', message, contested: [] });
@@ -439,10 +602,12 @@ export class BookingHoldService {
    * Deliberately **not** a release: the seats are sold, so there is nothing left
    * to free and no `DELETE` is sent — the hold id no longer names a hold. Only
    * the local state is dropped, which also stops the countdown that would
-   * otherwise report an expiry for a booking that succeeded.
+   * otherwise report an expiry for a booking that succeeded. The stored id goes
+   * with it: a hold that was paid for must never be resumed by a later reload.
    */
   complete(): void {
     this.holdState.set(null);
+    clearStoredHold();
   }
 }
 
@@ -483,4 +648,42 @@ function formatDuration(totalSeconds: number): string {
   const seconds = totalSeconds % 60;
 
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+/**
+ * The id of the hold waiting to be resumed, or `null` when storage holds none.
+ *
+ * Guarded like every other read of `localStorage` in this application: a browser
+ * that refuses access — private mode, a disabled storage permission, an overflowed
+ * quota — must cost the visitor the resume, never the booking itself. A value
+ * that is not a non-empty string counts as no hold, so a corrupted entry cannot
+ * send a meaningless id at the API.
+ */
+function readStoredHoldId(): string | null {
+  try {
+    const raw = localStorage.getItem(ACTIVE_HOLD_KEY);
+
+    return raw !== null && raw.length > 0 ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Records the id of a server-confirmed hold so a reload can read it back. */
+function storeHoldId(holdId: string): void {
+  try {
+    localStorage.setItem(ACTIVE_HOLD_KEY, holdId);
+  } catch {
+    // Storage unavailable: the hold still works for this visit, it simply does
+    // not survive a reload.
+  }
+}
+
+/** Forgets the stored id. Runs on every path that ends a hold. */
+function clearStoredHold(): void {
+  try {
+    localStorage.removeItem(ACTIVE_HOLD_KEY);
+  } catch {
+    // Nothing to keep in sync when storage cannot be written in the first place.
+  }
 }

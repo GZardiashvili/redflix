@@ -53,7 +53,10 @@ export interface Hold {
   readonly seats: readonly HoldSeat[];
 }
 
-/** Envelope of `POST /sessions/{session}/holds` (201). */
+/**
+ * Envelope of `POST /sessions/{session}/holds` (201) and `GET /holds/{hold}`
+ * (200): the same hold record either way, so one type covers both.
+ */
 export type HoldResponse = ApiResponse<Hold>;
 
 /** One seat as requested when creating a hold. */

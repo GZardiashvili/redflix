@@ -68,7 +68,9 @@
         The refund control: present on upcoming tickets, enabled only when the
         server reports `isRefundable`, disabled with an explanation otherwise.
         Clicking an enabled control only signals intent — the parent confirms
-        before any request is sent.
+        before any request is sent. The note below names the 2-hour cutoff
+        (`startsAt` minus 2 hours) while refundable, or explains the closed
+        window once `isRefundable` flips to false.
       -->
       <button
         class="ticket-card__refund"
@@ -79,14 +81,40 @@
         [attr.title]="
           order().isRefundable
             ? 'Request a refund for this order'
-            : 'This ticket can no longer be refunded'
+            : 'Refunds close 2 hours before the session'
         "
         (click)="refundRequested.emit()"
       >
         {{ refunding() ? 'Refunding…' : 'Refund' }}
       </button>
-      @if (!order().isRefundable) {
-        <p class="ticket-card__refund-note">This ticket can no longer be refunded</p>
+      @if (order().isRefundable) {
+        @if (refundCutoff() !== null) {
+          <p class="ticket-card__refund-note">
+            Refundable until {{ refundCutoff()! | date: 'HH:mm, EEE d MMM' : 'UTC' }}
+          </p>
+        }
+      } @else {
+        <p class="ticket-card__refund-note">Refunds close 2 hours before the session.</p>
+      }
+    } @else {
+      <!--
+        Past tickets: no refund action. A refunded order (`refundedAt !== null`)
+        renders its "Refunded" label instead of any control; an attended order
+        keeps the same Refund control visibly disabled so the stub keeps its
+        shape but cannot be interacted with.
+      -->
+      @if (isRefunded()) {
+        <p class="ticket-card__refunded">Refunded</p>
+      } @else {
+        <button
+          class="ticket-card__refund"
+          type="button"
+          disabled
+          aria-disabled="true"
+          title="This ticket can no longer be refunded"
+        >
+          Refund
+        </button>
       }
     }
   </div>

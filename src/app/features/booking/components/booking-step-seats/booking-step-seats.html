@@ -42,12 +42,26 @@
           The map column is two stacked boxes, not one scrolling box: only the
           canvas above scrolls. The key is a sibling of that scroll area, so it
           keeps its full height no matter how tall the hall is, and the canvas's
-          horizontal scrollbar can never land on top of it. It is also the last
-          thing the column gives up its space to — `flex-shrink: 0` — so a long
-          hall shortens the map rather than squeezing the labels out of view.
+          own scrollbar — hidden, since the canvas is panned by dragging — can
+          never land on top of it. It is also the last thing the column gives up
+          its space to — `flex-shrink: 0` — so a long hall shortens the map
+          rather than squeezing the labels out of view.
         -->
       <div class="booking-step__map">
-        <div class="booking-step__scroll">
+        <!--
+            The viewport: a fixed window over a canvas that may be wider than the
+            dialog (Hall B/D rows reach 14 seats plus aisles) and taller than the
+            panel (three sections). `appDragToPan` makes it pannable in both
+            axes; it is focusable and named so the same scrolling is available
+            from the keyboard, since the scrollbars themselves are hidden.
+          -->
+        <div
+          class="booking-step__scroll"
+          appDragToPan
+          role="region"
+          aria-label="Seat map viewport"
+          tabindex="0"
+        >
           <app-seat-map [map]="layout" />
         </div>
 

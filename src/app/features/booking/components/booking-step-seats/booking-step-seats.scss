@@ -49,14 +49,48 @@
   min-width: 0;
 }
 
+// The map viewport: a fixed window over a canvas that may be both wider and
+// taller than the panel allows.
+//
+// `min-height: 0` lets the flex item shrink below its content height, so a hall
+// taller than the column scrolls inside it instead of pushing the key out; the
+// height itself is capped at the design's slice of the column and, above that,
+// at 55% of the viewport, so the key beneath always keeps its place.
+//
+// Both axes scroll — Hall B/D rows reach 14 seats plus aisles — but neither bar
+// is shown: the map is dragged like a map view, and a native scrollbar would
+// give a second, uglier way to move it while drawing straight across the seats.
+// `-ms-overflow-style` and `scrollbar-width` cover Firefox and the legacy
+// engine; `::-webkit-scrollbar` covers Chrome, Safari and Edge.
 .booking-step__scroll {
+  width: 100%;
   // `min-height: 0` lets the flex item shrink below its content height, so a hall
   // taller than the column scrolls inside it instead of pushing the key out.
   min-height: 0;
-  overflow-y: auto;
+  max-height: 55vh;
+  overflow: auto;
   overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: #2a2c3d transparent;
+  cursor: grab;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  // Held down and moving: the canvas travels with the pointer, and selection is
+  // switched off so a drag cannot leave a half-highlighted seat code behind it.
+  &.is-panning {
+    cursor: grabbing;
+    user-select: none;
+  }
+
+  // Scrollbars are hidden, so the viewport still has to show where it is when it
+  // is reached by keyboard — arrow keys scroll it, as they always have.
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -2px;
+  }
 }
 
 // Loading, error and the (unexpected) empty layout all occupy the same area, so

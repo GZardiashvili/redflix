@@ -1,27 +1,34 @@
-// The seat map: the screen caption and the API's sections — the scrolling canvas
+// The seat map: the screen caption and the API's sections — the pannable canvas
 // only.
 //
 // Sections stack 32px apart and each one keeps its own row widths. The whole map
-// scrolls inside the dialog when a hall is taller than the panel, so every section
-// stays reachable rather than being clipped. The legend is not drawn here; it
-// belongs to Step 1's column footer, outside this scroll area, so it cannot be
-// scrolled out of view or overlapped by the horizontal scrollbar below.
+// lives inside a fixed viewport that is dragged to pan (see `DragToPan`), so a
+// hall taller or wider than the panel stays reachable rather than being clipped.
+// The legend is not drawn here; it belongs to Step 1's column footer, outside
+// this area, so it cannot be panned out of view.
 //
-// The extra bottom padding is the clearance that scrollbar needs: without it the
-// bar renders over the last row of seats rather than under them.
+// `min-width: max-content` is what makes the canvas a real canvas: it is never
+// narrower than the widest thing on it, so a hall whose rows outgrow the dialog
+// widens the canvas instead of clipping, and the SCREEN caption above the seats —
+// which fills the canvas — always spans exactly the width the rows do. A hall
+// that fits keeps the viewport's own width, so nothing narrows unnecessarily.
 .seat-map {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2rem; // 32px
-  padding: 0 1.25rem 2rem; // 20px sides, 32px below the last row for the scrollbar
+  min-width: max-content;
+  padding: 0 1.25rem 2rem; // 20px sides, 32px below the last row
 }
 
 // Static caption marking the front of the hall. It is presentation only: no seat
 // data is derived from it, and it does not imply the hall has this shape.
+//
+// Width is the whole canvas — rows included, since the canvas is sized by them —
+// with no cap of its own: a bar that stops short of the widest row reads as a
+// caption pinned to the left rather than as the front of the screen.
 .seat-map__screen {
   width: 100%;
-  max-width: 42.5rem; // 680px
   margin: 0;
   padding: 0.5rem 1.25rem; // 8px 20px
   border-radius: 0 0 1.25rem 1.25rem; // 20px

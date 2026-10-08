@@ -10,10 +10,10 @@ import { HoldRequest, HoldResponse } from '../models/hold';
  * Thin typed wrappers over `HttpClient`, like the other core services: no
  * caching, no state and no second API abstraction. {@link BookingHoldService}
  * owns everything about the hold's lifecycle — when it is created, counted
- * down, replaced and released — and calls these methods.
+ * down, replaced, restored and released — and calls these methods.
  *
- * Both endpoints are authenticated, so a `401` is handled by the existing auth
- * interceptor: it opens the login modal and replays the request once. The
+ * All three endpoints are authenticated, so a `401` is handled by the existing
+ * auth interceptor: it opens the login modal and replays the request once. The
  * feature layer therefore never sees a bare 401 and never opens a second login
  * flow of its own.
  */
@@ -43,6 +43,21 @@ export class HoldsService {
     const body: HoldRequest = { seats };
 
     return this.http.post<HoldResponse>(sessionHoldsUrl(sessionId), body);
+  }
+
+  /**
+   * Reads one hold back: `GET /holds/{hold}`, answering `200` with the hold as
+   * the server currently knows it.
+   *
+   * This is how a hold survives a reload: only its id is kept on the client, and
+   * this request decides whether that id still names something. The response
+   * carries `isLive`, which is `false` once the server has released the hold; a
+   * hold the API no longer recognises answers `404`, and one belonging to
+   * another account `403`. Those outcomes are decided by
+   * {@link BookingHoldService} — this method only fetches.
+   */
+  getHold(holdId: string): Observable<HoldResponse> {
+    return this.http.get<HoldResponse>(holdUrl(holdId));
   }
 
   /**

@@ -35,8 +35,24 @@ export interface SelectedSeatLine {
   readonly invalidReason: string | null;
 }
 
-/** Slug of the ticket type a newly selected seat defaults to. Owned by the API. */
+/**
+ * Slug of the ticket type a newly selected seat defaults to. Owned by the API.
+ */
 const DEFAULT_TICKET_TYPE_SLUG = 'adult';
+
+/**
+ * One seat the server is already holding for this visitor, in the hold
+ * response's vocabulary.
+ *
+ * `GET /holds/{hold}` names a ticket type by **slug** (`adult`) while selection
+ * stores the configuration's numeric id, so the two vocabularies are kept apart
+ * here rather than blurred together in a method signature.
+ */
+export interface HeldSeat {
+  readonly seatId: number;
+  readonly code: string;
+  readonly ticketTypeSlug: string;
+}
 
 /**
  * The seats picked in Step 1 and everything derived from them.
@@ -201,6 +217,38 @@ export class SeatSelectionService {
   /** Removes a seat from the selection along with its ticket type and validity. */
   deselect(seatId: number): void {
     this.selectionState.update((selection) => selection.filter((entry) => entry.seatId !== seatId));
+    this.noticeState.set(null);
+  }
+
+  /**
+   * Replaces the selection with seats the server is already holding.
+   *
+   * Used only to resume a hold that outlived a reload: the seats, their codes and
+   * their ticket types come straight from `GET /holds/{hold}`, so nothing about
+   * them is guessed or re-derived. The hold's **slug** is resolved against the
+   * current configuration, because selection stores the configured id; a slug the
+   * configuration no longer lists falls back to the default type rather than
+   * leaving a held seat with no type at all, and with no configuration at all
+   * nothing is restored — a seat without a ticket type could never be bought, so
+   * pretending to hold one would only surface later as a broken line.
+   */
+  restoreHeld(seats: readonly HeldSeat[]): void {
+    const fallback = this.defaultTicketType();
+
+    if (seats.length === 0 || fallback === null) {
+      this.clear();
+      return;
+    }
+
+    const types = this.ticketTypes();
+
+    this.selectionState.set(
+      seats.map((seat) => ({
+        seatId: seat.seatId,
+        code: seat.code,
+        ticketTypeId: types.find((type) => type.slug === seat.ticketTypeSlug)?.id ?? fallback.id,
+      })),
+    );
     this.noticeState.set(null);
   }
 

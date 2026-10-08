@@ -3,6 +3,7 @@ import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../../../shared/ui/error-state/error-state';
 import { LoadingIndicator } from '../../../../shared/ui/loading/loading-indicator';
 import { BookingHoldService } from '../../booking-hold.service';
+import { DragToPan } from '../../drag-to-pan.directive';
 import { SeatMapService } from '../../seat-map.service';
 import { SeatMap } from '../seat-map/seat-map';
 import { SeatMapLegendComponent } from '../seat-map/seat-map-legend/seat-map-legend';
@@ -25,13 +26,19 @@ import { SeatSelectionSummary } from '../seat-selection-summary/seat-selection-s
  * state of its own: both columns read the same selection owner, so the seats drawn
  * on the map and the seats listed with prices cannot disagree.
  *
- * Only the map canvas scrolls. The seat key is a sibling of the scroll area inside
+ * Only the map canvas moves. The seat key is a sibling of the scroll area inside
  * the same column, so it is never clipped by the scroll and never sits underneath
- * the canvas's horizontal scrollbar — the two share the column's height instead,
- * with the key taking a fixed slice of it and the map taking the rest.
+ * the canvas — the two share the column's height instead, with the key taking a
+ * fixed slice of it and the map taking the rest.
+ *
+ * The canvas is pannable rather than scrolled by hand: {@link DragToPan} turns
+ * the viewport into a press-and-drag surface, and its scrollbars are hidden, so a
+ * hall wider or taller than the panel is explored the way a map is instead of
+ * being pushed around behind visible bars.
  */
 @Component({
   imports: [
+    DragToPan,
     EmptyState,
     ErrorState,
     LoadingIndicator,
