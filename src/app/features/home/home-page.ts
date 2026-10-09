@@ -10,6 +10,7 @@ import {
 import { AuthService } from '../../core/services/auth.service';
 import { MoviesService } from '../../core/services/movies.service';
 import { RecentlyViewedService } from '../../core/services/recently-viewed.service';
+import { HorizontalWheelScroll } from '../../shared/utils/horizontal-wheel-scroll.directive';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../shared/ui/error-state/error-state';
 import { LoadingIndicator } from '../../shared/ui/loading/loading-indicator';
@@ -25,6 +26,7 @@ import { ScrollFade } from './scroll-fade.directive';
     EmptyState,
     ErrorState,
     HomeHero,
+    HorizontalWheelScroll,
     LoadingIndicator,
     MovieCard,
     RecentlyViewedCard,

@@ -118,6 +118,16 @@
   overflow-x: auto;
   overscroll-behavior-x: contain;
   padding-bottom: 0.25rem;
+  // The native scrollbar is hidden cross-browser: the row is a carousel, and a
+  // visible bar reads as a page control rather than the design's blurred edge.
+  // `appHorizontalWheelScroll` gives mouse users a way to scroll it anyway.
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
   // Figma's inset vignette on the row frame.
   box-shadow: inset 0 0 4px rgb(0 0 0 / 20%);
   mask-image: linear-gradient(

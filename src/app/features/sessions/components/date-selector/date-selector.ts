@@ -1,4 +1,5 @@
 import { Component, input, output } from '@angular/core';
+import { HorizontalWheelScroll } from '../../../../shared/utils/horizontal-wheel-scroll.directive';
 import { SessionDateOption, upcomingDateOptions } from '../../session-date';
 
 /**
@@ -10,7 +11,7 @@ import { SessionDateOption, upcomingDateOptions } from '../../session-date';
  * input and emits `dateSelected` when another day is picked.
  */
 @Component({
-  imports: [],
+  imports: [HorizontalWheelScroll],
   selector: 'app-date-selector',
   styleUrl: './date-selector.scss',
   templateUrl: './date-selector.html',
