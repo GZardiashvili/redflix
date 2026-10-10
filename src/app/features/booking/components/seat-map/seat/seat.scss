@@ -78,31 +78,27 @@
   color: #8f93a8;
 }
 
-// Held by another visitor: still an unavailable seat, so it keeps the same flat
-// mid-grey base as `sold` — the visitor learns the seat is not theirs either way.
-// The diagonal hatch of the design is what separates the two states, and it does
-// the work alone so the key can repeat exactly this pair and stay in step with
-// the map.
-//
-// The hatch is drawn over a lighter tint than `sold`'s base rather than a darker
-// overlay: a held seat is a *temporary* block, and a tile that reads as lighter
-// than a sold one says so at a glance even in peripheral vision or at the small
-// size the legend swatch repeats it at.
+// Held by another visitor: still an unavailable seat, so it keeps a base one
+// step lighter than `sold` — a tile that reads as lighter says at a glance, even
+// in peripheral vision, that the block is temporary. What separates it from
+// `sold` is the thick repeating diagonal zebra pattern stretched across the whole
+// tile rather than a single crossing line: the stripes read as "taken for now"
+// from any angle and survive being shrunk to the legend swatch, while leaving the
+// seat number legible on top. The key draws exactly this same gradient, so the
+// two stay in step.
 .seat--held {
   border-color: transparent;
-  background: #454a63;
+  background-color: #454a63;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.05) 10px,
+    transparent 10px,
+    transparent 20px
+  );
   box-shadow: none;
   color: #8f93a8;
-  overflow: hidden;
-
-  &::before {
-    position: absolute;
-    width: 5.25rem; // 84px, wide enough to cross the tile at the design's angle
-    height: 1.25rem; // 20px
-    background: rgb(7 12 28 / 45%);
-    content: '';
-    transform: rotate(-37.44deg);
-  }
+  text-decoration: none;
 }
 
 // The visitor's own live hold. Kept visibly its own thing so the hold-recovery

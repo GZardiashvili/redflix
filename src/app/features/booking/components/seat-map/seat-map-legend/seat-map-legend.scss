@@ -62,23 +62,22 @@
   background: #ec3013;
 }
 
-// `sold` and `held` share the striped treatment — a flat tile, with `held` set one
-// step lighter to mark it as temporary — so the swatches repeat exactly that pair
-// and the key cannot drift from the map.
+// `sold` stays a flat tile; `held` repeats the map's zebra exactly — the same
+// lighter base under the same repeating diagonal stripes — so the key cannot
+// drift from what the map actually draws.
 .legend__swatch--sold {
   background: #3a3d50;
 }
 
 .legend__swatch--held {
-  background:
-    linear-gradient(
-      to bottom right,
-      transparent 45%,
-      rgb(7 12 28 / 45%) 45%,
-      rgb(7 12 28 / 45%) 55%,
-      transparent 55%
-    ),
-    #454a63;
+  background-color: #454a63;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.05) 10px,
+    transparent 10px,
+    transparent 20px
+  );
 }
 
 // No seat in that position: shown as empty space rather than a colour, because
