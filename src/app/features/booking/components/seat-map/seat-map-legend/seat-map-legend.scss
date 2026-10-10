@@ -62,9 +62,12 @@
   background: #ec3013;
 }
 
-// `sold` stays a flat tile; `held` repeats the map's zebra exactly — the same
-// lighter base under the same repeating diagonal stripes — so the key cannot
-// drift from what the map actually draws.
+// `sold` stays a flat tile; `held` repeats the map's zebra — the same lighter
+// base under the same repeating diagonal stripes, so the key cannot drift from
+// what the map actually draws. The stops are scaled down to 3px/6px here (the
+// map's 10px/20px) because the swatch is only 16px across: at the map's size the
+// whole repeat would not fit and it would read as a single diagonal split
+// instead of a striped pattern.
 .legend__swatch--sold {
   background: #3a3d50;
 }
@@ -74,9 +77,9 @@
   background-image: repeating-linear-gradient(
     -45deg,
     rgba(255, 255, 255, 0.05),
-    rgba(255, 255, 255, 0.05) 10px,
-    transparent 10px,
-    transparent 20px
+    rgba(255, 255, 255, 0.05) 3px,
+    transparent 3px,
+    transparent 6px
   );
 }
 
