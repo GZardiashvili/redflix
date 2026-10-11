@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import {
   API_BASE_URL,
   holdUrl,
@@ -11,6 +12,7 @@ import { FilterOptions } from '../../core/models/filter-options';
 import { Hold } from '../../core/models/hold';
 import { SessionSeatMap } from '../../core/models/seat';
 import { FilterOptionsService } from '../../core/services/filter-options.service';
+import { AuthService } from '../../core/services/auth.service';
 import { BookingContext } from './booking-context';
 import { BookingHoldService } from './booking-hold.service';
 import { BookingStateService } from './booking-state.service';
@@ -201,3 +203,131 @@ describe('BookingHoldService persistence', () => {
     expect(hold.hold()).toBeNull();
   });
 });
+
+describe('BookingHoldService startup restore', () => {
+  const CONTEXT_KEY = 'kinoxii_active_hold_context';
+
+  let hold: BookingHoldService;
+  let booking: BookingStateService;
+  let selection: SeatSelectionService;
+  let httpMock: HttpTestingController;
+  let authenticated: ReturnType<typeof signal<boolean>>;
+  let initializing: ReturnType<typeof signal<boolean>>;
+
+  beforeEach(async () => {
+    localStorage.clear();
+
+    authenticated = signal(true);
+    initializing = signal(false);
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: AuthService,
+          useValue: {
+            isAuthenticated: authenticated.asReadonly(),
+            initializing: initializing.asReadonly(),
+          },
+        },
+      ],
+    });
+
+    hold = TestBed.inject(BookingHoldService);
+    booking = TestBed.inject(BookingStateService);
+    selection = TestBed.inject(SeatSelectionService);
+    httpMock = TestBed.inject(HttpTestingController);
+
+    const loading = TestBed.inject(FilterOptionsService).load();
+    httpMock.expectOne(`${API_BASE_URL}/filter-options`).flush({ data: FILTER_OPTIONS });
+    await loading;
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+    localStorage.clear();
+  });
+
+  it('reopens the booking on Step 2 when a stored hold is still live', () => {
+    localStorage.setItem(STORAGE_KEY, HOLD_ID);
+    localStorage.setItem(CONTEXT_KEY, JSON.stringify(context));
+
+    TestBed.flushEffects();
+
+    const request = httpMock.expectOne(holdUrl(HOLD_ID));
+    expect(request.request.method).toBe('GET');
+    request.flush({ data: aHold() });
+
+    TestBed.flushEffects();
+
+    // Reopening the flow also asks for the hall layout, exactly as a manual
+    // open does.
+    httpMock.expectOne(sessionSeatsUrl(SESSION_ID)).flush({ data: MAP });
+
+    expect(booking.isOpen()).toBe(true);
+    expect(booking.isStep2()).toBe(true);
+    expect(booking.context()).toEqual(context);
+    expect(selection.lines().map((line) => line.code)).toEqual(['C4']);
+    expect(hold.hold()?.holdId).toBe(HOLD_ID);
+  });
+
+  it('does not open the booking when the stored hold is no longer live', () => {
+    localStorage.setItem(STORAGE_KEY, HOLD_ID);
+    localStorage.setItem(CONTEXT_KEY, JSON.stringify(context));
+
+    TestBed.flushEffects();
+    httpMock.expectOne(holdUrl(HOLD_ID)).flush({ data: aHold({ isLive: false }) });
+    TestBed.flushEffects();
+
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+    expect(hold.hold()).toBeNull();
+    expect(booking.isOpen()).toBe(false);
+  });
+
+  it('does not open the booking when the API refuses the stored id', () => {
+    localStorage.setItem(STORAGE_KEY, HOLD_ID);
+    localStorage.setItem(CONTEXT_KEY, JSON.stringify(context));
+
+    TestBed.flushEffects();
+    httpMock
+      .expectOne(holdUrl(HOLD_ID))
+      .flush({ message: 'Not found.' }, { status: 404, statusText: 'Not Found' });
+    TestBed.flushEffects();
+
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+    expect(hold.hold()).toBeNull();
+    expect(booking.isOpen()).toBe(false);
+  });
+
+  it('does not request a hold while the session is still initializing', () => {
+    initializing.set(true);
+    localStorage.setItem(STORAGE_KEY, HOLD_ID);
+    localStorage.setItem(CONTEXT_KEY, JSON.stringify(context));
+
+    TestBed.flushEffects();
+
+    httpMock.expectNone(holdUrl(HOLD_ID));
+
+    initializing.set(false);
+    TestBed.flushEffects();
+
+    httpMock.expectOne(holdUrl(HOLD_ID)).flush({ data: aHold() });
+    TestBed.flushEffects();
+    httpMock.expectOne(sessionSeatsUrl(SESSION_ID)).flush({ data: MAP });
+
+    expect(booking.isStep2()).toBe(true);
+  });
+
+  it('does not request a hold for a guest', () => {
+    authenticated.set(false);
+    localStorage.setItem(STORAGE_KEY, HOLD_ID);
+    localStorage.setItem(CONTEXT_KEY, JSON.stringify(context));
+
+    TestBed.flushEffects();
+
+    httpMock.expectNone(holdUrl(HOLD_ID));
+    expect(booking.isOpen()).toBe(false);
+  });
+});
+

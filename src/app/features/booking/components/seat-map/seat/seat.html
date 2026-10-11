@@ -1,8 +1,8 @@
-@if (seat().state === 'available') {
+@if (interactive()) {
   <button
     type="button"
     class="seat seat--available"
-    [class.seat--selected]="selected()"
+    [class.seat--selected]="shownSelected()"
     [attr.data-state]="seat().state"
     [attr.data-seat]="seat().code"
     [attr.aria-pressed]="selected()"
@@ -16,7 +16,6 @@
     class="seat"
     [class.seat--sold]="seat().state === 'sold'"
     [class.seat--held]="seat().state === 'held'"
-    [class.seat--mine]="seat().isMine"
     [attr.data-state]="seat().state"
     [attr.data-seat]="seat().code"
     [attr.aria-label]="label()"

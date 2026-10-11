@@ -36,8 +36,36 @@ export class SeatComponent {
    */
   readonly selected = input(false);
 
-  /** Emitted when an available seat is activated. */
+  /** Emitted when a selectable seat is activated. */
   readonly toggled = output<Seat>();
+
+  /**
+   * Whether this seat is drawn as an interactive control rather than an inert
+   * tile.
+   *
+   * An `available` seat is always selectable. A `held` seat is selectable too
+   * when it is the visitor's own hold (`isMine`) or is already part of the
+   * selection — a hold recovered after a refresh is still theirs to change, so
+   * it must not be locked like another visitor's hold. `sold` and a
+   * third-party `held` seat stay inert.
+   */
+  protected readonly interactive = computed(
+    () => this.seat().state === 'available' || this.seat().isMine || this.selected(),
+  );
+
+  /**
+   * Whether the seat is drawn in the selected (accent) visual state.
+   *
+   * This follows the selection, not the server's `isMine` flag: the selection
+   * is the single source of truth for what the visitor has chosen, and it is
+   * what must move the moment a seat is dropped — by clicking the tile or the
+   * summary's remove control — even though the seat map is not refetched and so
+   * still reports the seat as held. A seat recovered from a hold is put back
+   * into the selection on restore, so it shows as chosen on that basis alone;
+   * coupling the colour to `isMine` would leave a removed seat stuck looking
+   * selected until the map reloaded.
+   */
+  protected readonly shownSelected = computed(() => this.selected());
 
   /**
    * Assistive-technology name: identity and state in one phrase, e.g.
@@ -45,7 +73,7 @@ export class SeatComponent {
    */
   protected readonly label = computed(() => {
     const seat = this.seat();
-    const state = seat.state === 'available' && this.selected() ? 'selected' : seat.state;
+    const state = this.shownSelected() ? 'selected' : seat.state;
 
     return `Seat ${seat.code}, ${state}`;
   });
@@ -54,14 +82,13 @@ export class SeatComponent {
    * Activates the seat.
    *
    * Guarded as well as being unreachable from the template: the handler is
-   * emitted rather than handled here, so a sold seat can never reach the
-   * selection owner even if a future caller wires it differently.
+   * emitted rather than handled here, so a sold or third-party-held seat can
+   * never reach the selection owner even if a future caller wires it
+   * differently.
    */
   protected select(): void {
-    const seat = this.seat();
-
-    if (seat.state === 'available') {
-      this.toggled.emit(seat);
+    if (this.interactive()) {
+      this.toggled.emit(this.seat());
     }
   }
 }

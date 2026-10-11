@@ -184,7 +184,11 @@ export class SeatSelectionService {
    * warning never outlives the selection that caused it.
    */
   toggle(seat: Seat): void {
-    if (seat.state !== 'available') {
+    // A seat the server reports as `held` is off limits in general, but one
+    // flagged `isMine` is the visitor's own hold: it is already in the
+    // selection after a refresh, so it must stay toggleable — otherwise a
+    // recovered hold could never be edited or dropped from the map.
+    if (seat.state !== 'available' && !seat.isMine) {
       return;
     }
 

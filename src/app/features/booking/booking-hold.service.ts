@@ -3,7 +3,9 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { EMPTY, catchError, switchMap, timer } from 'rxjs';
 import { ApiError, toApiError } from '../../core/api/api-error';
 import { Hold, HoldRequestSeat } from '../../core/models/hold';
+import { AuthService } from '../../core/services/auth.service';
 import { HoldsService } from '../../core/services/holds.service';
+import { BookingContext } from './booking-context';
 import { BookingStateService } from './booking-state.service';
 import { SeatMapService } from './seat-map.service';
 import { SeatSelectionService } from './seat-selection.service';
@@ -44,6 +46,20 @@ const EXPIRED_MESSAGE = 'Your hold time expired. Please re-select your seats.';
  * when the hold is released, expires, or is paid for.
  */
 const ACTIVE_HOLD_KEY = 'kinoxii_active_hold';
+
+/**
+ * `localStorage` key holding the booking context of the hold waiting to be
+ * resumed.
+ *
+ * A refreshed page has no open booking, so the hold id alone is not enough to
+ * reopen the flow: the modal needs the screening it belongs to (title, venue,
+ * hall, price, …). That context is written next to the hold id when the hold is
+ * created and cleared on exactly the same paths, so the two never drift. It is
+ * display data only — the server still decides whether the hold stands — so a
+ * restored hold is always confirmed with `GET /holds/{hold}` before anything is
+ * shown.
+ */
+const ACTIVE_HOLD_CONTEXT_KEY = 'kinoxii_active_hold_context';
 
 /**
  * The booking hold: the seats the server has reserved, how long they are
@@ -96,10 +112,23 @@ export class BookingHoldService {
   private readonly booking = inject(BookingStateService);
   private readonly selection = inject(SeatSelectionService);
   private readonly seatMap = inject(SeatMapService);
+  private readonly auth = inject(AuthService);
 
   private readonly holdState = signal<Hold | null>(null);
   private readonly submittingState = signal(false);
   private readonly failureState = signal<HoldFailure | null>(null);
+
+  /**
+   * A hold recovered at startup, waiting to be applied once the booking it
+   * belongs to is open.
+   *
+   * Opening a booking clears the selection (a new screening starts empty), so a
+   * restored hold cannot write its seats in the same tick it opens the flow —
+   * they would be wiped the instant they were written. The hold is parked here
+   * instead and applied by an effect that runs after that clearing has settled,
+   * so the recovered seats survive.
+   */
+  private readonly startupHoldToApply = signal<Hold | null>(null);
 
   /**
    * Whether a stored hold is being read back right now.
@@ -119,6 +148,18 @@ export class BookingHoldService {
    * transport failure left the id in storage.
    */
   private restoredForSession: number | null = null;
+
+  /**
+   * Whether the app-startup restore of a hold that survived a reload has
+   * already been attempted.
+   *
+   * A refreshed page opens with the booking closed, so the restore-on-open
+   * effect below never runs for it: there is no open context to trigger it.
+   * This flag is the startup path's own guard — set before its single request
+   * goes out, so one page load costs at most one `GET /holds/{hold}` and a
+   * failure cannot loop by retrying.
+   */
+  private startupRestoreAttempted = false;
 
   /**
    * The current wall-clock reading, refreshed once a second while a hold is
@@ -260,6 +301,77 @@ export class BookingHoldService {
 
       this.restore(stored, context.sessionId);
     });
+
+    // A refreshed page opens with the booking closed, so the restore-on-open
+    // effect above has no context to fire on: without this path a hold that
+    // survived a reload would sit in storage, unseen, until the visitor
+    // reopened that screening by hand.
+    //
+    // This is the automatic reopen. It waits for the session to settle — a
+    // still-initializing token must not be mistaken for a guest — and then, for
+    // an authenticated visitor with no booking already open, reads the stored
+    // hold back. If the server still honours it, the booking is launched
+    // straight onto Step 2 with the hold restored; if the id is dead, expired
+    // or refused, nothing opens and the key is dropped, exactly as a manual
+    // reopen would.
+    effect(() => {
+      // A booking already open means the restore-on-open effect owns this; the
+      // two must not both act on the same hold.
+      if (this.booking.context() !== null) {
+        return;
+      }
+
+      if (this.startupRestoreAttempted || this.auth.initializing()) {
+        return;
+      }
+
+      // Holds are an authenticated concept: without an account there is no
+      // hold to resume, so a guest never issues the request.
+      if (!this.auth.isAuthenticated()) {
+        this.startupRestoreAttempted = true;
+        return;
+      }
+
+      this.startupRestoreAttempted = true;
+
+      const stored = readStoredHoldId();
+      const storedContext = readStoredHoldContext();
+
+      if (stored === null || storedContext === null) {
+        return;
+      }
+
+      this.restoreAtStartup(stored, storedContext);
+    });
+
+    // Applies a hold parked by {@link restoreAtStartup} once the booking it
+    // belongs to is open.
+    //
+    // This is the second half of the automatic reopen. Opening the flow clears
+    // the selection, so the recovered seats cannot be written in the same tick
+    // the booking opens — they would be wiped immediately. Parking the hold and
+    // applying it here lets that clearing settle first: `SeatSelectionService`
+    // is constructed before this service, so its clear effect runs before this
+    // one, and `restoreHeld` — which replaces the selection outright — has the
+    // final word. Only then does the flow move to Step 2.
+    effect(() => {
+      const hold = this.startupHoldToApply();
+
+      if (hold === null || this.booking.context()?.sessionId !== hold.sessionId) {
+        return;
+      }
+
+      this.startupHoldToApply.set(null);
+      this.holdState.set(hold);
+      this.selection.restoreHeld(
+        hold.seats.map((seat) => ({
+          seatId: seat.seatId,
+          code: seat.code,
+          ticketTypeSlug: seat.ticketType.slug,
+        })),
+      );
+      this.booking.showStep2();
+    });
   }
 
   /**
@@ -333,6 +445,7 @@ export class BookingHoldService {
         switchMap((response) => {
           this.holdState.set(response.data);
           storeHoldId(response.data.holdId);
+          storeHoldContext(context);
           this.booking.showStep2();
 
           return EMPTY;
@@ -442,6 +555,79 @@ export class BookingHoldService {
             })),
           );
           this.booking.showStep2();
+
+          return EMPTY;
+        }),
+        catchError((error: unknown) => {
+          this.restoringState.set(false);
+
+          if (toApiError(error).status !== 0) {
+            clearStoredHold();
+          }
+
+          return EMPTY;
+        }),
+      )
+      .subscribe();
+  }
+
+  /**
+   * Reads a hold back on application startup and, if the server still honours
+   * it, reopens the booking straight onto Step 2.
+   *
+   * This is the automatic reopen of a hold that survived a page refresh. The
+   * restore-on-open effect above only fires once a booking is already open, and
+   * a reload opens with the booking closed — so without this path a live hold
+   * would sit in storage, unseen, until the visitor reopened that screening by
+   * hand.
+   *
+   * The stored screening context travels with the id precisely so the flow can
+   * be relaunched here: the server only confirms *whether* the hold stands, it
+   * does not restate the movie, venue or hall, so the modal could not render
+   * without the context saved beside the id. Every outcome is still the
+   * server's to declare, exactly as in {@link restore}:
+   *
+   * * `isLive: true` for the same screening — the booking is opened and the
+   *   hold is applied onto Step 2, where the visitor left it;
+   * * `isLive: false`, a live hold for another screening, or any refusal
+   *   (`404`, `403`, …) — nothing is opened and the key is dropped, so a dead
+   *   hold never surfaces a modal the visitor cannot use;
+   * * a transport failure (`status 0`) — nothing is known, so the key is kept
+   *   and the next open of the dialog tries again.
+   *
+   * The hold is applied by the parked-hold effect rather than here, because
+   * opening the flow clears the selection: writing the seats in this callback
+   * would have them wiped by that clearing an instant later.
+   */
+  private restoreAtStartup(holdId: string, context: BookingContext): void {
+    this.restoredForSession = context.sessionId;
+    this.restoringState.set(true);
+
+    this.holds
+      .getHold(holdId)
+      .pipe(
+        switchMap((response) => {
+          this.restoringState.set(false);
+
+          const hold = response.data;
+
+          if (!hold.isLive) {
+            clearStoredHold();
+            return EMPTY;
+          }
+
+          if (hold.sessionId !== context.sessionId) {
+            clearStoredHold();
+            this.sendRelease(hold.holdId);
+            return EMPTY;
+          }
+
+          // Park the hold and open the flow. The parked-hold effect applies the
+          // seats once the booking is open and its opening selection-clear has
+          // settled, then moves to Step 2. `restoredForSession` is already set,
+          // so the restore-on-open effect does not issue a second request.
+          this.startupHoldToApply.set(hold);
+          this.booking.startBooking(context);
 
           return EMPTY;
         }),
@@ -679,10 +865,48 @@ function storeHoldId(holdId: string): void {
   }
 }
 
+/**
+ * The booking context stored beside the hold id, or `null` when none is kept.
+ *
+ * Parsed defensively: a malformed or partial entry counts as no context, so a
+ * corrupted value degrades to "no auto-reopen" rather than throwing or opening
+ * the flow with a screening the modal cannot render. Only the fields the modal
+ * and its steps need are checked for presence; everything else is carried
+ * through as written.
+ */
+function readStoredHoldContext(): BookingContext | null {
+  try {
+    const raw = localStorage.getItem(ACTIVE_HOLD_CONTEXT_KEY);
+
+    if (raw === null || raw.length === 0) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw) as Partial<BookingContext>;
+
+    return typeof parsed?.sessionId === 'number' && typeof parsed?.movieTitle === 'string'
+      ? (parsed as BookingContext)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Records the booking context beside the hold id, so a reload can reopen it. */
+function storeHoldContext(context: BookingContext): void {
+  try {
+    localStorage.setItem(ACTIVE_HOLD_CONTEXT_KEY, JSON.stringify(context));
+  } catch {
+    // Storage unavailable: the hold still works for this visit, it simply does
+    // not survive a reload.
+  }
+}
+
 /** Forgets the stored id. Runs on every path that ends a hold. */
 function clearStoredHold(): void {
   try {
     localStorage.removeItem(ACTIVE_HOLD_KEY);
+    localStorage.removeItem(ACTIVE_HOLD_CONTEXT_KEY);
   } catch {
     // Nothing to keep in sync when storage cannot be written in the first place.
   }
