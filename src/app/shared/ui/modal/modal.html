@@ -1,6 +1,7 @@
 @if (open()) {
   <div
     class="modal__overlay"
+    [class.modal__overlay--top]="layer() === 'top'"
     [class.modal__overlay--booking]="variant() === 'booking'"
     (click)="onOverlayClick($event)"
   >

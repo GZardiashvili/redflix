@@ -20,6 +20,15 @@
   animation: modal-overlay-in 180ms ease-out;
 }
 
+// One step above the shared layer. Dialogs that opt into it — the shell's login
+// and registration dialogs — stay on top of a dialog that is already open. That
+// is the case when a protected request fails while a booking dialog is up: the
+// session has to be recovered before the booking can continue, so the login has
+// to be the dialog the visitor sees and acts on.
+.modal__overlay--top {
+  z-index: 1001;
+}
+
 .modal__dialog {
   margin: auto;
   width: min(100%, 32rem);

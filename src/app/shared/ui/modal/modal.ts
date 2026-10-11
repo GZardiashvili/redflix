@@ -38,6 +38,19 @@ export class Modal {
   readonly variant = input<'default' | 'booking'>('default');
 
   /**
+   * Stacking layer of the overlay.
+   *
+   * Shell-level dialogs that must stay above every other dialog ask for `top`.
+   * The login and registration dialogs are the case: an expired session has to
+   * be recovered before anything else, and it can happen while a booking dialog
+   * is still open, so it has to be the one the visitor sees and acts on.
+   *
+   * Every dialog otherwise shares one layer, where DOM order alone decides
+   * which overlay paints last.
+   */
+  readonly layer = input<'default' | 'top'>('default');
+
+  /**
    * Requested by the user through the close button, Escape or the overlay.
    *
    * The parent decides what happens next (usually setting its own `open` signal to `false`);

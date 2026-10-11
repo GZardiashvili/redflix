@@ -1,4 +1,4 @@
-<app-modal [open]="open()" title="Sign up" (closed)="closed.emit()">
+<app-modal layer="top" [open]="open()" title="Sign up" (closed)="closed.emit()">
   <form class="register-modal" [formGroup]="form" (ngSubmit)="submit()" novalidate>
     <p class="register-modal__subtitle">Welcome to Kino XII</p>
 

@@ -6,13 +6,14 @@ import { Modal } from './modal';
   imports: [Modal],
   template: `
     <button type="button" class="trigger" (click)="open.set(true)">Open</button>
-    <app-modal [open]="open()" title="Test dialog" (closed)="onClosed()">
+    <app-modal [open]="open()" [layer]="layer()" title="Test dialog" (closed)="onClosed()">
       <button type="button" class="projected">Projected action</button>
     </app-modal>
   `,
 })
 class ModalHost {
   readonly open = signal(false);
+  readonly layer = signal<'default' | 'top'>('default');
   closedCount = 0;
 
   onClosed(): void {
@@ -85,6 +86,18 @@ describe('Modal', () => {
 
     expect(closedCount()).toBe(1);
     expect(overlay()).toBeNull();
+  });
+
+  it('lifts the overlay above the shared layer only when asked', async () => {
+    await setOpen(true);
+    expect(overlay()?.classList).not.toContain('modal__overlay--top');
+
+    // The shell's login dialog opts in: it can open while a booking dialog is
+    // still up, and the session has to be recovered before the booking
+    // continues, so it must be the dialog the visitor sees.
+    fixture.componentInstance.layer.set('top');
+    await render();
+    expect(overlay()?.classList).toContain('modal__overlay--top');
   });
 
   it('ignores Escape while closed and unrelated keys while open', async () => {
